@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eaton NZMH4-PX1600-TAZ (PXR25) — Monitorizare Multi-Device în Lanț</title>
+  <style>
+    :root {
+      --bg: #0b1120;
+      --card: #111827;
+      --card-border: #1f2937;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --accent: #005eb8;
+      --accent-light: #38bdf8;
+      --green: #10b981;
+      --amber: #f59e0b;
+      --red: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 20px;
+      line-height: 1.45;
+    }
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      border: 1px solid var(--card-border);
+      border-left: 5px solid var(--accent-light);
+      border-radius: 12px;
+      padding: 18px 24px;
+      margin-bottom: 16px;
+    }
+    .header h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    .header .sub {
+      color: var(--muted);
+      font-size: 0.88rem;
+      margin-top: 4px;
+    }
+    .conn-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 14px 20px;
+      margin-bottom: 16px;
+    }
+    .conn-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+    .field-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .field-group label {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    select {
+      background: #0f172a;
+      color: var(--text);
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.88rem;
+      outline: none;
+    }
+    select:focus { border-color: var(--accent-light); }
+    .actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      background: #1e293b;
+      color: var(--text);
+      border: 1px solid #334155;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .btn:hover { background: #334155; }
+    .btn-primary {
+      background: var(--accent);
+      border-color: #0284c7;
+    }
+    .btn-primary:hover { background: #0284c7; }
+    .btn-success {
+      background: #059669;
+      border-color: var(--green);
+      color: #fff;
+    }
+    .btn-success:hover { background: #10b981; }
+    .btn-danger {
+      background: #dc2626;
+      border-color: var(--red);
+      color: #fff;
+    }
+    .btn-danger:hover { background: #ef4444; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--green);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .badge.err {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--red);
+      border-color: rgba(239, 68, 68, 0.35);
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    /* Banner oprire pentru intervenție hardware */
+    .halted-banner {
+      display: none;
+      background: rgba(239, 68, 68, 0.16);
+      border: 2px solid var(--red);
+      border-radius: 12px;
+      padding: 18px 22px;
+      margin-bottom: 18px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+    .halted-banner.show { display: flex; }
+    .halted-banner h3 { color: #fca5a5; font-size: 1.08rem; }
+    .halted-banner p { color: #fecaca; font-size: 0.88rem; margin-top: 4px; }
+
+    /* Bara de navigare Pagini: Average-uri + fiecare Slave ID din lanț */
+    .nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px 18px;
+      margin-bottom: 20px;
+    }
+    .nav-tab {
+      background: #0f172a;
+      color: var(--text);
+      border: 1px solid #334155;
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .nav-tab:hover { border-color: var(--accent-light); }
+    .nav-tab.active {
+      background: var(--accent);
+      border-color: var(--accent-light);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+    }
+    .chain-arrow {
+      color: var(--muted);
+      font-size: 0.9rem;
+      user-select: none;
+    }
+
+    .status-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .status-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 14px 18px;
+    }
+    .status-card .label {
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    .status-card .val {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-top: 5px;
+      color: var(--accent-light);
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+    .panel h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #e2e8f0;
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+      gap: 12px;
+    }
+    .metric-box {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .metric-box .m-name {
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+    .metric-box .m-val {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-top: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+    .metric-box .m-unit {
+      font-size: 0.82rem;
+      color: var(--accent-light);
+      font-weight: 500;
+      margin-left: 4px;
+    }
+    .bar-bg {
+      height: 5px;
+      background: #1e293b;
+      border-radius: 3px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #0284c7, #38bdf8);
+      width: 0%;
+      transition: width 0.35s ease;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 9px 10px;
+      border-bottom: 1px solid #1e293b;
+    }
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+    }
+    tr:hover td { background: rgba(255, 255, 255, 0.02); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+
+    /* Pop-up Modal pentru verificarea lanțului / întrerupere hardware */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal-box {
+      background: #111827;
+      border: 2px solid var(--amber);
+      border-radius: 16px;
+      max-width: 580px;
+      width: 100%;
+      padding: 26px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+    }
+    .modal-box h2 {
+      font-size: 1.25rem;
+      color: #fde68a;
+      margin-bottom: 12px;
+    }
+    .modal-count-box {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin: 14px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-count-box .big-num {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent-light);
+    }
+    .modal-msg {
+      color: #e5e7eb;
+      font-size: 0.94rem;
+      margin-bottom: 16px;
+      line-height: 1.55;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- POP-UP MODAL: Verificare număr dispozitive în lanț / Întrerupere lanț -->
+  <div class="modal-backdrop" id="chain-modal">
+    <div class="modal-box">
+      <h2 id="modal-title">⚠️ Verificare Lanț Dispozitive (Modbus Daisy-Chain)</h2>
+      <div class="modal-count-box">
+        <div>
+          <div style="color:var(--muted);font-size:0.8rem;text-transform:uppercase">Număr Total Dispozitive Conectate</div>
+          <div id="modal-chain-range" style="font-size:0.9rem;color:#cbd5e1;margin-top:3px">—</div>
+        </div>
+        <div class="big-num" id="modal-total-count">0</div>
+      </div>
+      <div class="modal-msg" id="modal-message"></div>
+      <div style="color:var(--muted);font-size:0.84rem;background:#0f172a;padding:10px 14px;border-radius:8px;border-left:3px solid var(--amber)">
+        <strong>Notă conexiune în lanț:</strong> Deoarece aparatele sunt înseriate în lanț, de la primul ID care nu răspunde încolo nicio informație nu mai poate trece mai departe.
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-danger" onclick="respondChainAlert('problem')">
+          🛑 Problemă! (Oprește citirea pentru reparații hardware)
+        </button>
+        <button class="btn btn-success" onclick="respondChainAlert('ok')">
+          ✅ OK (Toate device-urile sunt conectate — Continuă)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER PRINCIPAL -->
+  <div class="header">
+    <div>
+      <h1>EATON NZMH4-PX1600-TAZ + NZM4-XBSM-TAZ-N (Multi-Device Daisy-Chain)</h1>
+      <div class="sub" id="conn-subtitle">Scanare automată Slave ID în lanț • Actualizare la 2 secunde</div>
+    </div>
+    <div class="actions">
+      <span id="conn-badge" class="badge"><span class="dot"></span> <span id="conn-text">Conectare...</span></span>
+      <button class="btn" onclick="rescanChain()">🔍 Rescanează Lanțul Slave ID</button>
+      <button class="btn" onclick="refreshSettings()">Reîncarcă Protecții & Istoric</button>
+      <a class="btn btn-primary" href="/api/csv" target="_blank">⬇ Descarcă CSV</a>
+    </div>
+  </div>
+
+  <!-- BANNER CITIRE OPRITĂ PENTRU INTERVENȚIE HARDWARE -->
+  <div class="halted-banner" id="halted-banner">
+    <div>
+      <h3>🛑 CITIREA A FOST OPRITĂ PENTRU REPARAȚII HARDWARE</h3>
+      <p id="halted-reason">Magistrala RS-485 este oprită complet. Poți interveni în siguranță asupra aparatelor și cablajului din lanț.</p>
+    </div>
+    <button class="btn btn-success" onclick="resumeReading()">
+      🔄 Am reparat hardware-ul — Reia Scanarea & Citirea
+    </button>
+  </div>
+
+  <!-- BARA DE SELECTARE PORT USB (COM) -->
+  <div class="conn-bar">
+    <div class="conn-controls">
+      <div class="field-group">
+        <label for="port-select">Port USB (COM):</label>
+        <select id="port-select" onchange="applyConnection()">
+          <option value="">Se scanează porturile...</option>
+        </select>
+        <button class="btn" onclick="loadPorts(true)">↻ Scanează Porturi USB</button>
+      </div>
+
+      <div class="field-group">
+        <label for="baud-select">Baudrate:</label>
+        <select id="baud-select" onchange="applyConnection()">
+          <option value="9600">9600 bps</option>
+          <option value="19200" selected>19200 bps (Implicit PXR)</option>
+          <option value="38400">38400 bps</option>
+          <option value="57600">57600 bps</option>
+        </select>
+      </div>
+
+      <button class="btn btn-primary" onclick="applyConnection()">Conectează & Caută Slave ID-uri</button>
+    </div>
+  </div>
+
+  <!-- BARA DE NAVIGARE PAGINI: PAGINA AVERAGE-URI + PAGINI INDIVIDUALE PER SLAVE ID -->
+  <div class="nav-tabs" id="nav-tabs">
+    <button class="nav-tab active" onclick="selectView('averages')">
+      📊 Pagina de Average-uri (Medii Sistem)
+    </button>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- PAGINA 1: MEDII PE ÎNTREGUL LANȚ (AVERAGE-URI) + TABEL SINTETIC       -->
+  <!-- ===================================================================== -->
+  <div id="view-averages">
+    <div class="status-strip">
+      <div class="status-card">
+        <div class="label">Dispozitive Active în Lanț</div>
+        <div class="val" id="avg-count">0 dispozitive</div>
+      </div>
+      <div class="status-card">
+        <div class="label">Topologie Lanț Activ</div>
+        <div class="val" id="avg-chain">—</div>
+      </div>
+      <div class="status-card">
+        <div class="label">Cicluri de Citire (2s)</div>
+        <div class="val" id="avg-polls">0</div>
+      </div>
+      <div class="status-card">
+        <div class="label">Ultima Citire / Rânduri CSV</div>
+        <div class="val" id="avg-time">—</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <h2><span>Medie Curenți pe Lanț (Average A)</span><span class="mono" style="font-size:0.78rem;color:var(--muted)">In = 1600 A</span></h2>
+        <div class="metrics-grid" id="avg-grid-currents"></div>
+      </div>
+      <div class="panel">
+        <h2><span>Medie Tensiuni Linie-Linie & Fază-Nul (Average V)</span></h2>
+        <div class="metrics-grid" id="avg-grid-voltages"></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <h2><span>Medie Puteri, Factor de Putere & Frecvență</span></h2>
+        <div class="metrics-grid" id="avg-grid-powers"></div>
+      </div>
+      <div class="panel">
+        <h2><span>Medie Contoare de Energie</span></h2>
+        <div class="metrics-grid" id="avg-grid-energy"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2><span>Stare Sintetică a Dispozitivelor din Lanț (Click pe un ID pentru pagina individuală)</span></h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Slave ID</th>
+            <th>Stare Disjunctor</th>
+            <th>Cauză Stare / Eveniment</th>
+            <th>IA / IB / IC (A)</th>
+            <th>VAB (V)</th>
+            <th>Putere P (W)</th>
+            <th>Acțiune</th>
+          </tr>
+        </thead>
+        <tbody id="fleet-summary-tbody">
+          <tr><td colspan="7" style="color:var(--muted)">Niciun dispozitiv activ în lanț.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- PAGINA 2: PAGINĂ INDIVIDUALĂ PENTRU UN SINGUR SLAVE ID SELECTAT       -->
+  <!-- ===================================================================== -->
+  <div id="view-device" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+      <h2 id="dev-page-title" style="font-size:1.2rem;color:var(--accent-light)">🔌 Pagina Individuală Dispozitiv</h2>
+      <button class="btn" onclick="selectView('averages')">⬅ Înapoi la Pagina de Average-uri</button>
+    </div>
+
+    <div class="status-strip">
+      <div class="status-card">
+        <div class="label">Stare Principală Disjunctor</div>
+        <div class="val" id="st-prim">—</div>
+      </div>
+      <div class="status-card">
+        <div class="label">Stare Secundară PXR25</div>
+        <div class="val" id="st-sec">—</div>
+      </div>
+      <div class="status-card">
+        <div class="label">Cauză Stare / Ultimul Eveniment</div>
+        <div class="val" id="st-cause">—</div>
+      </div>
+      <div class="status-card">
+        <div class="label">Ultima Citire Dispozitiv</div>
+        <div class="val" id="st-time">—</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <h2><span>Curenți în Timp Real (A)</span><span class="mono" style="font-size:0.78rem;color:var(--muted)">In = 1600 A</span></h2>
+        <div class="metrics-grid" id="dev-grid-currents"></div>
+      </div>
+      <div class="panel">
+        <h2><span>Tensiuni Linie-Linie & Fază-Nul (V)</span></h2>
+        <div class="metrics-grid" id="dev-grid-voltages"></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <h2><span>Puteri, Factor de Putere & Frecvență</span></h2>
+        <div class="metrics-grid" id="dev-grid-powers"></div>
+      </div>
+      <div class="panel">
+        <h2><span>Contoare de Energie (Clasa 1)</span></h2>
+        <div class="metrics-grid" id="dev-grid-energy"></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <h2><span>Setări de Protecție Active (PXR25 — Tabel 27)</span></h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Parametru</th>
+              <th>Registru</th>
+              <th>Valoare Decodată</th>
+              <th>Valoare Brută</th>
+            </tr>
+          </thead>
+          <tbody id="table-settings">
+            <tr><td colspan="4" style="color:var(--muted)">Se încarcă setările de protecție...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h2><span>Istoric Declanșări & Evenimente (PXR25 — Tabel 31/32)</span></h2>
+        <table>
+          <thead>
+            <tr>
+              <th>ID / Tip</th>
+              <th>Dată / Oră</th>
+              <th>Cauză / Eveniment</th>
+              <th>Curenți la Eveniment (IA / IB / IC / IG)</th>
+            </tr>
+          </thead>
+          <tbody id="table-events">
+            <tr><td colspan="4" style="color:var(--muted)">Se încarcă istoricul de declanșări...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+<script>
+let currentView = 'averages'; // 'averages' sau numărul Slave ID (ex: '1', '2', ...)
+let latestData = null;
+
+function selectView(viewKey) {
+  currentView = String(viewKey);
+  if (latestData) {
+    renderAll(latestData);
+  }
+}
+
+async function loadPorts(autoSelectUsb = false) {
+  try {
+    const res = await fetch('/api/ports', { cache: 'no-store' });
+    const info = await res.json();
+    const sel = document.getElementById('port-select');
+    const ports = info.ports || [];
+
+    if (ports.length === 0) {
+      sel.innerHTML = `<option value="${info.current_port || 'COM5'}">${info.current_port || 'COM5'} (Niciun port activ detectat)</option>`;
+    } else {
+      sel.innerHTML = ports.map(p => {
+        const tag = p.is_usb ? ' ★ [Adaptor USB]' : '';
+        return `<option value="${p.device}">${p.device} — ${p.description}${tag}</option>`;
+      }).join('');
+
+      const hasCurrent = ports.some(p => p.device === info.current_port);
+      if (hasCurrent && !autoSelectUsb) {
+        sel.value = info.current_port;
+      } else {
+        const usbPort = ports.find(p => p.is_usb);
+        if (usbPort) {
+          sel.value = usbPort.device;
+          if (usbPort.device !== info.current_port) {
+            applyConnection();
+          }
+        } else if (hasCurrent) {
+          sel.value = info.current_port;
+        }
+      }
+    }
+
+    if (info.baudrate) {
+      document.getElementById('baud-select').value = String(info.baudrate);
+    }
+  } catch (e) {
+    console.error('Eroare la încărcarea porturilor COM:', e);
+  }
+}
+
+async function applyConnection() {
+  const port = document.getElementById('port-select').value;
+  const baudrate = parseInt(document.getElementById('baud-select').value || '19200', 10);
+  if (!port) return;
+
+  try {
+    await fetch('/api/connect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ port, baudrate })
+    });
+    await fetchDashboardData();
+  } catch (e) {
+    console.error('Eroare la schimbarea portului:', e);
+  }
+}
+
+async function rescanChain() {
+  const port = document.getElementById('port-select').value;
+  const baudrate = parseInt(document.getElementById('baud-select').value || '19200', 10);
+  try {
+    await fetch('/api/scan-chain', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ port, baudrate })
+    });
+    await fetchDashboardData();
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+async function respondChainAlert(action) {
+  try {
+    await fetch('/api/chain-alert-action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action })
+    });
+    document.getElementById('chain-modal').classList.remove('show');
+    await fetchDashboardData();
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+async function resumeReading() {
+  try {
+    await fetch('/api/resume-reading', { method: 'POST' });
+    await fetchDashboardData();
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function renderCards(containerId, items, showBarMax) {
+  const el = document.getElementById(containerId);
+  if (!items || !items.length) {
+    el.innerHTML = '<div style="color:var(--muted)">Nu există date disponibile</div>';
+    return;
+  }
+  el.innerHTML = items.map(item => {
+    const valStr = (item.value === null || item.value === undefined)
+      ? '<span style="color:var(--muted);font-size:0.95rem">Indisponibil</span>'
+      : `${Number(item.value).toFixed(2)}<span class="m-unit">${item.unit || ''}</span>`;
+    let barHtml = '';
+    if (showBarMax && item.value !== null && item.value !== undefined) {
+      const pct = Math.min(100, Math.max(0, (Math.abs(item.value) / showBarMax) * 100));
+      barHtml = `<div class="bar-bg"><div class="bar-fill" style="width:${pct.toFixed(1)}%"></div></div>`;
+    }
+    return `
+      <div class="metric-box">
+        <div class="m-name">${item.name}</div>
+        <div class="m-val">${valStr}</div>
+        ${barHtml}
+      </div>
+    `;
+  }).join('');
+}
+
+function renderNavTabs(activeIds) {
+  const nav = document.getElementById('nav-tabs');
+  // Dacă eram pe pagina unui ID care a dispărut (ex: de la ID 10 încolo), revenim automat pe Average-uri
+  if (currentView !== 'averages' && !activeIds.map(String).includes(currentView)) {
+    currentView = 'averages';
+  }
+
+  let html = `
+    <button class="nav-tab ${currentView === 'averages' ? 'active' : ''}" onclick="selectView('averages')">
+      📊 Pagina de Average-uri (${activeIds.length} Dispozitive)
+    </button>
+  `;
+
+  activeIds.forEach((sid, idx) => {
+    html += `<span class="chain-arrow">➔</span>`;
+    const isAct = (currentView === String(sid)) ? 'active' : '';
+    html += `
+      <button class="nav-tab ${isAct}" onclick="selectView('${sid}')">
+        🔌 Dispozitiv ID #${sid}
+      </button>
+    `;
+  });
+
+  nav.innerHTML = html;
+}
+
+function renderAll(data) {
+  const activeIds = data.active_ids || [];
+  renderNavTabs(activeIds);
+
+  // 1. Banner oprire hardware
+  const haltedBanner = document.getElementById('halted-banner');
+  if (data.halted) {
+    haltedBanner.classList.add('show');
+    document.getElementById('halted-reason').textContent =
+      data.last_error || 'Citirea a fost oprită pentru intervenție hardware.';
+  } else {
+    haltedBanner.classList.remove('show');
+  }
+
+  // 2. Pop-up Modal verificare lanț / întrerupere
+  const alertObj = data.chain_alert || {};
+  const modal = document.getElementById('chain-modal');
+  if (alertObj.pending && !data.halted) {
+    modal.classList.add('show');
+    document.getElementById('modal-total-count').textContent = String(alertObj.detected_count || 0);
+    if (alertObj.detected_count > 0) {
+      const ids = alertObj.active_ids || [];
+      document.getElementById('modal-chain-range').textContent =
+        `Lanț activ: Slave ID #${ids[0]} .. #${ids[ids.length - 1]} (Fără răspuns de la ID #${alertObj.stopped_at_id})`;
+    } else {
+      document.getElementById('modal-chain-range').textContent =
+        `Niciun răspuns începând cu Slave ID #${alertObj.stopped_at_id || 1}`;
+    }
+    document.getElementById('modal-message').textContent = alertObj.message || '';
+  } else {
+    modal.classList.remove('show');
+  }
+
+  // 3. Badge stare conexiune
+  const badge = document.getElementById('conn-badge');
+  const connText = document.getElementById('conn-text');
+  if (data.halted) {
+    badge.className = 'badge err';
+    connText.textContent = 'OPRIT PENTRU REPARAȚII HARDWARE';
+  } else if (data.ok && activeIds.length > 0) {
+    badge.className = 'badge';
+    connText.textContent = `Online pe ${data.current_port} (${activeIds.length} aparate în lanț)`;
+  } else {
+    badge.className = 'badge err';
+    connText.textContent = data.last_error || 'Eroare comunicare';
+  }
+
+  document.getElementById('conn-subtitle').textContent =
+    `${data.connection_desc || 'USB-RS485'} • Actualizare la 2s • Fișier CSV: ${data.csv_path || 'Activ'}`;
+
+  // 4. Afișare Pagina de Average-uri vs Pagina Individuală a unui Slave ID
+  const viewAvg = document.getElementById('view-averages');
+  const viewDev = document.getElementById('view-device');
+
+  if (currentView === 'averages') {
+    viewAvg.style.display = 'block';
+    viewDev.style.display = 'none';
+
+    document.getElementById('avg-count').textContent = `${activeIds.length} dispozitiv(e)`;
+    document.getElementById('avg-chain').textContent =
+      activeIds.length > 0 ? activeIds.map(id => `#${id}`).join(' ➔ ') : 'Niciunul';
+    document.getElementById('avg-polls').textContent = `${data.poll_count || 0} cicluri`;
+    document.getElementById('avg-time').textContent = `${data.timestamp || '—'} (${data.csv_rows || 0} linii CSV)`;
+
+    const avgs = data.averages || [];
+    renderCards('avg-grid-currents', avgs.filter(m => m.category === 'currents'), 1600);
+    renderCards('avg-grid-voltages', avgs.filter(m => m.category === 'voltages'), 450);
+    renderCards('avg-grid-powers', avgs.filter(m => m.category === 'powers'), 0);
+    renderCards('avg-grid-energy', avgs.filter(m => m.category === 'energy'), 0);
+
+    const tbodyFleet = document.getElementById('fleet-summary-tbody');
+    if (activeIds.length === 0) {
+      tbodyFleet.innerHTML = '<tr><td colspan="7" style="color:var(--muted)">Niciun dispozitiv activ detectat în lanț.</td></tr>';
+    } else {
+      tbodyFleet.innerHTML = activeIds.map(sid => {
+        const dev = (data.devices || {})[String(sid)] || {};
+        const st = dev.status_info || {};
+        const meas = dev.measurements || [];
+        const getVal = (key) => {
+          const found = meas.find(m => m.key === key);
+          return (found && found.value !== null && found.value !== undefined)
+            ? Number(found.value).toFixed(1)
+            : '—';
+        };
+        return `
+          <tr>
+            <td class="mono"><strong>Slave ID #${sid}</strong></td>
+            <td>${st['Stare Principală Disjunctor'] || '—'}</td>
+            <td>${st['Cauză Stare / Eveniment'] || '—'}</td>
+            <td class="mono">${getVal('I_A')} / ${getVal('I_B')} / ${getVal('I_C')} A</td>
+            <td class="mono">${getVal('V_AB')} V</td>
+            <td class="mono">${getVal('P_TOT')} W</td>
+            <td>
+              <button class="btn btn-primary" onclick="selectView('${sid}')">
+                Pagina ID #${sid} ➔
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+  } else {
+    viewAvg.style.display = 'none';
+    viewDev.style.display = 'block';
+
+    const dev = (data.devices || {})[currentView] || {};
+    document.getElementById('dev-page-title').textContent =
+      `🔌 Pagina Individuală — Dispozitiv Slave ID #${currentView}`;
+
+    const st = dev.status_info || {};
+    document.getElementById('st-prim').textContent = st['Stare Principală Disjunctor'] || '—';
+    document.getElementById('st-sec').textContent = st['Stare Secundară Unitate PXR'] || '—';
+    document.getElementById('st-cause').textContent = st['Cauză Stare / Eveniment'] || '—';
+    document.getElementById('st-time').textContent = dev.timestamp || '—';
+
+    const meas = dev.measurements || [];
+    renderCards('dev-grid-currents', meas.filter(m => m.category === 'currents'), 1600);
+    renderCards('dev-grid-voltages', meas.filter(m => m.category === 'voltages'), 450);
+    renderCards('dev-grid-powers', meas.filter(m => m.category === 'powers'), 0);
+    renderCards('dev-grid-energy', meas.filter(m => m.category === 'energy'), 0);
+
+    const settings = dev.protection_settings || [];
+    const tbodyS = document.getElementById('table-settings');
+    if (settings.length > 0) {
+      tbodyS.innerHTML = settings.map(s => `
+        <tr>
+          <td><strong>${s.name}</strong></td>
+          <td class="mono">${s.register}</td>
+          <td style="color:var(--accent-light);font-weight:600">${s.formatted}</td>
+          <td class="mono" style="color:var(--muted)">${s.raw_hex}</td>
+        </tr>
+      `).join('');
+    } else {
+      tbodyS.innerHTML = '<tr><td colspan="4" style="color:var(--muted)">Nu există setări de protecție citite pentru acest ID.</td></tr>';
+    }
+
+    const events = dev.event_history || [];
+    const tbodyE = document.getElementById('table-events');
+    if (events.length > 0) {
+      tbodyE.innerHTML = events.map(ev => `
+        <tr>
+          <td class="mono">${ev.event_type} #${ev.event_id}</td>
+          <td class="mono">${ev.timestamp}</td>
+          <td><strong>${ev.cause}</strong></td>
+          <td class="mono">${ev.currents}</td>
+        </tr>
+      `).join('');
+    } else {
+      tbodyE.innerHTML = '<tr><td colspan="4" style="color:var(--muted)">Niciun eveniment de declanșare stocat.</td></tr>';
+    }
+  }
+}
+
+async function fetchDashboardData() {
+  try {
+    const res = await fetch('/api/data', { cache: 'no-store' });
+    latestData = await res.json();
+    renderAll(latestData);
+  } catch (err) {
+    console.error('Eroare preluare date dashboard:', err);
+  }
+}
+
+async function refreshSettings() {
+  try {
+    await fetch('/api/refresh-settings', { method: 'POST' });
+    await fetchDashboardData();
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+loadPorts(false);
+fetchDashboardData();
+setInterval(fetchDashboardData, 2000);
+</script>
+</body>
+</html>
