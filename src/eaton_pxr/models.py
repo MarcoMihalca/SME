@@ -67,6 +67,19 @@ class MeasuredValue:
 
 
 @dataclass(frozen=True)
+class EnergyIndicator:
+    """Indicator energetic suplimentar calculat automat (calitatea energiei, dezechilibre, compensare)."""
+    key: str
+    name: str
+    value: Optional[float]
+    unit: str
+    formatted: str
+    status: str  # 'ok' | 'warn' | 'danger' | 'neutral'
+    status_label: str
+    formula_hint: str
+
+
+@dataclass(frozen=True)
 class ProtectionSetting:
     """O setare de protecție citită din Tabelul 27 (Protection Group) al PXR25."""
     name: str
@@ -93,5 +106,6 @@ class PxrSnapshot:
     connection_desc: str
     status_info: Dict[str, str]
     measurements: List[MeasuredValue] = field(default_factory=list)
+    energy_indicators: List[EnergyIndicator] = field(default_factory=list)
     protection_settings: List[ProtectionSetting] = field(default_factory=list)
     event_history: List[TripEvent] = field(default_factory=list)

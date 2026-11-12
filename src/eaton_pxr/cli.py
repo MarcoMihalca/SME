@@ -45,6 +45,11 @@ def print_console_snapshot(
         val_str = f"{m.value:14.2f}" if m.value is not None else "  Indisponibil"
         print(f"  {m.name:<38} | {val_str} | {m.unit:<6}")
 
+    if snapshot.energy_indicators:
+        print("\n--- 2B. INDICATORI ENERGETICI SUPLIMENTARI (CALITATEA ENERGIEI) ---")
+        for ind in snapshot.energy_indicators:
+            print(f"  {ind.name:<44}: {ind.formatted:<28} [{ind.status_label}]")
+
     if show_settings_and_events and snapshot.protection_settings:
         print("\n--- 3. SETĂRI DE PROTECȚIE ACTIVE & CONFIGURAȚIE PXR25 ---")
         print(f"  {'Parametru':<38} | {'Registru':<17} | {'Valoare'}")
@@ -179,6 +184,9 @@ def run_cli(argv: Optional[list[str]] = None) -> int:
         return 0
 
     # Mod consolă (--console)
+    from .database import TimescaleBatchWriter
+
+    db_writer = TimescaleBatchWriter()
     try:
         first_iter = True
         while True:
@@ -187,6 +195,10 @@ def run_cli(argv: Optional[list[str]] = None) -> int:
                 include_settings_and_events=first_iter,
             )
             rows = csv_exporter.append_snapshot(snapshot)
+            db_writer.enqueue_snapshot(snapshot)
+            if args.watch <= 0:
+                db_writer.trigger_flush()
+                time.sleep(0.5)
             csv_msg = f"{csv_exporter.csv_path} ({rows} înregistrări)"
 
             print_console_snapshot(
@@ -204,5 +216,7 @@ def run_cli(argv: Optional[list[str]] = None) -> int:
     except Exception as exc:
         print(f"\n[EROARE] {exc}", file=sys.stderr)
         return 1
+    finally:
+        db_writer.close()
 
     return 0

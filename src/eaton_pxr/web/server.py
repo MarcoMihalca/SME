@@ -24,12 +24,14 @@ import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, Dict, List, Optional
 
+from ..analytics import compute_energy_indicators, evaluate_alarm_state
 from ..connection import (
     get_available_serial_ports,
     normalize_com_port,
     open_usb_modbus_client,
 )
 from ..csv_exporter import CsvExporter
+from ..database import TimescaleBatchWriter
 from ..models import PxrSnapshot, SerialConnectionConfig, TripEvent
 from ..reader import read_device_on_client
 from ..scanner import compute_fleet_averages, discover_daisy_chain
@@ -38,15 +40,43 @@ from ..scanner import compute_fleet_averages, discover_daisy_chain
 TEMPLATE_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "templates", "dashboard.html"
 )
+UI_PREFS_PATH = os.path.abspath("ui_preferences.json")
+MAX_HISTORY_POINTS = 120
+
+
+def load_ui_preferences() -> Dict[str, Any]:
+    if os.path.exists(UI_PREFS_PATH):
+        try:
+            with open(UI_PREFS_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, dict):
+                    return data
+        except Exception:
+            pass
+    return {}
+
+
+def save_ui_preferences(prefs: Dict[str, Any]) -> None:
+    try:
+        with open(UI_PREFS_PATH, "w", encoding="utf-8") as f:
+            json.dump(prefs, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
 
 
 class MultiDeviceDashboardState:
     """Starea partajată thread-safe pentru întregul lanț de aparate PXR25."""
 
-    def __init__(self, config: SerialConnectionConfig, csv_path: str) -> None:
+    def __init__(
+        self,
+        config: SerialConnectionConfig,
+        csv_path: str,
+        db_writer: Optional[TimescaleBatchWriter] = None,
+    ) -> None:
         self.lock = threading.Lock()
         self.config: SerialConnectionConfig = config
         self.csv_path = csv_path
+        self.db_writer = db_writer
 
         self.ok: bool = False
         self.halted: bool = False
@@ -64,6 +94,15 @@ class MultiDeviceDashboardState:
         # Datele per Slave ID și mediile pe întregul lanț
         self.devices: Dict[str, Dict[str, Any]] = {}
         self.averages: List[Dict[str, Any]] = []
+        self.averages_indicators: List[Dict[str, Any]] = []
+        self.history: Dict[str, List[Dict[str, Any]]] = {"averages": []}
+        self.alarm_state: Dict[str, Any] = {
+            "active": False,
+            "severity": "normal",
+            "count": 0,
+            "reasons": [],
+            "signature": "",
+        }
 
         # Stare Pop-up verificare lanț / întrerupere hardware
         self.chain_alert: Dict[str, Any] = {
@@ -93,7 +132,11 @@ class MultiDeviceDashboardState:
                 "active_ids": list(self.active_ids),
                 "devices": dict(self.devices),
                 "averages": list(self.averages),
+                "averages_indicators": list(self.averages_indicators),
+                "history": {k: list(v) for k, v in self.history.items()},
+                "alarm_state": dict(self.alarm_state),
                 "chain_alert": dict(self.chain_alert),
+                "db_status": self.db_writer.get_status_dict() if self.db_writer else {},
             }
 
 
@@ -109,7 +152,10 @@ def run_dashboard_server(
     Pornește firul de scanare + achiziție ciclică la 2 secunde pentru lanțul de dispozitive
     și serverul HTTP al Dashboard-ului Web.
     """
-    state = MultiDeviceDashboardState(config=config, csv_path=csv_exporter.csv_path)
+    db_writer = TimescaleBatchWriter()
+    state = MultiDeviceDashboardState(
+        config=config, csv_path=csv_exporter.csv_path, db_writer=db_writer
+    )
     stop_event = threading.Event()
     wake_event = threading.Event()
 
@@ -159,7 +205,11 @@ def run_dashboard_server(
                             state.last_error = (
                                 f"Niciun dispozitiv nu a răspuns la Slave ID #1 pe {active_cfg.port}."
                             )
-                            state.averages = [asdict(m) for m in compute_fleet_averages({})]
+                            empty_avg = compute_fleet_averages({})
+                            state.averages = [asdict(m) for m in empty_avg]
+                            state.averages_indicators = [
+                                asdict(ind) for ind in compute_energy_indicators(empty_avg)
+                            ]
                             state.chain_alert = {
                                 "pending": True,
                                 "reason": "initial_scan",
@@ -223,11 +273,12 @@ def run_dashboard_server(
 
                 now_str = time.strftime("%Y-%m-%d %H:%M:%S")
 
-                # Actualizăm cache-ul și CSV-ul doar pentru dispozitivele care au răspuns până la întrerupere
+                # Actualizăm cache-ul, coada RAM pentru TimescaleDB și CSV-ul doar pentru dispozitivele care au răspuns până la întrerupere
                 surviving_ids = sorted(current_snapshots.keys())
                 for sid in surviving_ids:
                     snap = current_snapshots[sid]
                     csv_exporter.append_snapshot(snap)
+                    db_writer.enqueue_snapshot(snap)
 
                     if snap.protection_settings:
                         settings_cache[sid] = [asdict(s) for s in snap.protection_settings]
@@ -262,11 +313,19 @@ def run_dashboard_server(
                         )
 
                 fleet_avg = compute_fleet_averages(current_snapshots)
+                fleet_indicators = compute_energy_indicators(fleet_avg)
                 total_csv_rows = csv_exporter.append_averages_row(
                     timestamp=now_str,
                     active_count=len(surviving_ids),
                     averages=fleet_avg,
                 )
+                db_writer.enqueue_averages(
+                    active_count=len(surviving_ids),
+                    averages=fleet_avg,
+                    indicators=fleet_indicators,
+                )
+
+                time_short = now_str.split(" ")[-1] if " " in now_str else now_str
 
                 with state.lock:
                     state.force_settings_refresh = False
@@ -288,13 +347,39 @@ def run_dashboard_server(
                             "connection_desc": snap.connection_desc,
                             "status_info": snap.status_info,
                             "measurements": [asdict(m) for m in snap.measurements],
+                            "energy_indicators": [asdict(ind) for ind in snap.energy_indicators],
                             "protection_settings": settings_cache.get(sid, []),
                             "event_history": combined_ev,
                         }
+                        dev_hist = state.history.setdefault(str(sid), [])
+                        dev_hist.append(
+                            {
+                                "t": time_short,
+                                "values": {m.key: m.value for m in snap.measurements},
+                                "indicators": {
+                                    ind.key: ind.value for ind in snap.energy_indicators
+                                },
+                            }
+                        )
+                        if len(dev_hist) > MAX_HISTORY_POINTS:
+                            del dev_hist[:-MAX_HISTORY_POINTS]
 
                     state.devices = new_devices_dict
                     state.averages = [asdict(m) for m in fleet_avg]
+                    state.averages_indicators = [asdict(ind) for ind in fleet_indicators]
                     state.active_ids = surviving_ids
+
+                    if surviving_ids:
+                        avg_hist = state.history.setdefault("averages", [])
+                        avg_hist.append(
+                            {
+                                "t": time_short,
+                                "values": {m.key: m.value for m in fleet_avg},
+                                "indicators": {ind.key: ind.value for ind in fleet_indicators},
+                            }
+                        )
+                        if len(avg_hist) > MAX_HISTORY_POINTS:
+                            del avg_hist[:-MAX_HISTORY_POINTS]
 
                     if broken_at_id is not None:
                         lost_ids = [x for x in chain_to_poll if x >= broken_at_id]
@@ -321,6 +406,10 @@ def run_dashboard_server(
                     else:
                         state.ok = True
                         state.last_error = ""
+
+                    state.alarm_state = evaluate_alarm_state(
+                        state.devices, state.chain_alert, state.halted
+                    )
 
             except Exception as exc:
                 with state.lock:
@@ -372,6 +461,16 @@ def run_dashboard_server(
 
             elif self.path.startswith("/api/data"):
                 body = json.dumps(state.to_json_dict(), ensure_ascii=False).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Cache-Control", "no-store")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            elif self.path.startswith("/api/ui-config"):
+                prefs = load_ui_preferences()
+                body = json.dumps(prefs, ensure_ascii=False).encode("utf-8")
                 self.send_response(200)
                 self.send_header("Content-Type", "application/json; charset=utf-8")
                 self.send_header("Cache-Control", "no-store")
@@ -448,7 +547,43 @@ def run_dashboard_server(
                         # Utilizatorul a confirmat "OK" -> continuăm cu dispozitivele active găsite
                         state.confirmed_ids = list(state.active_ids)
                         state.halted = False
+                    state.alarm_state = evaluate_alarm_state(
+                        state.devices, state.chain_alert, state.halted
+                    )
                 wake_event.set()
+                self._send_ok()
+
+            elif self.path.startswith("/api/ui-config"):
+                if isinstance(req, dict):
+                    save_ui_preferences(req)
+                self._send_ok()
+
+            elif self.path.startswith("/api/db-flush"):
+                db_writer.trigger_flush()
+                self._send_ok()
+
+            elif self.path.startswith("/api/db-enqueue-demo"):
+                # Permite adăugarea unui punct de test în coada RAM (queue.Queue) din modul Demo
+                vals = req.get("values") or {}
+                from ..models import MeasuredValue
+                from ..registers import PXR25_PARAMETERS
+
+                demo_meas = [
+                    MeasuredValue(
+                        p.key,
+                        p.name,
+                        p.category,
+                        float(vals[p.key]) if p.key in vals and vals[p.key] is not None else None,
+                        p.unit,
+                    )
+                    for p in PXR25_PARAMETERS
+                ]
+                demo_inds = compute_energy_indicators(demo_meas)
+                db_writer.enqueue_averages(
+                    active_count=1,
+                    averages=demo_meas,
+                    indicators=demo_inds,
+                )
                 self._send_ok()
 
             elif self.path.startswith("/api/resume-reading"):
@@ -485,6 +620,9 @@ def run_dashboard_server(
     print(" -> Pagină de Medii (Average-uri) + Pagini individuale per Slave ID")
     print(f" -> Actualizare automată: la fiecare {interval_sec:.1f} secunde")
     print(f" -> Salvare automată CSV: {csv_exporter.csv_path}")
+    print(
+        " -> TimescaleDB (Container Docker SME): Coadă RAM (max 5000) + Bulk Insert la 15s / 150 rânduri (max 300/batch)"
+    )
     print(" Apasă Ctrl+C în acest terminal pentru a opri serverul.")
     print("=" * 78 + "\n")
 
@@ -501,4 +639,5 @@ def run_dashboard_server(
     finally:
         stop_event.set()
         wake_event.set()
+        db_writer.close()
         server.server_close()

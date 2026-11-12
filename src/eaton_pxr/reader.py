@@ -11,6 +11,7 @@ import time
 from typing import Dict, List, Optional, Tuple
 from pymodbus.client import ModbusSerialClient
 
+from .analytics import compute_energy_indicators
 from .connection import (
     modbus_read_holding,
     modbus_write_multiple,
@@ -305,6 +306,7 @@ def read_device_on_client(
 ) -> PxrSnapshot:
     """Citește un singur Slave ID folosind o conexiune `ModbusSerialClient` deja deschisă."""
     status_info, measurements = read_realtime_measurements(client, config)
+    indicators = compute_energy_indicators(measurements)
     settings: List[ProtectionSetting] = []
     events: List[TripEvent] = []
     if include_settings_and_events:
@@ -319,6 +321,7 @@ def read_device_on_client(
         connection_desc=f"{config.description} [Slave #{config.slave_id}]",
         status_info=status_info,
         measurements=measurements,
+        energy_indicators=indicators,
         protection_settings=settings,
         event_history=events,
     )

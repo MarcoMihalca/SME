@@ -5,3 +5,5 @@ __pycache__/
 *.csv
 logs/
 .env
+.idea/
+ui_preferences.json

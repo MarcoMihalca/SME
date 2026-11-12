@@ -16,6 +16,7 @@
       --green: #10b981;
       --amber: #f59e0b;
       --red: #ef4444;
+      --purple: #a855f7;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -105,8 +106,16 @@
       cursor: pointer;
       text-decoration: none;
       transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
     .btn:hover { background: #334155; }
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 0.78rem;
+      border-radius: 6px;
+    }
     .btn-primary {
       background: var(--accent);
       border-color: #0284c7;
@@ -118,6 +127,12 @@
       color: #fff;
     }
     .btn-success:hover { background: #10b981; }
+    .btn-amber {
+      background: #b45309;
+      border-color: var(--amber);
+      color: #fff;
+    }
+    .btn-amber:hover { background: #d97706; }
     .btn-danger {
       background: #dc2626;
       border-color: var(--red);
@@ -169,6 +184,39 @@
     .halted-banner.show { display: flex; }
     .halted-banner h3 { color: #fca5a5; font-size: 1.08rem; }
     .halted-banner p { color: #fecaca; font-size: 0.88rem; margin-top: 4px; }
+
+    /* Banner Stare de Alarmă & Alertă Sonoră */
+    .alarm-banner {
+      display: none;
+      background: linear-gradient(90deg, rgba(220, 38, 38, 0.22) 0%, rgba(180, 83, 9, 0.18) 100%);
+      border: 2px solid var(--red);
+      border-radius: 12px;
+      padding: 16px 22px;
+      margin-bottom: 18px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      animation: alarmBorderPulse 1.4s infinite;
+    }
+    .alarm-banner.show { display: flex; }
+    @keyframes alarmBorderPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.45); }
+      50% { box-shadow: 0 0 18px 4px rgba(239, 68, 68, 0.35); }
+    }
+    .alarm-banner h3 {
+      color: #fca5a5;
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .alarm-list {
+      margin-top: 6px;
+      padding-left: 18px;
+      color: #fde68a;
+      font-size: 0.86rem;
+    }
 
     /* Bara de navigare Pagini: Average-uri + fiecare Slave ID din lanț */
     .nav-tabs {
@@ -252,6 +300,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
       color: #e2e8f0;
     }
     .metrics-grid {
@@ -294,6 +344,208 @@
       width: 0%;
       transition: width 0.35s ease;
     }
+
+    /* Indicatori Energetici Suplimentari (Calitatea Energiei) */
+    .indicators-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(265px, 1fr));
+      gap: 12px;
+    }
+    .indicator-card {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-left: 4px solid #475569;
+      border-radius: 10px;
+      padding: 13px 15px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .indicator-card.st-ok { border-left-color: var(--green); }
+    .indicator-card.st-warn { border-left-color: var(--amber); }
+    .indicator-card.st-danger { border-left-color: var(--red); background: rgba(239, 68, 68, 0.06); }
+    .indicator-card .ind-title {
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      font-weight: 600;
+    }
+    .indicator-card .ind-val {
+      font-size: 1.18rem;
+      font-weight: 700;
+      color: #f8fafc;
+      font-variant-numeric: tabular-nums;
+    }
+    .indicator-card .ind-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      width: fit-content;
+    }
+    .ind-badge.ok { background: rgba(16, 185, 129, 0.16); color: #34d399; }
+    .ind-badge.warn { background: rgba(245, 158, 11, 0.18); color: #fbbf24; }
+    .ind-badge.danger { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+    .ind-badge.neutral { background: rgba(148, 163, 184, 0.14); color: #94a3b8; }
+    .indicator-card .ind-hint {
+      font-size: 0.72rem;
+      color: var(--muted);
+      border-top: 1px dashed #1e293b;
+      padding-top: 5px;
+      margin-top: 2px;
+    }
+
+    /* Grafice Live Modulare (Drag & Drop + Enable/Disable) */
+    .charts-config-drawer {
+      display: none;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .charts-config-drawer.show { display: block; }
+    .config-items-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .config-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .config-item label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .config-item input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent-light);
+      cursor: pointer;
+    }
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    @media (max-width: 960px) {
+      .charts-grid { grid-template-columns: 1fr; }
+    }
+    .chart-card {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      padding: 14px;
+      transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .chart-card.span-2 {
+      grid-column: 1 / -1;
+    }
+    .chart-card.dragging {
+      opacity: 0.45;
+      border: 2px dashed var(--accent-light);
+    }
+    .chart-card.drag-over {
+      border: 2px solid var(--accent-light);
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.25);
+    }
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #1e293b;
+      padding-bottom: 8px;
+      cursor: grab;
+    }
+    .chart-header:active { cursor: grabbing; }
+    .chart-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .drag-handle {
+      color: var(--accent-light);
+      font-size: 1rem;
+      user-select: none;
+      padding: 2px 6px;
+      background: #1e293b;
+      border-radius: 5px;
+      title: "Trage cu mouse-ul pentru a muta graficul";
+    }
+    .chart-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+    .chart-controls {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .chart-btn {
+      background: #1e293b;
+      color: #cbd5e1;
+      border: 1px solid #334155;
+      border-radius: 5px;
+      padding: 3px 7px;
+      font-size: 0.74rem;
+      cursor: pointer;
+    }
+    .chart-btn:hover {
+      background: #334155;
+      color: #fff;
+    }
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.77rem;
+      color: #cbd5e1;
+    }
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #111827;
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid #1f2937;
+    }
+    .legend-color {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .chart-canvas-wrap {
+      position: relative;
+      width: 100%;
+      height: 220px;
+    }
+    .chart-canvas-wrap canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -406,9 +658,28 @@
     </div>
     <div class="actions">
       <span id="conn-badge" class="badge"><span class="dot"></span> <span id="conn-text">Conectare...</span></span>
+      <button class="btn" id="btn-sound-toggle" onclick="toggleSoundAlert()" title="Activează/Dezactivează alerta sonoră la alarmă">
+        🔔 Alertă Sonoră: ACTIVĂ
+      </button>
+      <button class="btn" onclick="testSoundAlert()" title="Testează difuzorul și sunetul de alarmă">
+        🔊 Test Alarmă
+      </button>
       <button class="btn" onclick="rescanChain()">🔍 Rescanează Lanțul Slave ID</button>
       <button class="btn" onclick="refreshSettings()">Reîncarcă Protecții & Istoric</button>
       <a class="btn btn-primary" href="/api/csv" target="_blank">⬇ Descarcă CSV</a>
+    </div>
+  </div>
+
+  <!-- BANNER ALERTA SONORĂ & STARE DE ALARMĂ ACTIVĂ -->
+  <div class="alarm-banner" id="alarm-banner">
+    <div>
+      <h3>🚨 STARE DE ALARMĂ ACTIVĂ ÎN SISTEM (ALERTĂ SONORĂ)</h3>
+      <ul class="alarm-list" id="alarm-reasons-list"></ul>
+    </div>
+    <div class="actions">
+      <button class="btn btn-amber" onclick="acknowledgeCurrentAlarm()">
+        🔕 Confirmă & Oprește Sunetul pt. Alarma Curentă
+      </button>
     </div>
   </div>
 
@@ -446,6 +717,13 @@
 
       <button class="btn btn-primary" onclick="applyConnection()">Conectează & Caută Slave ID-uri</button>
     </div>
+    <div class="conn-controls" style="border-left:1px solid #334155;padding-left:14px">
+      <span id="db-badge" class="badge"><span class="dot"></span> <span id="db-status-text">TimescaleDB (SME): Conectare...</span></span>
+      <span id="db-queue-info" class="mono" style="font-size:0.8rem;color:#cbd5e1">Coadă RAM: 0 / 5000 | Bulk Insert: 0 rânduri (la 15s)</span>
+      <button class="btn btn-sm" onclick="flushDbNow()" title="Forțează imediat Bulk Insert din coada RAM în TimescaleDB">
+        💾 Flush Coadă RAM ➔ DB Acum
+      </button>
+    </div>
   </div>
 
   <!-- BARA DE NAVIGARE PAGINI: PAGINA AVERAGE-URI + PAGINI INDIVIDUALE PER SLAVE ID -->
@@ -453,6 +731,49 @@
     <button class="nav-tab active" onclick="selectView('averages')">
       📊 Pagina de Average-uri (Medii Sistem)
     </button>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- SECȚIUNE COMUNĂ: GRAFICE LIVE MODULARE (DRAG & DROP + ENABLE/DISABLE) -->
+  <!-- ===================================================================== -->
+  <div class="panel" id="modular-charts-panel">
+    <h2>
+      <span>📈 Grafice Live Modulare — <span id="charts-context-label" style="color:var(--accent-light)">Medii Sistem (Average-uri)</span></span>
+      <div class="actions">
+        <span id="save-prefs-status" style="font-size:0.76rem;color:var(--green);font-weight:500">💾 Setup salvat automat</span>
+        <div class="field-group">
+          <label for="chart-window-select" style="font-size:0.75rem">Fereastră timp:</label>
+          <select id="chart-window-select" onchange="changeHistoryWindow(this.value)" style="padding:4px 8px;font-size:0.8rem">
+            <option value="30">Ultimele 30 citiri (1 min)</option>
+            <option value="60" selected>Ultimele 60 citiri (2 min)</option>
+            <option value="120">Ultimele 120 citiri (4 min)</option>
+          </select>
+        </div>
+        <button class="btn btn-sm" id="btn-demo-stream" onclick="toggleDemoChartStream()" title="Generează date de test în grafice și indicatori când nu ești conectat fizic la PXR25">
+          ▶️ Mod Demo Live (Test Fără Hardware)
+        </button>
+        <button class="btn btn-sm btn-primary" onclick="toggleChartsConfigDrawer()">
+          ⚙️ Personalizează Grafice (Enable/Disable & Ordine)
+        </button>
+      </div>
+    </h2>
+
+    <!-- SERTAR CONFIGURARE GRAFICE (ENABLE / DISABLE / ORDINE / RESET) -->
+    <div class="charts-config-drawer" id="charts-config-drawer">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+        <div>
+          <strong style="color:#f8fafc;font-size:0.92rem">Personalizare Modulară Grafice Live</strong>
+          <div style="color:var(--muted);font-size:0.8rem;margin-top:2px">
+            Bifează ce grafice dorești să fie afișate și mută-le fie cu mouse-ul (Drag & Drop direct pe titlul graficului), fie din butoanele ⬅ / ➡. Setările se salvează automat pentru data viitoare!
+          </div>
+        </div>
+        <button class="btn btn-sm" onclick="resetChartsConfig()">🔄 Resetează la Setup-ul Implicit</button>
+      </div>
+      <div class="config-items-list" id="charts-config-list"></div>
+    </div>
+
+    <!-- GRILA MODULARĂ DE GRAFICE -->
+    <div class="charts-grid" id="charts-grid"></div>
   </div>
 
   <!-- ===================================================================== -->
@@ -476,6 +797,15 @@
         <div class="label">Ultima Citire / Rânduri CSV</div>
         <div class="val" id="avg-time">—</div>
       </div>
+    </div>
+
+    <!-- PANOU INDICATORI ENERGETICI SUPLIMENTARI (MEDII LANȚ) -->
+    <div class="panel">
+      <h2>
+        <span>⚡ Indicatori Energetici Suplimentari & Calitatea Energiei (Medii Lanț)</span>
+        <span class="mono" style="font-size:0.76rem;color:var(--muted)">Calcul automat: NEMA • EN 50160 • ANRE (cos φ ≥ 0.92)</span>
+      </h2>
+      <div class="indicators-grid" id="avg-grid-indicators"></div>
     </div>
 
     <div class="grid-2">
@@ -549,6 +879,15 @@
       </div>
     </div>
 
+    <!-- PANOU INDICATORI ENERGETICI SUPLIMENTARI (DISPOZITIV INDIVIDUAL) -->
+    <div class="panel">
+      <h2>
+        <span>⚡ Indicatori Energetici Suplimentari & Calitatea Energiei (Dispozitiv Selectat)</span>
+        <span class="mono" style="font-size:0.76rem;color:var(--muted)">Calcul automat: NEMA • EN 50160 • ANRE (cos φ ≥ 0.92)</span>
+      </h2>
+      <div class="indicators-grid" id="dev-grid-indicators"></div>
+    </div>
+
     <div class="grid-2">
       <div class="panel">
         <h2><span>Curenți în Timp Real (A)</span><span class="mono" style="font-size:0.78rem;color:var(--muted)">In = 1600 A</span></h2>
@@ -612,10 +951,715 @@
 let currentView = 'averages'; // 'averages' sau numărul Slave ID (ex: '1', '2', ...)
 let latestData = null;
 
+// ============================================================================
+// 1. DEFINIȚII GRAFICE MODULARE ȘI PERSISTENȚĂ SETUP (localStorage + Server)
+// ============================================================================
+const STORAGE_KEY = 'eaton_pxr_ui_prefs_v1';
+
+const CHART_DEFINITIONS = {
+  currents: {
+    id: 'currents',
+    title: 'Curenți de Fază & Nul (IA, IB, IC, IN, IG)',
+    unit: 'A',
+    source: 'values',
+    series: [
+      { key: 'I_A', label: 'IA (L1)', color: '#38bdf8' },
+      { key: 'I_B', label: 'IB (L2)', color: '#f59e0b' },
+      { key: 'I_C', label: 'IC (L3)', color: '#10b981' },
+      { key: 'I_N', label: 'IN (Nul)', color: '#a855f7' },
+      { key: 'I_G', label: 'IG (Defect)', color: '#ef4444' }
+    ]
+  },
+  voltages_ll: {
+    id: 'voltages_ll',
+    title: 'Tensiuni Linie-Linie (VAB, VBC, VCA)',
+    unit: 'V',
+    source: 'values',
+    series: [
+      { key: 'V_AB', label: 'VAB (L1-L2)', color: '#38bdf8' },
+      { key: 'V_BC', label: 'VBC (L2-L3)', color: '#f59e0b' },
+      { key: 'V_CA', label: 'VCA (L3-L1)', color: '#10b981' }
+    ]
+  },
+  voltages_ln: {
+    id: 'voltages_ln',
+    title: 'Tensiuni Fază-Nul (VAN, VBN, VCN)',
+    unit: 'V',
+    source: 'values',
+    series: [
+      { key: 'V_AN', label: 'VAN (L1-N)', color: '#60a5fa' },
+      { key: 'V_BN', label: 'VBN (L2-N)', color: '#fbbf24' },
+      { key: 'V_CN', label: 'VCN (L3-N)', color: '#34d399' }
+    ]
+  },
+  powers: {
+    id: 'powers',
+    title: 'Profil Puteri Electrice (P Activă, Q Reactivă, S Aparentă)',
+    unit: 'W/VA',
+    source: 'values',
+    series: [
+      { key: 'P_TOT', label: 'P (W)', color: '#10b981' },
+      { key: 'Q_TOT', label: 'Q (VAR)', color: '#f59e0b' },
+      { key: 'S_TOT', label: 'S (VA)', color: '#38bdf8' }
+    ]
+  },
+  pf_freq: {
+    id: 'pf_freq',
+    title: 'Stabilitate Frecvență (Hz) & Factor de Putere (cos φ)',
+    unit: '',
+    source: 'values',
+    series: [
+      { key: 'FREQ', label: 'Frecvență (Hz)', color: '#38bdf8' },
+      { key: 'PF_TOT', label: 'cos φ', color: '#a855f7' }
+    ]
+  },
+  quality: {
+    id: 'quality',
+    title: 'Indicatori Suplimentari: Dezechilibru Curent (%) & Încărcare (% In)',
+    unit: '%',
+    source: 'indicators',
+    series: [
+      { key: 'I_UNBAL', label: 'Dezechilibru I (%)', color: '#ef4444' },
+      { key: 'LOAD_PCT', label: 'Încărcare (% In)', color: '#38bdf8' },
+      { key: 'V_LL_UNBAL', label: 'Dezechilibru V (%)', color: '#f59e0b' }
+    ]
+  }
+};
+
+function getDefaultUiConfig() {
+  return {
+    historyWindow: 60,
+    soundEnabled: true,
+    charts: [
+      { id: 'currents', enabled: true, span: 1 },
+      { id: 'voltages_ll', enabled: true, span: 1 },
+      { id: 'powers', enabled: true, span: 1 },
+      { id: 'quality', enabled: true, span: 1 },
+      { id: 'voltages_ln', enabled: false, span: 1 },
+      { id: 'pf_freq', enabled: false, span: 1 }
+    ]
+  };
+}
+
+let uiConfig = getDefaultUiConfig();
+let draggedChartId = null;
+
+function sanitizeUiConfig(raw) {
+  const def = getDefaultUiConfig();
+  if (!raw || typeof raw !== 'object') return def;
+
+  const knownIds = Object.keys(CHART_DEFINITIONS);
+  const seen = new Set();
+  const validCharts = [];
+
+  if (Array.isArray(raw.charts)) {
+    raw.charts.forEach(item => {
+      if (item && knownIds.includes(item.id) && !seen.has(item.id)) {
+        seen.add(item.id);
+        validCharts.push({
+          id: item.id,
+          enabled: Boolean(item.enabled),
+          span: item.span === 2 ? 2 : 1
+        });
+      }
+    });
+  }
+  knownIds.forEach(id => {
+    if (!seen.has(id)) {
+      const fallback = def.charts.find(c => c.id === id);
+      validCharts.push(fallback || { id, enabled: true, span: 1 });
+    }
+  });
+
+  return {
+    historyWindow: [30, 60, 120].includes(Number(raw.historyWindow)) ? Number(raw.historyWindow) : 60,
+    soundEnabled: raw.soundEnabled !== undefined ? Boolean(raw.soundEnabled) : true,
+    charts: validCharts
+  };
+}
+
+async function loadSavedUiConfig() {
+  let loaded = null;
+  try {
+    const localRaw = localStorage.getItem(STORAGE_KEY);
+    if (localRaw) loaded = JSON.parse(localRaw);
+  } catch (e) {}
+
+  try {
+    const res = await fetch('/api/ui-config', { cache: 'no-store' });
+    if (res.ok) {
+      const serverCfg = await res.json();
+      if (serverCfg && Array.isArray(serverCfg.charts) && serverCfg.charts.length > 0) {
+        loaded = serverCfg;
+      }
+    }
+  } catch (e) {}
+
+  uiConfig = sanitizeUiConfig(loaded);
+  document.getElementById('chart-window-select').value = String(uiConfig.historyWindow);
+  updateSoundButtonUi();
+  renderChartsStructure();
+}
+
+async function saveUiConfig() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(uiConfig));
+  } catch (e) {}
+  try {
+    await fetch('/api/ui-config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(uiConfig)
+    });
+    const st = document.getElementById('save-prefs-status');
+    if (st) {
+      st.textContent = '💾 Salvat pentru data viitoare!';
+      setTimeout(() => { st.textContent = '💾 Setup salvat automat'; }, 1800);
+    }
+  } catch (e) {}
+}
+
+function toggleChartsConfigDrawer() {
+  document.getElementById('charts-config-drawer').classList.toggle('show');
+}
+
+function changeHistoryWindow(val) {
+  uiConfig.historyWindow = Number(val) || 60;
+  saveUiConfig();
+  drawAllEnabledCharts();
+}
+
+function toggleChartEnabled(chartId, isEnabled) {
+  const target = uiConfig.charts.find(c => c.id === chartId);
+  if (target) {
+    target.enabled = Boolean(isEnabled);
+    saveUiConfig();
+    renderChartsStructure();
+    drawAllEnabledCharts();
+  }
+}
+
+function toggleChartSpan(chartId) {
+  const target = uiConfig.charts.find(c => c.id === chartId);
+  if (target) {
+    target.span = target.span === 2 ? 1 : 2;
+    saveUiConfig();
+    renderChartsStructure();
+    drawAllEnabledCharts();
+  }
+}
+
+function moveChartOrder(chartId, delta) {
+  const idx = uiConfig.charts.findIndex(c => c.id === chartId);
+  if (idx < 0) return;
+  const newIdx = idx + delta;
+  if (newIdx < 0 || newIdx >= uiConfig.charts.length) return;
+  const temp = uiConfig.charts[idx];
+  uiConfig.charts[idx] = uiConfig.charts[newIdx];
+  uiConfig.charts[newIdx] = temp;
+  saveUiConfig();
+  renderChartsStructure();
+  drawAllEnabledCharts();
+}
+
+function resetChartsConfig() {
+  uiConfig = getDefaultUiConfig();
+  document.getElementById('chart-window-select').value = String(uiConfig.historyWindow);
+  updateSoundButtonUi();
+  saveUiConfig();
+  renderChartsStructure();
+  drawAllEnabledCharts();
+}
+
+// Drag & Drop handlers pentru mutarea modulară a graficelor
+function onChartDragStart(e, chartId) {
+  draggedChartId = chartId;
+  e.currentTarget.classList.add('dragging');
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', chartId);
+  }
+}
+
+function onChartDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('.chart-card').forEach(el => el.classList.remove('drag-over'));
+  draggedChartId = null;
+}
+
+function onChartDragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('drag-over');
+}
+
+function onChartDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+
+function onChartDrop(e, targetChartId) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  const sourceId = draggedChartId || (e.dataTransfer ? e.dataTransfer.getData('text/plain') : null);
+  if (!sourceId || sourceId === targetChartId) return;
+
+  const srcIdx = uiConfig.charts.findIndex(c => c.id === sourceId);
+  const dstIdx = uiConfig.charts.findIndex(c => c.id === targetChartId);
+  if (srcIdx < 0 || dstIdx < 0) return;
+
+  const [moved] = uiConfig.charts.splice(srcIdx, 1);
+  uiConfig.charts.splice(dstIdx, 0, moved);
+
+  saveUiConfig();
+  renderChartsStructure();
+  drawAllEnabledCharts();
+}
+
+function renderChartsStructure() {
+  // 1. Randăm lista de checkbox-uri în sertarul de configurare
+  const cfgList = document.getElementById('charts-config-list');
+  cfgList.innerHTML = uiConfig.charts.map((c, idx) => {
+    const def = CHART_DEFINITIONS[c.id];
+    if (!def) return '';
+    return `
+      <div class="config-item">
+        <label>
+          <input type="checkbox" ${c.enabled ? 'checked' : ''} onchange="toggleChartEnabled('${c.id}', this.checked)" />
+          <span>${idx + 1}. ${def.title}</span>
+        </label>
+        <div style="display:flex;gap:4px">
+          <button class="chart-btn" onclick="moveChartOrder('${c.id}', -1)" title="Mută mai sus">⬆</button>
+          <button class="chart-btn" onclick="moveChartOrder('${c.id}', 1)" title="Mută mai jos">⬇</button>
+          <button class="chart-btn" onclick="toggleChartSpan('${c.id}')" title="Comută lățime 1x / 2x">${c.span === 2 ? '2x' : '1x'}</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // 2. Randăm cardurile graficelor activate în grilă
+  const grid = document.getElementById('charts-grid');
+  const enabledCharts = uiConfig.charts.filter(c => c.enabled);
+  if (enabledCharts.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;color:var(--muted);padding:20px;text-align:center;border:1px dashed #334155;border-radius:10px">
+        Toate graficele sunt dezactivate. Apasă pe <strong>„⚙️ Personalizează Grafice”</strong> pentru a activa graficele dorite.
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = enabledCharts.map(c => {
+    const def = CHART_DEFINITIONS[c.id];
+    const spanClass = c.span === 2 ? 'span-2' : '';
+    return `
+      <div class="chart-card ${spanClass}"
+           id="chart-card-${c.id}"
+           draggable="true"
+           ondragstart="onChartDragStart(event, '${c.id}')"
+           ondragend="onChartDragEnd(event)"
+           ondragover="onChartDragOver(event)"
+           ondragleave="onChartDragLeave(event)"
+           ondrop="onChartDrop(event, '${c.id}')">
+        <div class="chart-header">
+          <div class="chart-title-wrap">
+            <span class="drag-handle" title="Trage cu mouse-ul (Drag & Drop) pentru a muta graficul">⠿ Mută</span>
+            <span class="chart-title">${def.title}</span>
+          </div>
+          <div class="chart-controls">
+            <button class="chart-btn" onclick="moveChartOrder('${c.id}', -1)" title="Mută la stânga / mai sus">⬅</button>
+            <button class="chart-btn" onclick="moveChartOrder('${c.id}', 1)" title="Mută la dreapta / mai jos">➡</button>
+            <button class="chart-btn" onclick="toggleChartSpan('${c.id}')" title="Lățime 1 coloană / 2 coloane">⤢ ${c.span === 2 ? '2 Col' : '1 Col'}</button>
+            <button class="chart-btn" onclick="toggleChartEnabled('${c.id}', false)" title="Ascunde (Disable) acest grafic">✕</button>
+          </div>
+        </div>
+        <div class="chart-legend" id="chart-legend-${c.id}"></div>
+        <div class="chart-canvas-wrap">
+          <canvas id="chart-canvas-${c.id}"></canvas>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============================================================================
+// 2. MOTOR DE RANDARE GRAFICE LIVE (HTML5 CANVAS HIGH-DPI)
+// ============================================================================
+let demoStreamTimer = null;
+let demoHistoryBuffer = [];
+
+function getActiveHistorySeries() {
+  if (demoStreamTimer !== null && demoHistoryBuffer.length > 0) {
+    return demoHistoryBuffer.slice(-uiConfig.historyWindow);
+  }
+  if (!latestData || !latestData.history) return [];
+  const key = currentView === 'averages' ? 'averages' : String(currentView);
+  const arr = latestData.history[key] || [];
+  return arr.slice(-uiConfig.historyWindow);
+}
+
+function drawSingleChart(chartCfg) {
+  const def = CHART_DEFINITIONS[chartCfg.id];
+  const canvas = document.getElementById(`chart-canvas-${chartCfg.id}`);
+  const legendEl = document.getElementById(`chart-legend-${chartCfg.id}`);
+  if (!def || !canvas || !legendEl) return;
+
+  const points = getActiveHistorySeries();
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  const width = Math.max(260, rect.width);
+  const height = Math.max(180, rect.height);
+
+  if (canvas.width !== Math.floor(width * dpr) || canvas.height !== Math.floor(height * dpr)) {
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+  }
+
+  const ctx = canvas.getContext('2d');
+  ctx.save();
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, width, height);
+
+  // Colectăm valorile pe fiecare serie și actualizăm legenda cu Ultima / Min / Max
+  let allNums = [];
+  const extractedSeries = def.series.map(s => {
+    const vals = points.map(pt => {
+      const bag = def.source === 'indicators' ? (pt.indicators || {}) : (pt.values || {});
+      const v = bag[s.key];
+      return (v !== null && v !== undefined && !isNaN(Number(v))) ? Number(v) : null;
+    });
+    const valid = vals.filter(v => v !== null);
+    if (valid.length > 0) allNums.push(...valid);
+    const lastVal = valid.length > 0 ? valid[valid.length - 1] : null;
+    const minVal = valid.length > 0 ? Math.min(...valid) : null;
+    const maxVal = valid.length > 0 ? Math.max(...valid) : null;
+    return { ...s, vals, lastVal, minVal, maxVal };
+  });
+
+  legendEl.innerHTML = extractedSeries.map(s => {
+    const valTxt = s.lastVal !== null
+      ? `<strong>${s.lastVal.toFixed(2)}</strong> <span style="color:var(--muted)">(min ${s.minVal.toFixed(1)} / max ${s.maxVal.toFixed(1)})</span>`
+      : `<span style="color:var(--muted)">—</span>`;
+    return `
+      <span class="legend-item">
+        <span class="legend-color" style="background:${s.color}"></span>
+        <span>${s.label}: ${valTxt}</span>
+      </span>
+    `;
+  }).join('');
+
+  const padL = 52, padR = 16, padT = 14, padB = 26;
+  const plotW = width - padL - padR;
+  const plotH = height - padT - padB;
+
+  // Desenăm grila de fundal
+  ctx.strokeStyle = '#1e293b';
+  ctx.lineWidth = 1;
+  const gridRows = 4;
+
+  let yMin = allNums.length ? Math.min(...allNums) : 0;
+  let yMax = allNums.length ? Math.max(...allNums) : 100;
+  if (Math.abs(yMax - yMin) < 1e-3) {
+    yMin -= 5;
+    yMax += 5;
+  } else {
+    const margin = (yMax - yMin) * 0.12;
+    yMin -= margin;
+    yMax += margin;
+  }
+
+  ctx.fillStyle = '#9ca3af';
+  ctx.font = '11px ui-monospace, Consolas, monospace';
+  ctx.textAlign = 'right';
+
+  for (let r = 0; r <= gridRows; r++) {
+    const y = padT + (plotH * r) / gridRows;
+    const val = yMax - ((yMax - yMin) * r) / gridRows;
+    ctx.beginPath();
+    ctx.moveTo(padL, y);
+    ctx.lineTo(padL + plotW, y);
+    ctx.stroke();
+    ctx.fillText(val.toFixed(1), padL - 6, y + 4);
+  }
+
+  if (points.length === 0 || allNums.length === 0) {
+    ctx.fillStyle = '#64748b';
+    ctx.textAlign = 'center';
+    ctx.font = '12.5px sans-serif';
+    ctx.fillText(
+      'În așteptarea citirilor Modbus în timp real (sau apasă „▶️ Mod Demo Live” pentru testare)...',
+      padL + plotW / 2,
+      padT + plotH / 2
+    );
+    ctx.restore();
+    return;
+  }
+
+  // Etichete timp pe axa X
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#9ca3af';
+  const stepX = points.length > 1 ? plotW / (points.length - 1) : plotW;
+  const labelIndices = [0, Math.floor((points.length - 1) / 2), points.length - 1];
+  const uniqueIdx = [...new Set(labelIndices)];
+  uniqueIdx.forEach(i => {
+    if (points[i]) {
+      const x = points.length > 1 ? padL + i * stepX : padL + plotW / 2;
+      ctx.fillText(points[i].t || '', x, height - 7);
+    }
+  });
+
+  // Trasează fiecare serie
+  extractedSeries.forEach(s => {
+    ctx.strokeStyle = s.color;
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    let started = false;
+    s.vals.forEach((v, i) => {
+      if (v === null) return;
+      const x = points.length > 1 ? padL + i * stepX : padL + plotW / 2;
+      const y = padT + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+      if (!started) {
+        ctx.moveTo(x, y);
+        started = true;
+      } else {
+        ctx.lineTo(x, y);
+      }
+    });
+    ctx.stroke();
+
+    // Desenăm punctele pe grafic
+    ctx.fillStyle = s.color;
+    s.vals.forEach((v, i) => {
+      if (v === null) return;
+      const x = points.length > 1 ? padL + i * stepX : padL + plotW / 2;
+      const y = padT + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+      ctx.beginPath();
+      ctx.arc(x, y, 2.8, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  });
+
+  ctx.restore();
+}
+
+function drawAllEnabledCharts() {
+  const lbl = document.getElementById('charts-context-label');
+  if (lbl) {
+    if (demoStreamTimer !== null) {
+      lbl.textContent = 'Mod Demo Live Activ (Simulare Forme de Undă & Indicatori)';
+    } else {
+      lbl.textContent = currentView === 'averages'
+        ? 'Medii Sistem (Average-uri pe Lanț)'
+        : `Dispozitiv Individual Slave ID #${currentView}`;
+    }
+  }
+  uiConfig.charts.filter(c => c.enabled).forEach(c => drawSingleChart(c));
+}
+
+window.addEventListener('resize', () => drawAllEnabledCharts());
+
+// Mod Demo opțional pentru testarea graficelor și indicatorilor fără hardware fizic
+function toggleDemoChartStream() {
+  const btn = document.getElementById('btn-demo-stream');
+  if (demoStreamTimer !== null) {
+    clearInterval(demoStreamTimer);
+    demoStreamTimer = null;
+    demoHistoryBuffer = [];
+    btn.textContent = '▶️ Mod Demo Live (Test Fără Hardware)';
+    btn.classList.remove('btn-amber');
+    if (latestData) renderAll(latestData);
+    return;
+  }
+
+  btn.textContent = '⏹️ Oprește Mod Demo Live';
+  btn.classList.add('btn-amber');
+  demoHistoryBuffer = [];
+
+  const pushDemoPoint = () => {
+    const now = new Date();
+    const tStr = now.toTimeString().split(' ')[0];
+    const ia = 420 + Math.sin(Date.now() / 4000) * 45 + (Math.random() - 0.5) * 18;
+    const ib = 445 + Math.cos(Date.now() / 4500) * 50 + (Math.random() - 0.5) * 18;
+    const ic = 395 + Math.sin(Date.now() / 3500) * 40 + (Math.random() - 0.5) * 18;
+    const in_c = Math.abs(ia - ib) * 0.45 + 12;
+    const ig = 1.2 + Math.random() * 0.5;
+
+    const vab = 401 + (Math.random() - 0.5) * 4;
+    const vbc = 398 + (Math.random() - 0.5) * 4;
+    const vca = 403 + (Math.random() - 0.5) * 4;
+    const van = vab / 1.732;
+    const vbn = vbc / 1.732;
+    const vcn = vca / 1.732;
+
+    const iAvg = (ia + ib + ic) / 3;
+    const iMax = Math.max(ia, ib, ic);
+    const loadPct = (iMax / 1600) * 100;
+    const iUnbal = (Math.max(Math.abs(ia - iAvg), Math.abs(ib - iAvg), Math.abs(ic - iAvg)) / iAvg) * 100;
+    const vAvg = (vab + vbc + vca) / 3;
+    const vUnbal = (Math.max(Math.abs(vab - vAvg), Math.abs(vbc - vAvg), Math.abs(vca - vAvg)) / vAvg) * 100;
+
+    const pf = 0.90 + Math.sin(Date.now() / 7000) * 0.05;
+    const sTot = 1.732 * vAvg * iAvg;
+    const pTot = sTot * pf;
+    const qTot = Math.sqrt(Math.max(0, sTot * sTot - pTot * pTot));
+    const freq = 50.0 + (Math.random() - 0.5) * 0.14;
+
+    demoHistoryBuffer.push({
+      t: tStr,
+      values: {
+        I_A: ia, I_B: ib, I_C: ic, I_N: in_c, I_G: ig,
+        V_AB: vab, V_BC: vbc, V_CA: vca,
+        V_AN: van, V_BN: vbn, V_CN: vcn,
+        P_TOT: pTot, Q_TOT: qTot, S_TOT: sTot,
+        PF_TOT: pf, FREQ: freq
+      },
+      indicators: {
+        LOAD_PCT: loadPct,
+        I_UNBAL: iUnbal,
+        V_LL_UNBAL: vUnbal
+      }
+    });
+    if (demoHistoryBuffer.length > 120) demoHistoryBuffer.shift();
+    drawAllEnabledCharts();
+
+    // Trimitem punctul Demo și în coada RAM (queue.Queue) de pe backend pentru a testa Bulk Insert în TimescaleDB
+    const lastPt = demoHistoryBuffer[demoHistoryBuffer.length - 1];
+    fetch('/api/db-enqueue-demo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values: lastPt.values })
+    }).catch(() => {});
+  };
+
+  for (let i = 0; i < 15; i++) pushDemoPoint();
+  demoStreamTimer = setInterval(pushDemoPoint, 2000);
+}
+
+// ============================================================================
+// 3. SISTEM DE ALERTĂ SONORĂ (WEB AUDIO API) LA STARE DE ALARMĂ
+// ============================================================================
+let audioCtx = null;
+let acknowledgedAlarmSignature = '';
+
+function ensureAudioContext() {
+  if (!audioCtx) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) {
+      audioCtx = new AudioContextClass();
+    }
+  }
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  return audioCtx;
+}
+
+function playAlarmBeepSequence(severity = 'critical') {
+  try {
+    const ctx = ensureAudioContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+    const freqs = severity === 'critical' ? [880, 660, 880] : [740, 587];
+    freqs.forEach((f, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(f, now + idx * 0.18);
+
+      gain.gain.setValueAtTime(0.001, now + idx * 0.18);
+      gain.gain.exponentialRampToValueAtTime(0.18, now + idx * 0.18 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.18 + 0.15);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now + idx * 0.18);
+      osc.stop(now + idx * 0.18 + 0.16);
+    });
+  } catch (e) {
+    console.warn('Web Audio API indisponibil sau blocat de browser:', e);
+  }
+}
+
+function updateSoundButtonUi() {
+  const btn = document.getElementById('btn-sound-toggle');
+  if (!btn) return;
+  if (uiConfig.soundEnabled) {
+    btn.textContent = '🔔 Alertă Sonoră: ACTIVĂ';
+    btn.classList.remove('btn-danger');
+  } else {
+    btn.textContent = '🔕 Alertă Sonoră: MUTE';
+    btn.classList.add('btn-danger');
+  }
+}
+
+function toggleSoundAlert() {
+  ensureAudioContext();
+  uiConfig.soundEnabled = !uiConfig.soundEnabled;
+  updateSoundButtonUi();
+  saveUiConfig();
+}
+
+function testSoundAlert() {
+  ensureAudioContext();
+  playAlarmBeepSequence('critical');
+}
+
+function acknowledgeCurrentAlarm() {
+  if (latestData && latestData.alarm_state && latestData.alarm_state.signature) {
+    acknowledgedAlarmSignature = latestData.alarm_state.signature;
+  }
+  document.getElementById('alarm-banner').classList.remove('show');
+}
+
+function handleAlarmState(data) {
+  const alarm = data.alarm_state || { active: false, reasons: [], signature: '' };
+  const banner = document.getElementById('alarm-banner');
+  const listEl = document.getElementById('alarm-reasons-list');
+
+  if (!alarm.active) {
+    acknowledgedAlarmSignature = '';
+    banner.classList.remove('show');
+    return;
+  }
+
+  listEl.innerHTML = (alarm.reasons || []).map(r => `<li>${r}</li>`).join('');
+
+  if (alarm.signature !== acknowledgedAlarmSignature) {
+    banner.classList.add('show');
+    if (uiConfig.soundEnabled) {
+      playAlarmBeepSequence(alarm.severity || 'critical');
+    }
+  }
+}
+
+// ============================================================================
+// 4. RANDARE INDICATORI ENERGETICI SUPLIMENTARI & CARDURI MĂSURĂTORI
+// ============================================================================
+function renderEnergyIndicators(containerId, indicators) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  if (!indicators || !indicators.length) {
+    el.innerHTML = '<div style="color:var(--muted)">Se calculează indicatorii energetici suplimentari...</div>';
+    return;
+  }
+  el.innerHTML = indicators.map(ind => {
+    const st = ind.status || 'neutral';
+    return `
+      <div class="indicator-card st-${st}">
+        <div class="ind-title">${ind.name}</div>
+        <div class="ind-val">${ind.formatted}</div>
+        <span class="ind-badge ${st}">${ind.status_label}</span>
+        <div class="ind-hint">${ind.formula_hint || ''}</div>
+      </div>
+    `;
+  }).join('');
+}
+
 function selectView(viewKey) {
   currentView = String(viewKey);
   if (latestData) {
     renderAll(latestData);
+  } else {
+    drawAllEnabledCharts();
   }
 }
 
@@ -691,6 +1735,7 @@ async function rescanChain() {
 }
 
 async function respondChainAlert(action) {
+  ensureAudioContext();
   try {
     await fetch('/api/chain-alert-action', {
       method: 'POST',
@@ -740,7 +1785,6 @@ function renderCards(containerId, items, showBarMax) {
 
 function renderNavTabs(activeIds) {
   const nav = document.getElementById('nav-tabs');
-  // Dacă eram pe pagina unui ID care a dispărut (ex: de la ID 10 încolo), revenim automat pe Average-uri
   if (currentView !== 'averages' && !activeIds.map(String).includes(currentView)) {
     currentView = 'averages';
   }
@@ -751,7 +1795,7 @@ function renderNavTabs(activeIds) {
     </button>
   `;
 
-  activeIds.forEach((sid, idx) => {
+  activeIds.forEach(sid => {
     html += `<span class="chain-arrow">➔</span>`;
     const isAct = (currentView === String(sid)) ? 'active' : '';
     html += `
@@ -767,6 +1811,9 @@ function renderNavTabs(activeIds) {
 function renderAll(data) {
   const activeIds = data.active_ids || [];
   renderNavTabs(activeIds);
+
+  // 0. Evaluare Stare de Alarmă & Alertă Sonoră
+  handleAlarmState(data);
 
   // 1. Banner oprire hardware
   const haltedBanner = document.getElementById('halted-banner');
@@ -814,7 +1861,28 @@ function renderAll(data) {
   document.getElementById('conn-subtitle').textContent =
     `${data.connection_desc || 'USB-RS485'} • Actualizare la 2s • Fișier CSV: ${data.csv_path || 'Activ'}`;
 
-  // 4. Afișare Pagina de Average-uri vs Pagina Individuală a unui Slave ID
+  // 3B. Stare Bază de Date TimescaleDB (Container Docker SME) & Coadă RAM (queue.Queue)
+  const dbSt = data.db_status || {};
+  const dbBadge = document.getElementById('db-badge');
+  const dbTxt = document.getElementById('db-status-text');
+  const dbQueueInfo = document.getElementById('db-queue-info');
+  if (dbBadge && dbTxt && dbQueueInfo) {
+    if (dbSt.connected) {
+      dbBadge.className = 'badge';
+      dbTxt.textContent = `TimescaleDB (${dbSt.container_name || 'SME'}): Online`;
+    } else {
+      dbBadge.className = 'badge err';
+      dbTxt.textContent = `TimescaleDB (${dbSt.container_name || 'SME'}): Offline`;
+    }
+    dbQueueInfo.textContent =
+      `Coadă RAM: ${dbSt.queue_size || 0}/${dbSt.queue_max_size || 5000} | ` +
+      `Inserate: ${dbSt.total_inserted_rows || 0} rânduri (${dbSt.total_batches || 0} loturi, ultimul: ${dbSt.last_batch_rows || 0} la ${dbSt.flush_interval_sec || 15}s)`;
+  }
+
+  // 4. Redesenează graficele modulare active
+  drawAllEnabledCharts();
+
+  // 5. Afișare Pagina de Average-uri vs Pagina Individuală a unui Slave ID
   const viewAvg = document.getElementById('view-averages');
   const viewDev = document.getElementById('view-device');
 
@@ -827,6 +1895,8 @@ function renderAll(data) {
       activeIds.length > 0 ? activeIds.map(id => `#${id}`).join(' ➔ ') : 'Niciunul';
     document.getElementById('avg-polls').textContent = `${data.poll_count || 0} cicluri`;
     document.getElementById('avg-time').textContent = `${data.timestamp || '—'} (${data.csv_rows || 0} linii CSV)`;
+
+    renderEnergyIndicators('avg-grid-indicators', data.averages_indicators || []);
 
     const avgs = data.averages || [];
     renderCards('avg-grid-currents', avgs.filter(m => m.category === 'currents'), 1600);
@@ -878,6 +1948,8 @@ function renderAll(data) {
     document.getElementById('st-sec').textContent = st['Stare Secundară Unitate PXR'] || '—';
     document.getElementById('st-cause').textContent = st['Cauză Stare / Eveniment'] || '—';
     document.getElementById('st-time').textContent = dev.timestamp || '—';
+
+    renderEnergyIndicators('dev-grid-indicators', dev.energy_indicators || []);
 
     const meas = dev.measurements || [];
     renderCards('dev-grid-currents', meas.filter(m => m.category === 'currents'), 1600);
@@ -936,9 +2008,20 @@ async function refreshSettings() {
   }
 }
 
-loadPorts(false);
-fetchDashboardData();
-setInterval(fetchDashboardData, 2000);
+async function flushDbNow() {
+  try {
+    await fetch('/api/db-flush', { method: 'POST' });
+    setTimeout(fetchDashboardData, 350);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+loadSavedUiConfig().then(() => {
+  loadPorts(false);
+  fetchDashboardData();
+  setInterval(fetchDashboardData, 2000);
+});
 </script>
 </body>
 </html>

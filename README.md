@@ -8,6 +8,9 @@ Aplicație modulară în Python pentru conectarea prin **adaptor USB–RS485 (Mo
     1. **„✅ OK (Toate device-urile sunt conectate)”** — continuă citirea cu aparatele active.
     2. **„🛑 Problemă! (Oprește citirea pentru reparații hardware)”** — oprește complet citirea pe magistrala RS-485 pentru intervenție hardware în siguranță.
 - **Pagină de Average-uri (Medii Sistem)** + **Pagini Individuale pentru fiecare Slave ID separat**.
+- **Grafice Live Modulare (Drag & Drop + Enable/Disable + Salvare Setup)**: 6 grafice în timp real care pot fi mutate modular, redimensionate (1x/2x) și activate/dezactivate, cu salvarea automată a configurației pentru sesiunile viitoare.
+- **Calcul Automat al Indicatorilor Energetici Suplimentari**: grad de încărcare disjunctor, dezechilibru de curent și tensiune (NEMA / EN 50160), încadrare tarifară $\cos \varphi$ ANRE ($\ge 0.92$) și calculul bateriei de compensare reactivă ($Q_{\text{comp}}$), încărcare conductor nul, abatere frecvență și putere deformantă.
+- **Alertă Sonoră la Stare de Alarmă** (Web Audio API) cu opțiuni de Mute/Unmute, Test și Confirmare (Acknowledge).
 - **Selectare directă a portului USB (COM) din Dashboard-ul Web** (fără introducere manuală în consolă).
 - **Salvare automată în CSV** (`pxr25_log.csv`) pentru fiecare Slave ID + rândul `AVERAGE`.
 
@@ -16,17 +19,18 @@ Aplicație modulară în Python pentru conectarea prin **adaptor USB–RS485 (Mo
 ## Structura Proiectului
 
 ```text
-cool-galileo/
+SME/
 ├── main.py                              # Punctul de intrare (Entry-point) — pornește direct Dashboard-ul Web
 ├── requirements.txt                     # Dependențe Python (pymodbus, pyserial)
 ├── README.md                            # Documentația proiectului
-├── backup_v1_single_device/             # Backup complet al versiunii anterioare (Single-Device)
+├── Detalii_Proiect.md                   # Arhitectură detaliată, scalare DB Big Data și Roadmap Notificări Externe
 └── src/
     └── eaton_pxr/
         ├── __init__.py                  # Inițializare pachet
-        ├── models.py                    # Modele de date (SerialConnectionConfig, PxrSnapshot, TripEvent)
+        ├── models.py                    # Modele de date (SerialConnectionConfig, PxrSnapshot, EnergyIndicator, TripEvent)
         ├── registers.py                 # Harta registrelor Modbus PXR25 și tabelele de coduri Eaton
         ├── decoder.py                   # Decodare binară registre 16/32 biți (Fixed-Point, Float, Protecții)
+        ├── analytics.py                 # Calcul automat indicatori energetici suplimentari și evaluare alarme
         ├── connection.py                # Gestiune conexiune USB–RS485 și detecție porturi COM
         ├── scanner.py                   # Scanare automată lanț Slave ID (daisy-chain) și calcul Average-uri
         ├── reader.py                    # Citire Modbus: valori în timp real, setări protecție, istoric declanșări
@@ -34,9 +38,9 @@ cool-galileo/
         ├── cli.py                       # Interfața linie de comandă (CLI)
         └── web/
             ├── __init__.py
-            ├── server.py                # Serverul HTTP Multi-Device și firul de achiziție la 2 secunde
+            ├── server.py                # Serverul HTTP Multi-Device, istoric live și persistență preferințe UI
             └── templates/
-                └── dashboard.html       # Interfața Web (Average-uri, Pagini per ID, Pop-up verificare lanț)
+                └── dashboard.html       # Interfața Web (Grafice modulare, Indicatori, Alerte sonore, Pop-up lanț)
 ```
 
 ---
