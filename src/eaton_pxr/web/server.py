@@ -140,6 +140,181 @@ class MultiDeviceDashboardState:
             }
 
 
+def record_live_status_transition(
+    snap: PxrSnapshot,
+    last_cause_per_id: Dict[int, str],
+    session_events_per_id: Dict[int, List[TripEvent]],
+    db_writer: Optional[TimescaleBatchWriter] = None,
+) -> Optional[TripEvent]:
+    """
+    Detectează schimbările de stare/cauză în timpul monitorizării live, le adaugă în
+    istoricul sesiunii și (dacă reprezintă o avarie/declanșare/tranziție) le trimite
+    și în tabelul permanent `trip_events` din TimescaleDB.
+    """
+    sid = snap.slave_id
+    prim = snap.status_info.get("Stare Principală Disjunctor", "")
+    cause = snap.status_info.get("Cauză Stare / Eveniment", "")
+    cur_cause = f"{prim} — {cause}"
+
+    if last_cause_per_id.get(sid) == cur_cause:
+        return None
+
+    had_previous = sid in last_cause_per_id
+    last_cause_per_id[sid] = cur_cause
+
+    by_key = {m.key: (m.value or 0.0) for m in snap.measurements}
+    cur_fmt = (
+        f"IA={by_key.get('I_A', 0.0):.1f}A, "
+        f"IB={by_key.get('I_B', 0.0):.1f}A, "
+        f"IC={by_key.get('I_C', 0.0):.1f}A, "
+        f"IG={by_key.get('I_G', 0.0):.1f}A"
+    )
+    lst = session_events_per_id.setdefault(sid, [])
+    live_ev = TripEvent(
+        event_id=str(len(lst) + 1),
+        event_type="Live",
+        timestamp=snap.timestamp,
+        cause=cur_cause,
+        currents=cur_fmt,
+    )
+    lst.insert(0, live_ev)
+
+    is_fault = any(
+        k in prim for k in ("[0x03]", "[0x04]", "Tripped", "Declanșat", "Alarm")
+    ) or (bool(cause) and "[0x0000]" not in cause and "Normal" not in cause)
+
+    if db_writer is not None and (is_fault or had_previous):
+        db_writer.enqueue_trip_event(sid, live_ev)
+
+    return live_ev
+
+
+def update_state_after_poll(
+    state: MultiDeviceDashboardState,
+    chain_to_poll: List[int],
+    current_snapshots: Dict[int, PxrSnapshot],
+    broken_at_id: Optional[int],
+    now_str: str,
+    total_csv_rows: int,
+    settings_cache: Dict[int, List[Dict[str, Any]]],
+    events_cache: Dict[int, List[Dict[str, Any]]],
+    session_events_per_id: Dict[int, List[TripEvent]],
+) -> None:
+    """Actualizează thread-safe starea Dashboard-ului după un ciclu de citire în lanț."""
+    surviving_ids = sorted(current_snapshots.keys())
+    fleet_avg = compute_fleet_averages(current_snapshots)
+    fleet_indicators = compute_energy_indicators(fleet_avg)
+    time_short = now_str.split(" ")[-1] if " " in now_str else now_str
+
+    with state.lock:
+        state.force_settings_refresh = False
+        state.timestamp = now_str
+        state.poll_count += 1
+        state.csv_rows = total_csv_rows
+
+        new_devices_dict: Dict[str, Dict[str, Any]] = {}
+        for sid in surviving_ids:
+            snap = current_snapshots[sid]
+            combined_ev = [
+                asdict(ev) for ev in session_events_per_id.get(sid, [])[:10]
+            ] + events_cache.get(sid, [])
+            new_devices_dict[str(sid)] = {
+                "slave_id": sid,
+                "timestamp": snap.timestamp,
+                "connection_desc": snap.connection_desc,
+                "status_info": snap.status_info,
+                "measurements": [asdict(m) for m in snap.measurements],
+                "energy_indicators": [asdict(ind) for ind in snap.energy_indicators],
+                "protection_settings": settings_cache.get(sid, []),
+                "event_history": combined_ev,
+            }
+            dev_hist = state.history.setdefault(str(sid), [])
+            dev_hist.append(
+                {
+                    "t": time_short,
+                    "values": {m.key: m.value for m in snap.measurements},
+                    "indicators": {
+                        ind.key: ind.value for ind in snap.energy_indicators
+                    },
+                }
+            )
+            if len(dev_hist) > MAX_HISTORY_POINTS:
+                del dev_hist[:-MAX_HISTORY_POINTS]
+
+        state.devices = new_devices_dict
+        state.averages = [asdict(m) for m in fleet_avg]
+        state.averages_indicators = [asdict(ind) for ind in fleet_indicators]
+        state.active_ids = surviving_ids
+
+        if surviving_ids:
+            avg_hist = state.history.setdefault("averages", [])
+            avg_hist.append(
+                {
+                    "t": time_short,
+                    "values": {m.key: m.value for m in fleet_avg},
+                    "indicators": {ind.key: ind.value for ind in fleet_indicators},
+                }
+            )
+            if len(avg_hist) > MAX_HISTORY_POINTS:
+                del avg_hist[:-MAX_HISTORY_POINTS]
+
+        if broken_at_id is not None:
+            lost_ids = [x for x in chain_to_poll if x >= broken_at_id]
+            state.ok = len(surviving_ids) > 0
+            state.last_error = (
+                f"Întrerupere lanț la Slave ID #{broken_at_id}! "
+                f"Dispozitivele #{broken_at_id}..#{chain_to_poll[-1]} au dispărut."
+            )
+            state.chain_alert = {
+                "pending": True,
+                "reason": "chain_break",
+                "detected_count": len(surviving_ids),
+                "active_ids": surviving_ids,
+                "stopped_at_id": broken_at_id,
+                "previous_count": len(chain_to_poll),
+                "lost_ids": lost_ids,
+                "message": (
+                    f"ATENȚIE: Nu se mai primește răspuns de la Dispozitivul cu Slave ID #{broken_at_id}! "
+                    f"Deoarece conexiunea este în lanț, toate dispozitivele de la #{broken_at_id} "
+                    f"până la #{chain_to_poll[-1]} ({len(lost_ids)} aparate) au dispărut. "
+                    f"Dispozitive rămase active: {len(surviving_ids)}."
+                ),
+            }
+        elif not state.chain_alert.get("pending"):
+            state.ok = len(surviving_ids) > 0
+            state.last_error = ""
+
+        state.alarm_state = evaluate_alarm_state(
+            state.devices, state.chain_alert, state.halted
+        )
+
+
+def apply_chain_alert_action(state: MultiDeviceDashboardState, action: str) -> None:
+    """Aplică decizia operatorului din Pop-up ('ok' sau 'problem') asupra stării lanțului."""
+    with state.lock:
+        state.chain_alert["pending"] = False
+        if action == "problem":
+            state.halted = True
+            state.ok = False
+            state.last_error = (
+                "CITIRE OPRITĂ PENTRU INTERVENȚIE HARDWARE "
+                f"(Problema raportată la Slave ID #{state.chain_alert.get('stopped_at_id', '?')})."
+            )
+        else:
+            state.confirmed_ids = list(state.active_ids)
+            state.halted = False
+            if state.active_ids:
+                state.ok = True
+                state.last_error = ""
+            else:
+                # Dacă nu mai era niciun dispozitiv activ (ex: ID #1 a avut timeout),
+                # re-declanșăm scanarea automată pentru a nu rămâne cu lista goală.
+                state.needs_discovery = True
+        state.alarm_state = evaluate_alarm_state(
+            state.devices, state.chain_alert, state.halted
+        )
+
+
 def run_dashboard_server(
     config: SerialConnectionConfig,
     csv_exporter: CsvExporter,
@@ -287,30 +462,12 @@ def run_dashboard_server(
                             asdict(ev) for ev in snap.event_history if ev.event_id != "ACTIV"
                         ]
 
-                    cur_cause = (
-                        f"{snap.status_info.get('Stare Principală Disjunctor', '')} — "
-                        f"{snap.status_info.get('Cauză Stare / Eveniment', '')}"
+                    record_live_status_transition(
+                        snap=snap,
+                        last_cause_per_id=last_cause_per_id,
+                        session_events_per_id=session_events_per_id,
+                        db_writer=db_writer,
                     )
-                    if last_cause_per_id.get(sid) != cur_cause:
-                        last_cause_per_id[sid] = cur_cause
-                        by_key = {m.key: (m.value or 0.0) for m in snap.measurements}
-                        cur_fmt = (
-                            f"IA={by_key.get('I_A', 0.0):.1f}A, "
-                            f"IB={by_key.get('I_B', 0.0):.1f}A, "
-                            f"IC={by_key.get('I_C', 0.0):.1f}A, "
-                            f"IG={by_key.get('I_G', 0.0):.1f}A"
-                        )
-                        lst = session_events_per_id.setdefault(sid, [])
-                        lst.insert(
-                            0,
-                            TripEvent(
-                                event_id=str(len(lst) + 1),
-                                event_type="Live",
-                                timestamp=snap.timestamp,
-                                cause=cur_cause,
-                                currents=cur_fmt,
-                            ),
-                        )
 
                 fleet_avg = compute_fleet_averages(current_snapshots)
                 fleet_indicators = compute_energy_indicators(fleet_avg)
@@ -325,91 +482,17 @@ def run_dashboard_server(
                     indicators=fleet_indicators,
                 )
 
-                time_short = now_str.split(" ")[-1] if " " in now_str else now_str
-
-                with state.lock:
-                    state.force_settings_refresh = False
-                    state.timestamp = now_str
-                    state.poll_count += 1
-                    state.csv_rows = total_csv_rows
-
-                    # Construim dicționarul `devices` DOAR cu ID-urile vizibile (1 .. broken_at_id-1)
-                    # Tot ce era de la `broken_at_id` încolo DISPARE imediat!
-                    new_devices_dict: Dict[str, Dict[str, Any]] = {}
-                    for sid in surviving_ids:
-                        snap = current_snapshots[sid]
-                        combined_ev = [
-                            asdict(ev) for ev in session_events_per_id.get(sid, [])[:10]
-                        ] + events_cache.get(sid, [])
-                        new_devices_dict[str(sid)] = {
-                            "slave_id": sid,
-                            "timestamp": snap.timestamp,
-                            "connection_desc": snap.connection_desc,
-                            "status_info": snap.status_info,
-                            "measurements": [asdict(m) for m in snap.measurements],
-                            "energy_indicators": [asdict(ind) for ind in snap.energy_indicators],
-                            "protection_settings": settings_cache.get(sid, []),
-                            "event_history": combined_ev,
-                        }
-                        dev_hist = state.history.setdefault(str(sid), [])
-                        dev_hist.append(
-                            {
-                                "t": time_short,
-                                "values": {m.key: m.value for m in snap.measurements},
-                                "indicators": {
-                                    ind.key: ind.value for ind in snap.energy_indicators
-                                },
-                            }
-                        )
-                        if len(dev_hist) > MAX_HISTORY_POINTS:
-                            del dev_hist[:-MAX_HISTORY_POINTS]
-
-                    state.devices = new_devices_dict
-                    state.averages = [asdict(m) for m in fleet_avg]
-                    state.averages_indicators = [asdict(ind) for ind in fleet_indicators]
-                    state.active_ids = surviving_ids
-
-                    if surviving_ids:
-                        avg_hist = state.history.setdefault("averages", [])
-                        avg_hist.append(
-                            {
-                                "t": time_short,
-                                "values": {m.key: m.value for m in fleet_avg},
-                                "indicators": {ind.key: ind.value for ind in fleet_indicators},
-                            }
-                        )
-                        if len(avg_hist) > MAX_HISTORY_POINTS:
-                            del avg_hist[:-MAX_HISTORY_POINTS]
-
-                    if broken_at_id is not None:
-                        lost_ids = [x for x in chain_to_poll if x >= broken_at_id]
-                        state.ok = len(surviving_ids) > 0
-                        state.last_error = (
-                            f"Întrerupere lanț la Slave ID #{broken_at_id}! "
-                            f"Dispozitivele #{broken_at_id}..#{chain_to_poll[-1]} au dispărut."
-                        )
-                        state.chain_alert = {
-                            "pending": True,
-                            "reason": "chain_break",
-                            "detected_count": len(surviving_ids),
-                            "active_ids": surviving_ids,
-                            "stopped_at_id": broken_at_id,
-                            "previous_count": len(chain_to_poll),
-                            "lost_ids": lost_ids,
-                            "message": (
-                                f"ATENȚIE: Nu se mai primește răspuns de la Dispozitivul cu Slave ID #{broken_at_id}! "
-                                f"Deoarece conexiunea este în lanț, toate dispozitivele de la #{broken_at_id} "
-                                f"până la #{chain_to_poll[-1]} ({len(lost_ids)} aparate) au dispărut. "
-                                f"Dispozitive rămase active: {len(surviving_ids)}."
-                            ),
-                        }
-                    else:
-                        state.ok = True
-                        state.last_error = ""
-
-                    state.alarm_state = evaluate_alarm_state(
-                        state.devices, state.chain_alert, state.halted
-                    )
+                update_state_after_poll(
+                    state=state,
+                    chain_to_poll=chain_to_poll,
+                    current_snapshots=current_snapshots,
+                    broken_at_id=broken_at_id,
+                    now_str=now_str,
+                    total_csv_rows=total_csv_rows,
+                    settings_cache=settings_cache,
+                    events_cache=events_cache,
+                    session_events_per_id=session_events_per_id,
+                )
 
             except Exception as exc:
                 with state.lock:
@@ -502,17 +585,27 @@ def run_dashboard_server(
                 self.end_headers()
 
         def do_POST(self) -> None:
-            length = int(self.headers.get("Content-Length", "0"))
+            try:
+                length = max(0, min(65536, int(self.headers.get("Content-Length", "0"))))
+            except (TypeError, ValueError):
+                length = 0
             raw_body = self.rfile.read(length) if length > 0 else b"{}"
             try:
-                req = json.loads(raw_body.decode("utf-8"))
+                parsed = json.loads(raw_body.decode("utf-8"))
+                req = parsed if isinstance(parsed, dict) else {}
             except Exception:
                 req = {}
 
             if self.path.startswith("/api/connect") or self.path.startswith("/api/scan-chain"):
                 with state.lock:
-                    new_port = normalize_com_port(req.get("port", state.config.port))
-                    new_baud = int(req.get("baudrate", state.config.baudrate))
+                    raw_port = req.get("port")
+                    new_port = normalize_com_port(
+                        str(raw_port) if raw_port else state.config.port
+                    )
+                    try:
+                        new_baud = int(req.get("baudrate") or state.config.baudrate)
+                    except (TypeError, ValueError):
+                        new_baud = state.config.baudrate
                     state.config = SerialConnectionConfig(
                         port=new_port,
                         baudrate=new_baud,
@@ -532,24 +625,8 @@ def run_dashboard_server(
 
             elif self.path.startswith("/api/chain-alert-action"):
                 # Acțiunea aleasă de utilizator în Pop-up: "ok" sau "problem"
-                action = req.get("action", "ok")
-                with state.lock:
-                    state.chain_alert["pending"] = False
-                    if action == "problem":
-                        # Oprește complet citirea pentru ca tehnicianul să poată repara hardware-ul!
-                        state.halted = True
-                        state.ok = False
-                        state.last_error = (
-                            "CITIRE OPRITĂ PENTRU INTERVENȚIE HARDWARE "
-                            f"(Problema raportată la Slave ID #{state.chain_alert.get('stopped_at_id', '?')})."
-                        )
-                    else:
-                        # Utilizatorul a confirmat "OK" -> continuăm cu dispozitivele active găsite
-                        state.confirmed_ids = list(state.active_ids)
-                        state.halted = False
-                    state.alarm_state = evaluate_alarm_state(
-                        state.devices, state.chain_alert, state.halted
-                    )
+                action = str(req.get("action") or "ok")
+                apply_chain_alert_action(state, action)
                 wake_event.set()
                 self._send_ok()
 
@@ -563,8 +640,9 @@ def run_dashboard_server(
                 self._send_ok()
 
             elif self.path.startswith("/api/db-enqueue-demo"):
-                # Permite adăugarea unui punct de test în coada RAM (queue.Queue) din modul Demo
-                vals = req.get("values") or {}
+                # Calculează valorile și cei 8 indicatori energetici pentru modul Demo
+                # fără a polua tabelul de producție `pxr25_measurements` (decât dacă `persist_to_db` este explicit True).
+                vals = req.get("values") if isinstance(req.get("values"), dict) else {}
                 from ..models import MeasuredValue
                 from ..registers import PXR25_PARAMETERS
 
@@ -579,12 +657,25 @@ def run_dashboard_server(
                     for p in PXR25_PARAMETERS
                 ]
                 demo_inds = compute_energy_indicators(demo_meas)
-                db_writer.enqueue_averages(
-                    active_count=1,
-                    averages=demo_meas,
-                    indicators=demo_inds,
-                )
-                self._send_ok()
+                if req.get("persist_to_db") is True:
+                    db_writer.enqueue_averages(
+                        active_count=1,
+                        averages=demo_meas,
+                        indicators=demo_inds,
+                    )
+                body = json.dumps(
+                    {
+                        "status": "ok",
+                        "measurements": [asdict(m) for m in demo_meas],
+                        "indicators": [asdict(ind) for ind in demo_inds],
+                    },
+                    ensure_ascii=False,
+                ).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
 
             elif self.path.startswith("/api/resume-reading"):
                 with state.lock:

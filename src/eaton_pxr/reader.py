@@ -51,47 +51,68 @@ def read_realtime_measurements(
 ) -> Tuple[Dict[str, str], List[MeasuredValue]]:
     """
     Citește starea disjunctorului și toate cele 20 de mărimi electrice în timp real
-    pentru `config.slave_id`. Dacă aparatul nu răspunde la citirea stării, ridică RuntimeError.
+    pentru `config.slave_id` folosind 2 citiri bloc contigue (Status+Mărimi și Contoare Energie)
+    pentru a minimiza latența pe magistrala RS-485 în regim multi-device.
+    Dacă aparatul nu răspunde la citirea blocului principal, ridică RuntimeError.
     """
-    status_addr = REG_STATUS_FLOAT if config.use_float else REG_STATUS_FIXED
-    resp_status = modbus_read_holding(client, status_addr, 2, config.slave_id)
-    if resp_status.isError() or len(getattr(resp_status, "registers", [])) < 2:
+    base_main = REG_STATUS_FLOAT if config.use_float else REG_STATUS_FIXED
+    # Blocul 1: 0x1800..0x1835 (sau 0x1200..0x1235) = 54 registre contigue
+    resp_main = modbus_read_holding(client, base_main, 54, config.slave_id)
+    main_regs = getattr(resp_main, "registers", None) or []
+    if resp_main.isError() or len(main_regs) < 2:
         raise RuntimeError(
             f"Dispozitivul cu Slave ID={config.slave_id} nu mai răspunde pe magistrala RS-485."
         )
 
-    status_info = decode_status_registers(
-        resp_status.registers[0], resp_status.registers[1]
+    status_info = decode_status_registers(main_regs[0], main_regs[1])
+
+    # Blocul 2: Contoarele de energie Clasa 1 (0x1872..0x187F = 14 registre contigue)
+    energy_base = 0x1872
+    resp_energy = modbus_read_holding(client, energy_base, 14, config.slave_id)
+    energy_regs = (
+        getattr(resp_energy, "registers", None) or []
+        if not resp_energy.isError()
+        else []
     )
+
     measurements: List[MeasuredValue] = []
 
     for param in PXR25_PARAMETERS:
         if config.use_float and param.modbus_float_addr is not None:
-            resp = modbus_read_holding(
-                client, param.modbus_float_addr, 2, config.slave_id
-            )
-            if resp.isError():
+            off = param.modbus_float_addr - REG_STATUS_FLOAT
+            if 0 <= off and len(main_regs) >= off + 2:
+                r0, r1 = main_regs[off], main_regs[off + 1]
+            else:
                 measurements.append(
                     MeasuredValue(param.key, param.name, param.category, None, param.unit)
                 )
                 continue
-            val = decode_32bit_float(
-                resp.registers[0], resp.registers[1], word_swap=config.word_swap
-            )
+            val = decode_32bit_float(r0, r1, word_swap=config.word_swap)
             clean_val = None if val != val else val
             measurements.append(
                 MeasuredValue(param.key, param.name, param.category, clean_val, param.unit)
             )
         else:
-            resp = modbus_read_holding(client, param.modbus_fp_addr, 2, config.slave_id)
-            if resp.isError():
+            addr = param.modbus_fp_addr
+            r0_r1: Optional[Tuple[int, int]] = None
+            if not config.use_float and REG_STATUS_FIXED <= addr <= REG_STATUS_FIXED + 52:
+                off = addr - REG_STATUS_FIXED
+                if len(main_regs) >= off + 2:
+                    r0_r1 = (main_regs[off], main_regs[off + 1])
+            elif energy_base <= addr <= energy_base + 12:
+                off = addr - energy_base
+                if len(energy_regs) >= off + 2:
+                    r0_r1 = (energy_regs[off], energy_regs[off + 1])
+
+            if r0_r1 is None:
                 measurements.append(
                     MeasuredValue(param.key, param.name, param.category, None, param.unit)
                 )
                 continue
+
             raw_int = decode_32bit_int(
-                resp.registers[0],
-                resp.registers[1],
+                r0_r1[0],
+                r0_r1[1],
                 signed=param.fp_signed,
                 word_swap=config.word_swap,
             )

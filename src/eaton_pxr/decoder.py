@@ -5,7 +5,7 @@ Funcții de decodare binară a registrelor Modbus (16 biți / 32 biți Fixed-Poi
 from __future__ import annotations
 
 import struct
-from typing import Dict
+from typing import Dict, Tuple
 from .registers import (
     CAUSE_OF_STATUS_CODES,
     PRIMARY_STATUS_CODES,

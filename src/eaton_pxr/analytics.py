@@ -426,8 +426,13 @@ def evaluate_alarm_state(
     severity = "normal"
 
     if halted:
-        reasons.append("Citire oprită pentru intervenție hardware pe magistrala RS-485.")
-        severity = "critical"
+        return {
+            "active": False,
+            "severity": "normal",
+            "count": 0,
+            "reasons": [],
+            "signature": "",
+        }
 
     if chain_alert.get("pending") and chain_alert.get("reason") == "chain_break":
         msg = chain_alert.get("message") or "Întrerupere detectată în lanțul Modbus RS-485!"
