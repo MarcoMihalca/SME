@@ -343,24 +343,14 @@ class TimescaleBatchWriter:
         """Declanșează imediat un Bulk Insert din coada RAM în TimescaleDB."""
         self._flush_event.set()
 
-    def _batch_worker_loop(self) -> None:
-        conn: Any = None
-        cols_sql = ", ".join(MEASUREMENT_COLUMNS)
-        placeholders = ", ".join(["%s"] * len(MEASUREMENT_COLUMNS))
-        insert_meas_sql = (
-            f"INSERT INTO pxr25_measurements ({cols_sql}) VALUES ({placeholders})"
-        )
-        insert_event_sql = """
-            INSERT INTO trip_events (slave_id, event_id, event_type, event_timestamp, cause, currents)
-            VALUES (%s, %s, %s, %s, %s, %s)
-            ON CONFLICT (slave_id, event_id, event_timestamp, cause) DO NOTHING
-        """
-
-        while not self._stop_event.is_set():
-            self._flush_event.wait(timeout=self.flush_interval_sec)
-            self._flush_event.clear()
-
-            # Verificăm conexiunea și schema chiar dacă nu sunt rânduri încă
+    def _flush_pending_batches(
+        self,
+        conn: Any,
+        insert_meas_sql: str,
+        insert_event_sql: str,
+        drain_all: bool = False,
+    ) -> Any:
+        while True:
             if conn is None:
                 try:
                     conn = self._connect()
@@ -372,10 +362,8 @@ class TimescaleBatchWriter:
                     with self._lock:
                         self.connected = False
                         self.last_error = f"Conexiune TimescaleDB (SME) indisponibilă: {exc}"
-                    conn = None
-                    continue
+                    return None
 
-            # Extragem un lot (batch) de până la MAX_ROWS_PER_BATCH (300) rânduri din coada RAM
             batch: List[Tuple[Any, ...]] = []
             while len(batch) < self.max_batch_size:
                 try:
@@ -391,7 +379,7 @@ class TimescaleBatchWriter:
                     break
 
             if not batch and not ev_batch:
-                continue
+                break
 
             try:
                 with conn.cursor() as cur:
@@ -410,25 +398,80 @@ class TimescaleBatchWriter:
                         self.total_batches += 1
                         self.last_batch_rows = len(batch)
                         self.last_flush_time = now_str
+                    elif ev_batch:
+                        self.last_flush_time = now_str
             except Exception as exc:
-                # Dacă inserarea a eșuat (ex. containerul a fost repornit), punem rândurile înapoi în coadă
+                # Dacă inserarea a eșuat, punem atât măsurătorile cât și evenimentele înapoi în cozi
                 for row in batch:
                     try:
                         self.measurement_queue.put_nowait(row)
+                    except queue.Full:
+                        break
+                for ev_row in ev_batch:
+                    try:
+                        self.events_queue.put_nowait(ev_row)
                     except queue.Full:
                         break
                 try:
                     conn.close()
                 except Exception:
                     pass
-                conn = None
                 with self._lock:
                     self.connected = False
                     self.last_error = f"Eroare la Bulk Insert în TimescaleDB: {exc}"
+                return None
+
+            if not drain_all and (
+                self.measurement_queue.qsize() < self.trigger_threshold
+                and self.events_queue.empty()
+            ):
+                break
+
+        return conn
+
+    def _batch_worker_loop(self) -> None:
+        conn: Any = None
+        cols_sql = ", ".join(MEASUREMENT_COLUMNS)
+        placeholders = ", ".join(["%s"] * len(MEASUREMENT_COLUMNS))
+        insert_meas_sql = (
+            f"INSERT INTO pxr25_measurements ({cols_sql}) VALUES ({placeholders})"
+        )
+        insert_event_sql = """
+            INSERT INTO trip_events (slave_id, event_id, event_type, event_timestamp, cause, currents)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            ON CONFLICT (slave_id, event_id, event_timestamp, cause) DO NOTHING
+        """
+
+        while not self._stop_event.is_set():
+            self._flush_event.wait(timeout=self.flush_interval_sec)
+            self._flush_event.clear()
+            conn = self._flush_pending_batches(
+                conn,
+                insert_meas_sql,
+                insert_event_sql,
+                drain_all=self._stop_event.is_set(),
+            )
+
+        # La oprire (close), golim toate elementele rămase în measurement_queue și events_queue
+        if not self.measurement_queue.empty() or not self.events_queue.empty():
+            conn = self._flush_pending_batches(
+                conn,
+                insert_meas_sql,
+                insert_event_sql,
+                drain_all=True,
+            )
+
+        if conn is not None:
+            try:
+                conn.close()
+            except Exception:
+                pass
 
     def close(self) -> None:
         self._stop_event.set()
         self._flush_event.set()
+        if self._worker_thread.is_alive():
+            self._worker_thread.join(timeout=5.0)
 
     def get_status_dict(self) -> Dict[str, Any]:
         with self._lock:

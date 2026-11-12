@@ -21,9 +21,14 @@ Aplicație modulară în Python pentru conectarea prin **adaptor USB–RS485 (Mo
 ```text
 SME/
 ├── main.py                              # Punctul de intrare (Entry-point) — pornește direct Dashboard-ul Web
-├── requirements.txt                     # Dependențe Python (pymodbus, pyserial)
+├── requirements.txt                     # Dependențe Python (pymodbus, pyserial, psycopg[binary])
+├── docker-compose.yml                   # Serviciul Docker PostgreSQL 16 + TimescaleDB (Container: SME)
+├── docker/
+│   └── init_timescaledb.sql             # Inițializare Hypertable, Continuous Aggregates (1m/15m) și Retenție
 ├── README.md                            # Documentația proiectului
 ├── Detalii_Proiect.md                   # Arhitectură detaliată, scalare DB Big Data și Roadmap Notificări Externe
+├── tests/
+│   └── test_bug_fixes.py                # Suite de teste unitare și de regresie
 └── src/
     └── eaton_pxr/
         ├── __init__.py                  # Inițializare pachet
@@ -33,7 +38,8 @@ SME/
         ├── analytics.py                 # Calcul automat indicatori energetici suplimentari și evaluare alarme
         ├── connection.py                # Gestiune conexiune USB–RS485 și detecție porturi COM
         ├── scanner.py                   # Scanare automată lanț Slave ID (daisy-chain) și calcul Average-uri
-        ├── reader.py                    # Citire Modbus: valori în timp real, setări protecție, istoric declanșări
+        ├── reader.py                    # Citire Modbus în blocuri contigue: valori, setări protecție, istoric declanșări
+        ├── database.py                  # Coadă RAM (queue.Queue) și Bulk Insert în TimescaleDB (Container SME)
         ├── csv_exporter.py              # Modul dedicat pentru crearea și scrierea fișierului CSV
         ├── cli.py                       # Interfața linie de comandă (CLI)
         └── web/
@@ -47,7 +53,12 @@ SME/
 
 ## Utilizare
 
-Pornește direct Dashboard-ul Web (fără niciun parametru în consolă):
+1. **(Opțional) Pornește baza de date TimescaleDB în Docker (`SME`)**:
+```powershell
+docker compose up -d
+```
+
+2. **Pornește direct Dashboard-ul Web (fără niciun parametru în consolă)**:
 ```powershell
 .\.venv\Scripts\python.exe main.py
 ```

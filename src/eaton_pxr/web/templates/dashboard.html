@@ -1009,8 +1009,8 @@ const CHART_DEFINITIONS = {
     unit: '',
     source: 'values',
     series: [
-      { key: 'FREQ', label: 'Frecvență (Hz)', color: '#38bdf8' },
-      { key: 'PF_TOT', label: 'cos φ', color: '#a855f7' }
+      { key: 'FREQ', label: 'Frecvență (Hz)', color: '#38bdf8', rightAxis: false },
+      { key: 'PF_TOT', label: 'cos φ', color: '#a855f7', rightAxis: true }
     ]
   },
   quality: {
@@ -1318,8 +1318,10 @@ function drawSingleChart(chartCfg) {
   ctx.scale(dpr, dpr);
   ctx.clearRect(0, 0, width, height);
 
-  // Colectăm valorile pe fiecare serie și actualizăm legenda cu Ultima / Min / Max
-  let allNums = [];
+  // Colectăm valorile pe fiecare serie (axa stângă și opțional axa dreaptă) și actualizăm legenda
+  let leftNums = [];
+  let rightNums = [];
+  const hasRightAxis = def.series.some(s => s.rightAxis);
   const extractedSeries = def.series.map(s => {
     const vals = points.map(pt => {
       const bag = def.source === 'indicators' ? (pt.indicators || {}) : (pt.values || {});
@@ -1327,7 +1329,10 @@ function drawSingleChart(chartCfg) {
       return (v !== null && v !== undefined && !isNaN(Number(v))) ? Number(v) : null;
     });
     const valid = vals.filter(v => v !== null);
-    if (valid.length > 0) allNums.push(...valid);
+    if (valid.length > 0) {
+      if (s.rightAxis) rightNums.push(...valid);
+      else leftNums.push(...valid);
+    }
     const lastVal = valid.length > 0 ? valid[valid.length - 1] : null;
     const minVal = valid.length > 0 ? Math.min(...valid) : null;
     const maxVal = valid.length > 0 ? Math.max(...valid) : null;
@@ -1336,7 +1341,7 @@ function drawSingleChart(chartCfg) {
 
   legendEl.innerHTML = extractedSeries.map(s => {
     const valTxt = s.lastVal !== null
-      ? `<strong>${s.lastVal.toFixed(2)}</strong> <span style="color:var(--muted)">(min ${s.minVal.toFixed(1)} / max ${s.maxVal.toFixed(1)})</span>`
+      ? `<strong>${s.lastVal.toFixed(2)}</strong> <span style="color:var(--muted)">(min ${s.minVal.toFixed(2)} / max ${s.maxVal.toFixed(2)})</span>`
       : `<span style="color:var(--muted)">—</span>`;
     return `
       <span class="legend-item">
@@ -1346,41 +1351,55 @@ function drawSingleChart(chartCfg) {
     `;
   }).join('');
 
-  const padL = 52, padR = 16, padT = 14, padB = 26;
+  const padL = 52, padR = hasRightAxis ? 48 : 16, padT = 14, padB = 26;
   const plotW = width - padL - padR;
   const plotH = height - padT - padB;
+
+  function calcBounds(nums, defaultMax = 100) {
+    let mn = nums.length ? Math.min(...nums) : 0;
+    let mx = nums.length ? Math.max(...nums) : defaultMax;
+    if (Math.abs(mx - mn) < 1e-3) {
+      const delta = Math.max(0.05, Math.abs(mx) * 0.05 || 1);
+      mn -= delta;
+      mx += delta;
+    } else {
+      const margin = (mx - mn) * 0.15;
+      mn -= margin;
+      mx += margin;
+    }
+    return [mn, mx];
+  }
+
+  const [yMin, yMax] = calcBounds(leftNums, 100);
+  const [yMinR, yMaxR] = calcBounds(rightNums, 1);
 
   // Desenăm grila de fundal
   ctx.strokeStyle = '#1e293b';
   ctx.lineWidth = 1;
   const gridRows = 4;
 
-  let yMin = allNums.length ? Math.min(...allNums) : 0;
-  let yMax = allNums.length ? Math.max(...allNums) : 100;
-  if (Math.abs(yMax - yMin) < 1e-3) {
-    yMin -= 5;
-    yMax += 5;
-  } else {
-    const margin = (yMax - yMin) * 0.12;
-    yMin -= margin;
-    yMax += margin;
-  }
-
   ctx.fillStyle = '#9ca3af';
   ctx.font = '11px ui-monospace, Consolas, monospace';
-  ctx.textAlign = 'right';
 
   for (let r = 0; r <= gridRows; r++) {
     const y = padT + (plotH * r) / gridRows;
-    const val = yMax - ((yMax - yMin) * r) / gridRows;
+    const valL = yMax - ((yMax - yMin) * r) / gridRows;
     ctx.beginPath();
     ctx.moveTo(padL, y);
     ctx.lineTo(padL + plotW, y);
     ctx.stroke();
-    ctx.fillText(val.toFixed(1), padL - 6, y + 4);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#9ca3af';
+    ctx.fillText(valL.toFixed(1), padL - 6, y + 4);
+    if (hasRightAxis) {
+      const valR = yMaxR - ((yMaxR - yMinR) * r) / gridRows;
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#c084fc';
+      ctx.fillText(valR.toFixed(2), padL + plotW + 6, y + 4);
+    }
   }
 
-  if (points.length === 0 || allNums.length === 0) {
+  if (points.length === 0 || (leftNums.length === 0 && rightNums.length === 0)) {
     ctx.fillStyle = '#64748b';
     ctx.textAlign = 'center';
     ctx.font = '12.5px sans-serif';
@@ -1408,6 +1427,8 @@ function drawSingleChart(chartCfg) {
 
   // Trasează fiecare serie
   extractedSeries.forEach(s => {
+    const sMin = s.rightAxis ? yMinR : yMin;
+    const sMax = s.rightAxis ? yMaxR : yMax;
     ctx.strokeStyle = s.color;
     ctx.lineWidth = 2.2;
     ctx.beginPath();
@@ -1415,7 +1436,7 @@ function drawSingleChart(chartCfg) {
     s.vals.forEach((v, i) => {
       if (v === null) return;
       const x = points.length > 1 ? padL + i * stepX : padL + plotW / 2;
-      const y = padT + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+      const y = padT + plotH - ((v - sMin) / (sMax - sMin)) * plotH;
       if (!started) {
         ctx.moveTo(x, y);
         started = true;
@@ -1430,7 +1451,7 @@ function drawSingleChart(chartCfg) {
     s.vals.forEach((v, i) => {
       if (v === null) return;
       const x = points.length > 1 ? padL + i * stepX : padL + plotW / 2;
-      const y = padT + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+      const y = padT + plotH - ((v - sMin) / (sMax - sMin)) * plotH;
       ctx.beginPath();
       ctx.arc(x, y, 2.8, 0, Math.PI * 2);
       ctx.fill();
@@ -1520,17 +1541,51 @@ function toggleDemoChartStream() {
     if (demoHistoryBuffer.length > 120) demoHistoryBuffer.shift();
     drawAllEnabledCharts();
 
-    // Trimitem punctul Demo și în coada RAM (queue.Queue) de pe backend pentru a testa Bulk Insert în TimescaleDB
+    // Calculăm pe backend cei 8 indicatori energetici și cardurile de măsurători pentru Mod Demo
+    // (fără a polua tabelul de producție `pxr25_measurements` din TimescaleDB)
     const lastPt = demoHistoryBuffer[demoHistoryBuffer.length - 1];
     fetch('/api/db-enqueue-demo', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ values: lastPt.values })
-    }).catch(() => {});
+      body: JSON.stringify({
+        values: {
+          ...lastPt.values,
+          E_FWD: 1240.5,
+          E_REV: 0.0,
+          E_TOT: 1240.5,
+          E_APP: 1350.2
+        },
+        persist_to_db: false
+      })
+    })
+      .then(r => r.json())
+      .then(demoRes => {
+        if (demoStreamTimer === null || !demoRes) return;
+        if (Array.isArray(demoRes.indicators)) {
+          renderEnergyIndicators('avg-grid-indicators', demoRes.indicators);
+        }
+        if (Array.isArray(demoRes.measurements)) {
+          const dm = demoRes.measurements;
+          renderCards('avg-grid-currents', dm.filter(m => m.category === 'currents'), 1600);
+          renderCards('avg-grid-voltages', dm.filter(m => m.category === 'voltages'), 450);
+          renderCards('avg-grid-powers', dm.filter(m => m.category === 'powers'), 0);
+          renderCards('avg-grid-energy', dm.filter(m => m.category === 'energy'), 0);
+        }
+      })
+      .catch(() => {});
   };
 
   for (let i = 0; i < 15; i++) pushDemoPoint();
   demoStreamTimer = setInterval(pushDemoPoint, 2000);
+}
+
+function escapeHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 // ============================================================================
@@ -1621,7 +1676,7 @@ function handleAlarmState(data) {
     return;
   }
 
-  listEl.innerHTML = (alarm.reasons || []).map(r => `<li>${r}</li>`).join('');
+  listEl.innerHTML = (alarm.reasons || []).map(r => `<li>${escapeHtml(r)}</li>`).join('');
 
   if (alarm.signature !== acknowledgedAlarmSignature) {
     banner.classList.add('show');
@@ -1671,11 +1726,14 @@ async function loadPorts(autoSelectUsb = false) {
     const ports = info.ports || [];
 
     if (ports.length === 0) {
-      sel.innerHTML = `<option value="${info.current_port || 'COM5'}">${info.current_port || 'COM5'} (Niciun port activ detectat)</option>`;
+      const cp = escapeHtml(info.current_port || 'COM5');
+      sel.innerHTML = `<option value="${cp}">${cp} (Niciun port activ detectat)</option>`;
     } else {
       sel.innerHTML = ports.map(p => {
         const tag = p.is_usb ? ' ★ [Adaptor USB]' : '';
-        return `<option value="${p.device}">${p.device} — ${p.description}${tag}</option>`;
+        const devEsc = escapeHtml(p.device);
+        const descEsc = escapeHtml(p.description);
+        return `<option value="${devEsc}">${devEsc} — ${descEsc}${tag}</option>`;
       }).join('');
 
       const hasCurrent = ports.some(p => p.device === info.current_port);
@@ -1736,6 +1794,9 @@ async function rescanChain() {
 
 async function respondChainAlert(action) {
   ensureAudioContext();
+  if (action === 'problem') {
+    acknowledgeCurrentAlarm();
+  }
   try {
     await fetch('/api/chain-alert-action', {
       method: 'POST',
@@ -1896,13 +1957,15 @@ function renderAll(data) {
     document.getElementById('avg-polls').textContent = `${data.poll_count || 0} cicluri`;
     document.getElementById('avg-time').textContent = `${data.timestamp || '—'} (${data.csv_rows || 0} linii CSV)`;
 
-    renderEnergyIndicators('avg-grid-indicators', data.averages_indicators || []);
+    if (demoStreamTimer === null) {
+      renderEnergyIndicators('avg-grid-indicators', data.averages_indicators || []);
 
-    const avgs = data.averages || [];
-    renderCards('avg-grid-currents', avgs.filter(m => m.category === 'currents'), 1600);
-    renderCards('avg-grid-voltages', avgs.filter(m => m.category === 'voltages'), 450);
-    renderCards('avg-grid-powers', avgs.filter(m => m.category === 'powers'), 0);
-    renderCards('avg-grid-energy', avgs.filter(m => m.category === 'energy'), 0);
+      const avgs = data.averages || [];
+      renderCards('avg-grid-currents', avgs.filter(m => m.category === 'currents'), 1600);
+      renderCards('avg-grid-voltages', avgs.filter(m => m.category === 'voltages'), 450);
+      renderCards('avg-grid-powers', avgs.filter(m => m.category === 'powers'), 0);
+      renderCards('avg-grid-energy', avgs.filter(m => m.category === 'energy'), 0);
+    }
 
     const tbodyFleet = document.getElementById('fleet-summary-tbody');
     if (activeIds.length === 0) {

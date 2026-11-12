@@ -37,9 +37,12 @@ class CsvExporter:
             os.makedirs(parent_dir, exist_ok=True)
 
         if not os.path.exists(self.csv_path) or os.path.getsize(self.csv_path) == 0:
-            with open(self.csv_path, mode="w", newline="", encoding="utf-8-sig") as f:
-                writer = csv.writer(f)
-                writer.writerow(headers)
+            try:
+                with open(self.csv_path, mode="w", newline="", encoding="utf-8-sig") as f:
+                    writer = csv.writer(f)
+                    writer.writerow(headers)
+            except OSError:
+                pass
             self.row_count = 0
         else:
             try:
@@ -60,11 +63,14 @@ class CsvExporter:
         for m in snapshot.measurements:
             row.append(f"{m.value:.2f}" if m.value is not None else "")
 
-        with open(self.csv_path, mode="a", newline="", encoding="utf-8-sig") as f:
-            writer = csv.writer(f)
-            writer.writerow(row)
+        try:
+            with open(self.csv_path, mode="a", newline="", encoding="utf-8-sig") as f:
+                writer = csv.writer(f)
+                writer.writerow(row)
+            self.row_count += 1
+        except OSError:
+            pass
 
-        self.row_count += 1
         return self.row_count
 
     def append_averages_row(
@@ -87,9 +93,12 @@ class CsvExporter:
         for m in averages:
             row.append(f"{m.value:.2f}" if m.value is not None else "")
 
-        with open(self.csv_path, mode="a", newline="", encoding="utf-8-sig") as f:
-            writer = csv.writer(f)
-            writer.writerow(row)
+        try:
+            with open(self.csv_path, mode="a", newline="", encoding="utf-8-sig") as f:
+                writer = csv.writer(f)
+                writer.writerow(row)
+            self.row_count += 1
+        except OSError:
+            pass
 
-        self.row_count += 1
         return self.row_count

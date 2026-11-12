@@ -196,9 +196,6 @@ def run_cli(argv: Optional[list[str]] = None) -> int:
             )
             rows = csv_exporter.append_snapshot(snapshot)
             db_writer.enqueue_snapshot(snapshot)
-            if args.watch <= 0:
-                db_writer.trigger_flush()
-                time.sleep(0.5)
             csv_msg = f"{csv_exporter.csv_path} ({rows} înregistrări)"
 
             print_console_snapshot(
