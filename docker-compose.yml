@@ -1,0 +1,23 @@
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: SME
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sme_user
+      POSTGRES_PASSWORD: sme_password
+      POSTGRES_DB: sme_energy
+      TZ: Europe/Bucharest
+    ports:
+      - "5432:5432"
+    volumes:
+      - sme_timescaledb_data:/var/lib/postgresql/data
+      - ./docker/init_timescaledb.sql:/docker-entrypoint-initdb.d/01_init_timescaledb.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sme_user -d sme_energy"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  sme_timescaledb_data:
