@@ -24,7 +24,11 @@ import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, Dict, List, Optional
 
-from ..analytics import compute_energy_indicators, evaluate_alarm_state
+from ..analytics import (
+    compute_energy_indicators,
+    evaluate_alarm_state,
+    evaluate_overcurrent_notification,
+)
 from ..connection import (
     get_available_serial_ports,
     normalize_com_port,
@@ -34,6 +38,7 @@ from ..csv_exporter import CsvExporter
 from ..database import TimescaleBatchWriter
 from ..models import PxrSnapshot, SerialConnectionConfig, TripEvent
 from ..reader import read_device_on_client
+from ..registers import DEFAULT_MAX_CURRENT_AMPS, RTC_SYNC_INTERVAL_SEC
 from ..scanner import compute_fleet_averages, discover_daisy_chain
 
 
@@ -90,12 +95,15 @@ class MultiDeviceDashboardState:
         self.confirmed_ids: Optional[List[int]] = None
         self.needs_discovery: bool = True
         self.force_settings_refresh: bool = True
+        self.force_time_sync: bool = True
+        self.last_time_sync: str = "—"
 
         # Datele per Slave ID și mediile pe întregul lanț
         self.devices: Dict[str, Dict[str, Any]] = {}
         self.averages: List[Dict[str, Any]] = []
         self.averages_indicators: List[Dict[str, Any]] = []
         self.history: Dict[str, List[Dict[str, Any]]] = {"averages": []}
+        self.overcurrent_alerts: List[Dict[str, Any]] = []
         self.alarm_state: Dict[str, Any] = {
             "active": False,
             "severity": "normal",
@@ -134,6 +142,8 @@ class MultiDeviceDashboardState:
                 "averages": list(self.averages),
                 "averages_indicators": list(self.averages_indicators),
                 "history": {k: list(v) for k, v in self.history.items()},
+                "last_time_sync": self.last_time_sync,
+                "overcurrent_alerts": list(self.overcurrent_alerts),
                 "alarm_state": dict(self.alarm_state),
                 "chain_alert": dict(self.chain_alert),
                 "db_status": self.db_writer.get_status_dict() if self.db_writer else {},
@@ -199,6 +209,7 @@ def update_state_after_poll(
     settings_cache: Dict[int, List[Dict[str, Any]]],
     events_cache: Dict[int, List[Dict[str, Any]]],
     session_events_per_id: Dict[int, List[TripEvent]],
+    time_sync_cache: Optional[Dict[int, str]] = None,
 ) -> None:
     """Actualizează thread-safe starea Dashboard-ului după un ciclu de citire în lanț."""
     surviving_ids = sorted(current_snapshots.keys())
@@ -208,16 +219,38 @@ def update_state_after_poll(
 
     with state.lock:
         state.force_settings_refresh = False
+        state.force_time_sync = False
         state.timestamp = now_str
         state.poll_count += 1
         state.csv_rows = total_csv_rows
 
         new_devices_dict: Dict[str, Dict[str, Any]] = {}
+        overcurrent_alerts: List[Dict[str, Any]] = []
+        latest_sync_ts: Optional[str] = None
+
         for sid in surviving_ids:
             snap = current_snapshots[sid]
             combined_ev = [
                 asdict(ev) for ev in session_events_per_id.get(sid, [])[:10]
             ] + events_cache.get(sid, [])
+
+            oc_alert = snap.overcurrent_alert
+            if oc_alert is None:
+                oc_alert = evaluate_overcurrent_notification(
+                    snap.measurements,
+                    max_current_limit_a=snap.max_current_limit_a,
+                    slave_id=sid,
+                    register_label=snap.max_current_register,
+                )
+            if oc_alert.get("exceeded"):
+                overcurrent_alerts.append(oc_alert)
+
+            synced_at = snap.time_synced_at or (
+                time_sync_cache.get(sid) if time_sync_cache else None
+            )
+            if synced_at:
+                latest_sync_ts = synced_at
+
             new_devices_dict[str(sid)] = {
                 "slave_id": sid,
                 "timestamp": snap.timestamp,
@@ -227,6 +260,11 @@ def update_state_after_poll(
                 "energy_indicators": [asdict(ind) for ind in snap.energy_indicators],
                 "protection_settings": settings_cache.get(sid, []),
                 "event_history": combined_ev,
+                "max_current_limit_a": snap.max_current_limit_a,
+                "nominal_current_in_a": snap.nominal_current_in_a,
+                "max_current_register": snap.max_current_register,
+                "time_synced_at": synced_at or "—",
+                "overcurrent_alert": oc_alert,
             }
             dev_hist = state.history.setdefault(str(sid), [])
             dev_hist.append(
@@ -245,6 +283,9 @@ def update_state_after_poll(
         state.averages = [asdict(m) for m in fleet_avg]
         state.averages_indicators = [asdict(ind) for ind in fleet_indicators]
         state.active_ids = surviving_ids
+        state.overcurrent_alerts = overcurrent_alerts
+        if latest_sync_ts:
+            state.last_time_sync = latest_sync_ts
 
         if surviving_ids:
             avg_hist = state.history.setdefault("averages", [])
@@ -287,6 +328,15 @@ def update_state_after_poll(
         state.alarm_state = evaluate_alarm_state(
             state.devices, state.chain_alert, state.halted
         )
+
+
+def trigger_manual_time_sync(state: MultiDeviceDashboardState) -> str:
+    """Marchează sincronizarea imediată a ceasului RTC pe toate dispozitivele la următorul ciclu."""
+    ts = time.strftime("%Y-%m-%d %H:%M:%S")
+    with state.lock:
+        state.force_time_sync = True
+        state.last_time_sync = ts
+    return ts
 
 
 def apply_chain_alert_action(state: MultiDeviceDashboardState, action: str) -> None:
@@ -334,11 +384,15 @@ def run_dashboard_server(
     stop_event = threading.Event()
     wake_event = threading.Event()
 
-    # Păstrăm în memorie setările de protecție și istoricul fiecărui Slave ID
+    # Păstrăm în memorie setările de protecție, pragul maxim Ir, sincronizarea RTC și istoricul fiecărui Slave ID
     settings_cache: Dict[int, List[Dict[str, Any]]] = {}
     events_cache: Dict[int, List[Dict[str, Any]]] = {}
     session_events_per_id: Dict[int, List[TripEvent]] = {}
     last_cause_per_id: Dict[int, str] = {}
+    max_current_cache: Dict[int, float] = {}
+    nominal_in_cache: Dict[int, float] = {}
+    time_sync_cache: Dict[int, str] = {}
+    last_sync_epoch: Dict[int, float] = {}
 
     def polling_worker() -> None:
         while not stop_event.is_set():
@@ -349,6 +403,7 @@ def run_dashboard_server(
                 is_halted = state.halted
                 need_disc = state.needs_discovery
                 need_settings = state.force_settings_refresh
+                need_time_sync = state.force_time_sync
                 active_cfg = state.config
 
             if is_halted:
@@ -429,15 +484,35 @@ def run_dashboard_server(
                 broken_at_id: Optional[int] = None
 
                 with open_usb_modbus_client(active_cfg) as client:
+                    now_epoch = time.time()
                     for sid in chain_to_poll:
                         dev_cfg = active_cfg.with_slave(sid)
-                        fetch_full = need_settings or (sid not in settings_cache)
+                        fetch_full = (
+                            need_settings
+                            or (sid not in settings_cache)
+                            or (sid not in max_current_cache)
+                        )
+                        should_sync_rtc = (
+                            need_time_sync
+                            or need_settings
+                            or (sid not in last_sync_epoch)
+                            or ((now_epoch - last_sync_epoch[sid]) >= RTC_SYNC_INTERVAL_SEC)
+                        )
                         try:
                             snap = read_device_on_client(
                                 client=client,
                                 config=dev_cfg,
                                 include_settings_and_events=fetch_full,
+                                sync_time=should_sync_rtc,
+                                cached_max_current_a=max_current_cache.get(sid),
+                                cached_nominal_in_a=nominal_in_cache.get(sid),
                             )
+                            if snap.time_synced_at:
+                                time_sync_cache[sid] = snap.time_synced_at
+                                last_sync_epoch[sid] = now_epoch
+                            if fetch_full:
+                                max_current_cache[sid] = snap.max_current_limit_a
+                                nominal_in_cache[sid] = snap.nominal_current_in_a
                             current_snapshots[sid] = snap
                         except Exception:
                             # Deoarece conexiunea este în lanț (daisy-chain), dacă `sid` (ex: ID 10)
@@ -492,6 +567,7 @@ def run_dashboard_server(
                     settings_cache=settings_cache,
                     events_cache=events_cache,
                     session_events_per_id=session_events_per_id,
+                    time_sync_cache=time_sync_cache,
                 )
 
             except Exception as exc:
@@ -620,6 +696,7 @@ def run_dashboard_server(
                     state.halted = False
                     state.needs_discovery = True
                     state.force_settings_refresh = True
+                    state.force_time_sync = True
                 wake_event.set()
                 self._send_ok()
 
@@ -656,7 +733,26 @@ def run_dashboard_server(
                     )
                     for p in PXR25_PARAMETERS
                 ]
-                demo_inds = compute_energy_indicators(demo_meas)
+                try:
+                    max_limit = float(
+                        req.get("max_current_limit_a") or DEFAULT_MAX_CURRENT_AMPS
+                    )
+                except (TypeError, ValueError):
+                    max_limit = DEFAULT_MAX_CURRENT_AMPS
+                try:
+                    demo_sid = int(req.get("slave_id") or 1)
+                except (TypeError, ValueError):
+                    demo_sid = 1
+
+                demo_inds = compute_energy_indicators(
+                    demo_meas, nominal_current_in=max_limit
+                )
+                overcurrent_alert = evaluate_overcurrent_notification(
+                    demo_meas,
+                    max_current_limit_a=max_limit,
+                    slave_id=demo_sid,
+                    register_label="403007 (0x0BBE)",
+                )
                 if req.get("persist_to_db") is True:
                     db_writer.enqueue_averages(
                         active_count=1,
@@ -668,7 +764,23 @@ def run_dashboard_server(
                         "status": "ok",
                         "measurements": [asdict(m) for m in demo_meas],
                         "indicators": [asdict(ind) for ind in demo_inds],
+                        "max_current_limit_a": max_limit,
+                        "overcurrent_alert": overcurrent_alert,
+                        "server_time": time.strftime("%Y-%m-%d %H:%M:%S"),
                     },
+                    ensure_ascii=False,
+                ).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            elif self.path.startswith("/api/sync-time"):
+                synced_at = trigger_manual_time_sync(state)
+                wake_event.set()
+                body = json.dumps(
+                    {"status": "ok", "synced_at": synced_at},
                     ensure_ascii=False,
                 ).encode("utf-8")
                 self.send_response(200)
@@ -682,6 +794,7 @@ def run_dashboard_server(
                     state.halted = False
                     state.needs_discovery = True
                     state.force_settings_refresh = True
+                    state.force_time_sync = True
                 wake_event.set()
                 self._send_ok()
 

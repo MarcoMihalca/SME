@@ -5,13 +5,18 @@ Critice, Importante și Minore din platforma Eaton PXR25 (SME).
 
 from __future__ import annotations
 
+from datetime import datetime
 import os
 import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
 
 from src.eaton_pxr import decoder
-from src.eaton_pxr.analytics import compute_energy_indicators, evaluate_alarm_state
+from src.eaton_pxr.analytics import (
+    compute_energy_indicators,
+    evaluate_alarm_state,
+    evaluate_overcurrent_notification,
+)
 from src.eaton_pxr.csv_exporter import CsvExporter
 from src.eaton_pxr.database import TimescaleBatchWriter
 from src.eaton_pxr.models import (
@@ -20,11 +25,21 @@ from src.eaton_pxr.models import (
     SerialConnectionConfig,
     TripEvent,
 )
-from src.eaton_pxr.reader import read_realtime_measurements
-from src.eaton_pxr.registers import PXR25_PARAMETERS
+from src.eaton_pxr.reader import (
+    read_device_datetime,
+    read_device_on_client,
+    read_max_current_setting,
+    read_realtime_measurements,
+    sync_device_datetime,
+)
+from src.eaton_pxr.registers import PXR25_PARAMETERS, REG_RTC_START
 from src.eaton_pxr.scanner import compute_fleet_averages
 from src.eaton_pxr.web import server
-from src.eaton_pxr.web.server import MultiDeviceDashboardState
+from src.eaton_pxr.web.server import (
+    MultiDeviceDashboardState,
+    trigger_manual_time_sync,
+    update_state_after_poll,
+)
 
 
 def _make_sample_measurements(ia: float = 400.0) -> list[MeasuredValue]:
@@ -268,6 +283,163 @@ class TestImportantAndMinorBugFixes(unittest.TestCase):
         avgs = compute_fleet_averages({1: s1, 2: s2})
         self.assertEqual(len(avgs), 20)
         self.assertAlmostEqual(avgs[0].value or 0.0, 400.0)
+
+
+class TestNewFeaturesRtcDropdownSimpleModeAndOvercurrent(unittest.TestCase):
+    """Teste pentru sincronizare RTC, citire prag maxim amperaj, notificare și UI."""
+
+    def test_rtc_encode_decode_and_sync_device_datetime(self) -> None:
+        """Sincronizează ceasul dispozitivului (0x0B68..0x0B6F) cu data și ora serverului."""
+        sample_dt = datetime(2026, 11, 16, 17, 45, 30, 250000)  # Luni (weekday=0 -> Eaton=2)
+        regs = decoder.encode_rtc_registers(sample_dt)
+        self.assertEqual(regs, [11, 16, 2026, 2, 17, 45, 30, 25])
+        self.assertEqual(decoder.decode_rtc_registers(regs), "2026-11-16 17:45:30")
+
+        fake_client = MagicMock()
+        ok_resp = MagicMock()
+        ok_resp.isError.return_value = False
+        fake_client.write_registers.return_value = ok_resp
+
+        ok, ts_str = sync_device_datetime(fake_client, slave_id=3, dt=sample_dt)
+        self.assertTrue(ok)
+        self.assertEqual(ts_str, "2026-11-16 17:45:30")
+        fake_client.write_registers.assert_called_once()
+        call_kwargs = fake_client.write_registers.call_args.kwargs
+        self.assertEqual(call_kwargs["address"], REG_RTC_START)
+        self.assertEqual(call_kwargs["values"], regs)
+
+        # Verificăm și citirea ceasului RTC
+        read_resp = MagicMock()
+        read_resp.isError.return_value = False
+        read_resp.registers = regs
+        fake_client.read_holding_registers.return_value = read_resp
+        self.assertEqual(read_device_datetime(fake_client, slave_id=3), "2026-11-16 17:45:30")
+
+    def test_rtc_sync_fallback_when_day_of_week_readonly(self) -> None:
+        """Dacă scrierea blocului de 8 registre eșuează, fallback-ul scrie data și ora separat."""
+        sample_dt = datetime(2026, 11, 16, 18, 0, 5)
+        fake_client = MagicMock()
+        err_resp = MagicMock()
+        err_resp.isError.return_value = True
+        ok_resp = MagicMock()
+        ok_resp.isError.return_value = False
+        fake_client.write_registers.side_effect = [err_resp, ok_resp, ok_resp]
+
+        ok, ts_str = sync_device_datetime(fake_client, slave_id=1, dt=sample_dt)
+        self.assertTrue(ok)
+        self.assertEqual(ts_str, "2026-11-16 18:00:05")
+        self.assertEqual(fake_client.write_registers.call_count, 3)
+
+    def test_read_max_current_setting_and_overcurrent_notification(self) -> None:
+        """Citește registrul Ir (0x0BBE) și notifică utilizatorul când sarcina depășește pragul."""
+        fake_client = MagicMock()
+        write_ok = MagicMock()
+        write_ok.isError.return_value = False
+        fake_client.write_register.return_value = write_ok
+
+        # Bloc 0x0BB9..0x0BBE (6 registre): In=1600 A la index 0, Ir=75 (% din In = 1200 A) la index 5
+        block_resp = MagicMock()
+        block_resp.isError.return_value = False
+        block_resp.registers = [1600, 0, 0, 0, 0, 75]
+        fake_client.read_holding_registers.return_value = block_resp
+
+        max_ir, in_amps, reg_lbl = read_max_current_setting(fake_client, slave_id=1)
+        self.assertAlmostEqual(in_amps, 1600.0)
+        self.assertAlmostEqual(max_ir, 1200.0)
+        self.assertEqual(reg_lbl, "403007 (0x0BBE)")
+
+        # Sub limită (400 A < 1200 A) -> fără notificare
+        meas_ok = _make_sample_measurements(ia=400.0)
+        alert_ok = evaluate_overcurrent_notification(
+            meas_ok, max_current_limit_a=max_ir, slave_id=1, register_label=reg_lbl
+        )
+        self.assertFalse(alert_ok["exceeded"])
+        self.assertEqual(alert_ok["message"], "")
+
+        # Peste limită (1350 A > 1200 A) -> notificare + alarmă critică
+        meas_over = _make_sample_measurements(ia=1350.0)
+        alert_over = evaluate_overcurrent_notification(
+            meas_over, max_current_limit_a=max_ir, slave_id=1, register_label=reg_lbl
+        )
+        self.assertTrue(alert_over["exceeded"])
+        self.assertAlmostEqual(alert_over["current_load_a"], 1350.0)
+        self.assertAlmostEqual(alert_over["excess_a"], 150.0)
+        self.assertIn("DEPĂȘIT", alert_over["message"])
+        self.assertIn("1200.0 A", alert_over["message"])
+
+        alarm = evaluate_alarm_state(
+            devices={
+                "1": {
+                    "status_info": {
+                        "Stare Principală Disjunctor": "Închis (Closed) [0x02]",
+                        "Stare Secundară Unitate PXR": "Alimentat / Normal [0x07]",
+                        "Cauză Stare / Eveniment": "Normal [0x0000]",
+                    },
+                    "energy_indicators": [],
+                    "overcurrent_alert": alert_over,
+                }
+            },
+            chain_alert={"pending": False},
+            halted=False,
+        )
+        self.assertTrue(alarm["active"])
+        self.assertEqual(alarm["severity"], "critical")
+        self.assertTrue(any("DEPĂȘIT" in r for r in alarm["reasons"]))
+
+    def test_server_state_tracks_time_sync_and_overcurrent_alerts(self) -> None:
+        """Starea dashboard-ului păstrează timestamp-ul sincronizării și alertele de depășire prag."""
+        cfg = SerialConnectionConfig(port="COM5")
+        state = MultiDeviceDashboardState(config=cfg, csv_path="dummy.csv", db_writer=None)
+        synced_ts = trigger_manual_time_sync(state)
+        self.assertTrue(state.force_time_sync)
+        self.assertEqual(state.last_time_sync, synced_ts)
+
+        over_meas = _make_sample_measurements(ia=1700.0)
+        oc = evaluate_overcurrent_notification(over_meas, max_current_limit_a=1600.0, slave_id=2)
+        snap = PxrSnapshot(
+            slave_id=2,
+            timestamp="2026-11-16 17:50:00",
+            connection_desc="COM5 [Slave #2]",
+            status_info={
+                "Stare Principală Disjunctor": "Închis (Closed) [0x02]",
+                "Stare Secundară Unitate PXR": "Alimentat / Normal [0x07]",
+                "Cauză Stare / Eveniment": "Normal [0x0000]",
+            },
+            measurements=over_meas,
+            energy_indicators=compute_energy_indicators(over_meas, nominal_current_in=1600.0),
+            max_current_limit_a=1600.0,
+            nominal_current_in_a=1600.0,
+            time_synced_at="2026-11-16 17:50:00",
+            overcurrent_alert=oc,
+        )
+        update_state_after_poll(
+            state=state,
+            chain_to_poll=[2],
+            current_snapshots={2: snap},
+            broken_at_id=None,
+            now_str="2026-11-16 17:50:00",
+            total_csv_rows=1,
+            settings_cache={},
+            events_cache={},
+            session_events_per_id={},
+            time_sync_cache={2: "2026-11-16 17:50:00"},
+        )
+        payload = state.to_json_dict()
+        self.assertEqual(payload["last_time_sync"], "2026-11-16 17:50:00")
+        self.assertEqual(len(payload["overcurrent_alerts"]), 1)
+        self.assertEqual(payload["overcurrent_alerts"][0]["slave_id"], 2)
+        self.assertTrue(payload["alarm_state"]["active"])
+
+    def test_dashboard_template_has_dropdown_simple_mode_and_notifications(self) -> None:
+        """Template-ul HTML conține dropdown pentru device-uri, toggle Simplu/Avansat și toast notificare."""
+        with open(server.TEMPLATE_PATH, "r", encoding="utf-8") as f:
+            html = f.read()
+        self.assertIn('id="device-select"', html)
+        self.assertIn('id="btn-mode-simple"', html)
+        self.assertIn('id="btn-mode-advanced"', html)
+        self.assertIn('id="overcurrent-toast"', html)
+        self.assertIn('/api/sync-time', html)
+        self.assertNotIn('id="view-averages"', html)
 
 
 if __name__ == "__main__":
