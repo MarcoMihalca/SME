@@ -6,7 +6,7 @@ pentru monitorizarea multi-device în lanț (daisy-chain RS-485).
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 @dataclass(frozen=True)
@@ -109,3 +109,8 @@ class PxrSnapshot:
     energy_indicators: List[EnergyIndicator] = field(default_factory=list)
     protection_settings: List[ProtectionSetting] = field(default_factory=list)
     event_history: List[TripEvent] = field(default_factory=list)
+    max_current_limit_a: float = 1600.0
+    nominal_current_in_a: float = 1600.0
+    max_current_register: str = "403007 (0x0BBE)"
+    time_synced_at: Optional[str] = None
+    overcurrent_alert: Optional[Dict[str, Any]] = None

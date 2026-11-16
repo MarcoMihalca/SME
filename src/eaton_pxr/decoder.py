@@ -4,8 +4,9 @@ Funcții de decodare binară a registrelor Modbus (16 biți / 32 biți Fixed-Poi
 
 from __future__ import annotations
 
+from datetime import datetime
 import struct
-from typing import Dict, Tuple
+from typing import Dict, List, Optional, Tuple
 from .registers import (
     CAUSE_OF_STATUS_CODES,
     PRIMARY_STATUS_CODES,
@@ -126,3 +127,44 @@ def decode_protection_value(
         return f"{raw} %", in_amps, ir_amps
 
     return str(raw), in_amps, ir_amps
+
+
+def encode_rtc_registers(dt: Optional[datetime] = None) -> List[int]:
+    """
+    Codifică data și ora într-un bloc de 8 registre Modbus RTC (402921..402928 / 0x0B68..0x0B6F)
+    conform manualului Eaton MN012005EN:
+      [Month (1-12), Day (1-31), Year (2000-2099), DayOfWeek (1=Dum..7=Sâm),
+       Hour (0-23), Minute (0-59), Second (0-59), 1/100th Sec (0-99)]
+    """
+    target = dt or datetime.now()
+    # Python weekday(): Monday=0..Sunday=6 -> Eaton PXR: Sunday=1, Monday=2, ..., Saturday=7
+    day_of_week = ((target.weekday() + 1) % 7) + 1
+    hundredths = min(99, max(0, int(target.microsecond // 10000)))
+    return [
+        target.month,
+        target.day,
+        target.year,
+        day_of_week,
+        target.hour,
+        target.minute,
+        target.second,
+        hundredths,
+    ]
+
+
+def decode_rtc_registers(regs: List[int]) -> Optional[str]:
+    """Decodează cele 7-8 registre Modbus RTC (0x0B68..0x0B6F) în format 'YYYY-MM-DD HH:MM:SS'."""
+    if not regs or len(regs) < 7:
+        return None
+    month = int(regs[0])
+    day = int(regs[1])
+    year = int(regs[2])
+    hour = int(regs[4])
+    minute = int(regs[5])
+    second = int(regs[6])
+
+    if not (1 <= month <= 12 and 1 <= day <= 31 and 2000 <= year <= 2099):
+        return None
+    if not (0 <= hour <= 23 and 0 <= minute <= 59 and 0 <= second <= 59):
+        return None
+    return f"{year:04d}-{month:02d}-{day:02d} {hour:02d}:{minute:02d}:{second:02d}"

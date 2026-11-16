@@ -49,9 +49,19 @@ REG_STATUS_FLOAT = 0x1200       # Reg 404609..404610
 REG_STATUS_FIXED = 0x1800       # Reg 406145..406146
 REG_PRODUCT_ID = 0x186E         # Reg 406255..406256
 
+# Registrele pentru Ceasul în Timp Real (Real-Time Clock — Date & Time din MN012005EN)
+# 402921..402928: Month, Day, Year, Day of Week, Hour, Minute, Second, 1/100th Second
+REG_RTC_START = 0x0B68          # Reg 402921 (Month) .. 0x0B6F / Reg 402928 (1/100s)
+RTC_REGISTER_COUNT = 8
+RTC_SYNC_INTERVAL_SEC = 300.0   # Resincronizare automată la fiecare 5 minute
+
 # Adresele pentru Tabelul 27 (Setting Group 1: Protection Group)
 REG_PASSWORD = 0x0BB7           # Reg 403000
 REG_GROUP_SELECT = 0x0BB8       # Reg 403001
+REG_NOMINAL_CURRENT_IN = 0x0BB9 # Reg 403002 (Curent Nominal In)
+REG_MAX_CURRENT_IR = 0x0BBE     # Reg 403007 (Prag Suprasarcină / Setare maximă amperaj Ir)
+REG_HIGH_LOAD_ALARM = 0x0BC2    # Reg 403011 (Alarmă sarcină ridicată / High Load 1)
+DEFAULT_MAX_CURRENT_AMPS = 1600.0
 PROTECTION_BLOCK_COUNT = 24     # 0x0BB8..0x0BCF
 
 # Definițiile registrelor din Tabelul 27 (Setări de protecție PXR25)

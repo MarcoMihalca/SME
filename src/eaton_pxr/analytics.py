@@ -412,6 +412,72 @@ def compute_energy_indicators(
     return indicators
 
 
+def evaluate_overcurrent_notification(
+    measurements: List[MeasuredValue],
+    max_current_limit_a: float = 1600.0,
+    slave_id: Optional[int] = None,
+    register_label: str = "403007 (0x0BBE)",
+) -> Dict[str, Any]:
+    """
+    Verifică dacă sarcina actuală (curentul maxim pe fazele IA, IB, IC) depășește
+    pragul maxim de amperaj citit din registrul de protecție (Ir — 403007 / 0x0BBE)
+    și construiește notificarea corespunzătoare.
+    """
+    by_key: Dict[str, Optional[float]] = {m.key: m.value for m in measurements}
+    phase_map = [
+        ("L1 (IA)", _get_val(by_key, "I_A")),
+        ("L2 (IB)", _get_val(by_key, "I_B")),
+        ("L3 (IC)", _get_val(by_key, "I_C")),
+    ]
+    valid_phases = [(lbl, val) for lbl, val in phase_map if val is not None]
+    limit_a = float(max_current_limit_a)
+    if not valid_phases:
+        return {
+            "exceeded": False,
+            "slave_id": slave_id,
+            "current_load_a": 0.0,
+            "max_limit_a": round(limit_a, 2),
+            "register": register_label,
+            "exceeded_phases": [],
+            "excess_a": 0.0,
+            "load_pct": 0.0,
+            "message": "",
+        }
+
+    current_load_a = max(val for _, val in valid_phases)
+    exceeded_phases = [
+        f"{lbl}={val:.1f} A"
+        for lbl, val in valid_phases
+        if limit_a > 0 and val > limit_a
+    ]
+    exceeded = bool(limit_a > 0 and current_load_a > limit_a)
+    excess_a = max(0.0, current_load_a - limit_a) if limit_a > 0 else 0.0
+    load_pct = (current_load_a / limit_a) * 100.0 if limit_a > 0 else 0.0
+
+    if exceeded:
+        dev_prefix = f"Dispozitiv ID #{slave_id}: " if slave_id is not None else ""
+        phases_txt = ", ".join(exceeded_phases)
+        msg = (
+            f"{dev_prefix}Pragul maxim de amperaj setat ({limit_a:.1f} A, "
+            f"citit din registrul {register_label}) a fost DEPĂȘIT de sarcina actuală "
+            f"({current_load_a:.1f} A — {load_pct:.1f}% din limită; faze: {phases_txt})!"
+        )
+    else:
+        msg = ""
+
+    return {
+        "exceeded": exceeded,
+        "slave_id": slave_id,
+        "current_load_a": round(current_load_a, 2),
+        "max_limit_a": round(limit_a, 2),
+        "register": register_label,
+        "exceeded_phases": exceeded_phases,
+        "excess_a": round(excess_a, 2),
+        "load_pct": round(load_pct, 2),
+        "message": msg,
+    }
+
+
 def evaluate_alarm_state(
     devices: Dict[str, Dict[str, Any]],
     chain_alert: Dict[str, Any],
@@ -457,6 +523,16 @@ def evaluate_alarm_state(
             reasons.append(f"Dispozitiv ID #{sid_str} (Eveniment activ): {cause}")
             if severity != "critical":
                 severity = "warning"
+
+        # Verificăm depășirea pragului maxim de amperaj citit din registru
+        oc_alert = dev.get("overcurrent_alert") or {}
+        if oc_alert.get("exceeded"):
+            oc_msg = oc_alert.get("message") or (
+                f"Dispozitiv ID #{sid_str} — Prag maxim amperaj depășit "
+                f"({oc_alert.get('current_load_a')} A > {oc_alert.get('max_limit_a')} A)"
+            )
+            reasons.append(oc_msg)
+            severity = "critical"
 
         # Verificăm și indicatorii energetici critici ('danger')
         for ind in dev.get("energy_indicators", []):
