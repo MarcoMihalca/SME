@@ -66,11 +66,11 @@ Pe lângă mărimile brute citite din registrele Modbus, sistemul calculează au
 
 ---
 
-## 3. Dezvoltări Viitoare (Roadmap) — Serviciul de Notificare Externă Automată
+## 3. Dezvoltări Viitoare (Roadmap)
 
 > **Statut:** *Planificat pentru implementare în versiunea viitoare a proiectului.*
 
-Pe lângă alerta vizuală (Pop-up modal + Banner de alarmă) și alerta sonoră locală din browser implementate în prezent, sistemul va fi extins cu un **Serviciu de Notificare Externă Automată (`src/eaton_pxr/notifier.py`)** pentru alertarea la distanță a personalului tehnic de mentenanță.
+Pe lângă alerta vizuală (Pop-up modal + Banner de alarmă) și alerta sonoră locală din browser implementate în prezent, sistemul va fi extins cu un **Serviciu de Notificare Externă Automată (`src/eaton_pxr/notifier.py`)** pentru alertarea la distanță a personalului tehnic de mentenanță, precum și cu noi opțiuni de personalizare pentru interfața web.
 
 ### 3.1. Canale de Comunicare Planificate
 1. **Telegram Bot API**:
@@ -86,6 +86,12 @@ Pe lângă alerta vizuală (Pop-up modal + Banner de alarmă) și alerta sonoră
 - **Execuție Asincronă (Non-Blocking)**: Trimiterea notificărilor prin rețea va rula pe un fir de execuție dedicat (`NotificationWorker` cu `queue.Queue`), astfel încât o eventuală întârziere a conexiunii la internet să nu încetinească niciodată bucla de citire Modbus RTU de la 2 secunde.
 - **Mecanism de Deduplicare & Cooldown (Anti-Spam)**:
   - Pentru aceeași semnătură de alarmă (ex: Slave ID `#4` în stare `Tripped`), sistemul va trimite **o singură notificare inițială**, urmată de un reminder doar dacă problema nu a fost remediată după un interval configurabil (ex: 30 de minute), și o **notificare de revenire la normal (Recovery)** în momentul în care disjunctorul este reînchis sau lanțul RS-485 este restabilit.
+
+### 3.3. Îmbunătățiri Viitoare de Interfață Web (UI / UX)
+1. **Mod Simplu / Detaliat (Simple / Detailed View)**:
+   - Introducerea unui comutator rapid în dashboard între **Modul Simplu** (vizualizare compactă pentru monitorizare operațională rapidă: starea disjunctorului, curenții principali, tensiunile, puterile și alarmele active) și **Modul Detaliat** (vizualizare completă pentru analiză inginerească: toți parametrii electrici, indicatorii energetici suplimentari, graficele modulare extinse, setările de protecție și istoricul complet de evenimente).
+2. **Mod Dark / White Theme (Temă Întunecată / Luminoasă)**:
+   - Adăugarea unui selector de temă între modul **Dark Theme** și un mod **White Theme (Light Mode)** cu contrast ridicat, optimizat pentru lizibilitate în medii industriale sau de laborator puternic iluminate, cu persistența automată a preferinței utilizatorului între sesiuni.
 
 ---
 

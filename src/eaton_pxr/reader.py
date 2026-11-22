@@ -7,11 +7,12 @@ Serviciul de citire Modbus RTU pentru:
 
 from __future__ import annotations
 
+from datetime import datetime
 import time
 from typing import Dict, List, Optional, Tuple
 from pymodbus.client import ModbusSerialClient
 
-from .analytics import compute_energy_indicators
+from .analytics import compute_energy_indicators, evaluate_overcurrent_notification
 from .connection import (
     modbus_read_holding,
     modbus_write_multiple,
@@ -22,7 +23,9 @@ from .decoder import (
     decode_32bit_float,
     decode_32bit_int,
     decode_protection_value,
+    decode_rtc_registers,
     decode_status_registers,
+    encode_rtc_registers,
 )
 from .models import (
     MeasuredValue,
@@ -33,15 +36,20 @@ from .models import (
 )
 from .registers import (
     CAUSE_OF_STATUS_CODES,
+    DEFAULT_MAX_CURRENT_AMPS,
     MODBUS_PORT_CONFIG_SPECS,
     PROTECTION_BLOCK_COUNT,
     PROTECTION_REGISTER_SPECS,
     PXR25_PARAMETERS,
     REG_GROUP_SELECT,
+    REG_MAX_CURRENT_IR,
+    REG_NOMINAL_CURRENT_IN,
     REG_PASSWORD,
     REG_PRODUCT_ID,
+    REG_RTC_START,
     REG_STATUS_FIXED,
     REG_STATUS_FLOAT,
+    RTC_REGISTER_COUNT,
 )
 
 
@@ -320,21 +328,162 @@ def read_event_history(
     return events
 
 
+def sync_device_datetime(
+    client: ModbusSerialClient,
+    slave_id: int = 1,
+    dt: Optional[datetime] = None,
+) -> Tuple[bool, str]:
+    """
+    Scrie și sincronizează automat data și ora dispozitivului PXR25 (registrele RTC
+    402921..402928 / 0x0B68..0x0B6F) cu data și ora curentă a serverului.
+    Returnează (succes: bool, timestamp_str: str).
+    """
+    target_dt = dt or datetime.now()
+    ts_str = target_dt.strftime("%Y-%m-%d %H:%M:%S")
+    regs = encode_rtc_registers(target_dt)
+
+    try:
+        resp = modbus_write_multiple(client, REG_RTC_START, regs, slave_id)
+        if resp is not None and not resp.isError():
+            return True, ts_str
+    except Exception:
+        pass
+
+    # Fallback: unele variante de firmware tratează 0x0B6B (Day of Week) ca read-only
+    try:
+        r_date = modbus_write_multiple(client, REG_RTC_START, regs[0:3], slave_id)
+        r_time = modbus_write_multiple(client, REG_RTC_START + 4, regs[4:7], slave_id)
+        if (r_date is not None and not r_date.isError()) and (
+            r_time is not None and not r_time.isError()
+        ):
+            return True, ts_str
+    except Exception:
+        pass
+
+    return False, ts_str
+
+
+def read_device_datetime(
+    client: ModbusSerialClient,
+    slave_id: int = 1,
+) -> Optional[str]:
+    """Citește data și ora internă a dispozitivului PXR25 din registrele 0x0B68..0x0B6F."""
+    try:
+        resp = modbus_read_holding(client, REG_RTC_START, RTC_REGISTER_COUNT, slave_id)
+        if resp is not None and not resp.isError():
+            regs = getattr(resp, "registers", None) or []
+            return decode_rtc_registers(list(regs))
+    except Exception:
+        pass
+    return None
+
+
+def read_max_current_setting(
+    client: ModbusSerialClient,
+    slave_id: int = 1,
+) -> Tuple[float, float, str]:
+    """
+    Citește din registrele de protecție PXR25 (403002 / 0x0BB9 pentru In și
+    403007 / 0x0BBE pentru Ir — setarea maximă de amperaj admisă).
+    Returnează (max_current_ir_a, nominal_current_in_a, register_label).
+    """
+    reg_label = "403007 (0x0BBE)"
+    for group_cmd in (0x01FF, 0x0001):
+        try:
+            modbus_write_single(client, REG_PASSWORD, 0x0000, slave_id)
+            modbus_write_single(client, REG_GROUP_SELECT, group_cmd, slave_id)
+            break
+        except Exception:
+            pass
+
+    raw_in: Optional[int] = None
+    raw_ir: Optional[int] = None
+
+    try:
+        block_resp = modbus_read_holding(client, REG_NOMINAL_CURRENT_IN, 6, slave_id)
+        regs = getattr(block_resp, "registers", None) or []
+        if block_resp is not None and not block_resp.isError() and len(regs) >= 6:
+            raw_in = int(regs[0])
+            raw_ir = int(regs[5])
+    except Exception:
+        pass
+
+    if raw_in is None:
+        try:
+            r_in = modbus_read_holding(client, REG_NOMINAL_CURRENT_IN, 1, slave_id)
+            if r_in is not None and not r_in.isError() and getattr(r_in, "registers", None):
+                raw_in = int(r_in.registers[0])
+        except Exception:
+            pass
+
+    if raw_ir is None:
+        try:
+            r_ir = modbus_read_holding(client, REG_MAX_CURRENT_IR, 1, slave_id)
+            if r_ir is not None and not r_ir.isError() and getattr(r_ir, "registers", None):
+                raw_ir = int(r_ir.registers[0])
+        except Exception:
+            pass
+
+    in_amps = DEFAULT_MAX_CURRENT_AMPS
+    if raw_in is not None:
+        _, in_amps, _ = decode_protection_value(
+            "In", raw_in, DEFAULT_MAX_CURRENT_AMPS, DEFAULT_MAX_CURRENT_AMPS
+        )
+
+    ir_amps = in_amps
+    if raw_ir is not None:
+        _, in_amps, ir_amps = decode_protection_value("Ir", raw_ir, in_amps, in_amps)
+
+    return float(ir_amps), float(in_amps), reg_label
+
+
 def read_device_on_client(
     client: ModbusSerialClient,
     config: SerialConnectionConfig,
     include_settings_and_events: bool = True,
+    sync_time: Optional[bool] = None,
+    cached_max_current_a: Optional[float] = None,
+    cached_nominal_in_a: Optional[float] = None,
 ) -> PxrSnapshot:
     """Citește un singur Slave ID folosind o conexiune `ModbusSerialClient` deja deschisă."""
+    should_sync = include_settings_and_events if sync_time is None else sync_time
+    time_synced_at: Optional[str] = None
+    if should_sync:
+        sync_ok, sync_ts = sync_device_datetime(client, slave_id=config.slave_id)
+        if sync_ok:
+            time_synced_at = sync_ts
+
     status_info, measurements = read_realtime_measurements(client, config)
-    indicators = compute_energy_indicators(measurements)
     settings: List[ProtectionSetting] = []
     events: List[TripEvent] = []
+    max_limit_a = (
+        cached_max_current_a
+        if cached_max_current_a is not None
+        else DEFAULT_MAX_CURRENT_AMPS
+    )
+    in_a = (
+        cached_nominal_in_a
+        if cached_nominal_in_a is not None
+        else DEFAULT_MAX_CURRENT_AMPS
+    )
+    reg_lbl = "403007 (0x0BBE)"
+
     if include_settings_and_events:
         settings = read_protection_settings(client, slave_id=config.slave_id)
         events = read_event_history(
             client, slave_id=config.slave_id, current_status=status_info
         )
+        max_limit_a, in_a, reg_lbl = read_max_current_setting(
+            client, slave_id=config.slave_id
+        )
+
+    indicators = compute_energy_indicators(measurements, nominal_current_in=max_limit_a)
+    overcurrent_alert = evaluate_overcurrent_notification(
+        measurements,
+        max_current_limit_a=max_limit_a,
+        slave_id=config.slave_id,
+        register_label=reg_lbl,
+    )
 
     return PxrSnapshot(
         slave_id=config.slave_id,
@@ -345,6 +494,11 @@ def read_device_on_client(
         energy_indicators=indicators,
         protection_settings=settings,
         event_history=events,
+        max_current_limit_a=max_limit_a,
+        nominal_current_in_a=in_a,
+        max_current_register=reg_lbl,
+        time_synced_at=time_synced_at,
+        overcurrent_alert=overcurrent_alert,
     )
 
 
