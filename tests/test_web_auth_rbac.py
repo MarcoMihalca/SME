@@ -348,6 +348,30 @@ class TestWebAuthAndRbac(unittest.TestCase):
         st_after_out, _, _ = user_client.request("GET", "/api/data")
         self.assertEqual(st_after_out, 401)
 
+    def test_templates_auth_contracts_and_offline_isolation(self) -> None:
+        with open(server.LOGIN_TEMPLATE_PATH, "r", encoding="utf-8") as f:
+            login_html = f.read()
+        with open(server.TEMPLATE_PATH, "r", encoding="utf-8") as f:
+            dash_html = f.read()
+
+        for marker in ("login-form", "username", "password", "login-error", "/api/auth/login"):
+            self.assertIn(marker, login_html)
+
+        for marker in (
+            "X-CSRF-Token",
+            "/api/auth/me",
+            "/api/auth/logout",
+            "/api/auth/change-password",
+            "/api/users",
+            "/api/audit-logs",
+            "data-theme",
+        ):
+            self.assertIn(marker, dash_html)
+
+        for html_name, html_body in (("login.html", login_html), ("dashboard.html", dash_html)):
+            self.assertNotIn("http://", html_body, f"External http:// URL found in {html_name}")
+            self.assertNotIn("https://", html_body, f"External https:// URL found in {html_name}")
+
 
 if __name__ == "__main__":
     unittest.main()

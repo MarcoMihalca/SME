@@ -3,550 +3,998 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Eaton NZMH4-PX1600-TAZ (PXR25) — Telemetrie Dispozitive</title>
+  <title>Eaton NZMH4-PX1600-TAZ (PXR25) — Telemetrie Dispozitive SME</title>
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('sme_theme_v1');
+        if (saved === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
   <style>
     :root {
-      --bg: #090c10;
-      --surface: #0f141c;
-      --surface-elevated: #141b26;
-      --cell: #0a0e14;
-      --border: #1e2736;
-      --border-strong: #2c394f;
-      --text: #f1f5f9;
-      --text-dim: #cbd5e1;
-      --muted: #8b9bb4;
-      --accent: #0ea5e9;
-      --accent-deep: #0284c7;
-      --accent-soft: rgba(14, 165, 233, 0.14);
-      --green: #10b981;
-      --green-soft: rgba(16, 185, 129, 0.14);
-      --amber: #f59e0b;
-      --amber-soft: rgba(245, 158, 11, 0.15);
-      --red: #ef4444;
-      --red-soft: rgba(239, 68, 68, 0.15);
-      --purple: #a855f7;
-      --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      --font-mono: "JetBrains Mono", "Cascadia Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+      --bg: #F7F8FA;
+      --surface: #FFFFFF;
+      --surface-subtle: #F1F5F9;
+      --rail-bg: #0F294A;
+      --rail-border: #1E3A5F;
+      --rail-text: #E2E8F0;
+      --rail-muted: #93C5FD;
+      --ink: #0F172A;
+      --ink-secondary: #334155;
+      --ink-muted: #475569;
+      --border: #CBD5E1;
+      --border-subtle: #E2E8F0;
+      --accent: #005FB8;
+      --accent-hover: #004C97;
+      --accent-soft: #EBF4FF;
+      --btn-accent-bg: #005FB8;
+      --btn-accent-hover: #004C97;
+      --btn-ok-bg: #0F766E;
+      --btn-ok-hover: #065F46;
+      --btn-danger-bg: #C81E1E;
+      --btn-danger-hover: #991B1B;
+      --phase-a: #005FB8;
+      --phase-b: #B45309;
+      --phase-c: #0F766E;
+      --phase-n: #6D28D9;
+      --phase-g: #475569;
+      --ok: #0F766E;
+      --ok-ink: #065F46;
+      --ok-bg: #ECFDF5;
+      --ok-border: #99F6E4;
+      --warn: #B45309;
+      --warn-ink: #92400E;
+      --warn-bg: #FFFBEB;
+      --warn-border: #FDE68A;
+      --danger: #C81E1E;
+      --danger-ink: #991B1B;
+      --danger-bg: #FEF2F2;
+      --danger-border: #FECACA;
+      --chart-grid: #E2E8F0;
+      --chart-axis: #475569;
+      --radius: 4px;
+      --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.06);
+      --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.14);
+      --font-sans: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Roboto", sans-serif;
+      --font-mono: "Cascadia Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    [data-theme="dark"] {
+      --bg: #0C131D;
+      --surface: #131C2B;
+      --surface-subtle: #1A2538;
+      --rail-bg: #081324;
+      --rail-border: #1E324F;
+      --rail-text: #E2E8F0;
+      --rail-muted: #93C5FD;
+      --ink: #F1F5F9;
+      --ink-secondary: #CBD5E1;
+      --ink-muted: #94A3B8;
+      --border: #263449;
+      --border-subtle: #1E293B;
+      --accent: #3898EC;
+      --accent-hover: #60AEF5;
+      --accent-soft: rgba(56, 152, 236, 0.14);
+      --btn-accent-bg: #0B66C3;
+      --btn-accent-hover: #0953A0;
+      --btn-ok-bg: #0F766E;
+      --btn-ok-hover: #115E59;
+      --btn-danger-bg: #C81E1E;
+      --btn-danger-hover: #B91C1C;
+      --phase-a: #38BDF8;
+      --phase-b: #F59E0B;
+      --phase-c: #34D399;
+      --phase-n: #C084FC;
+      --phase-g: #CBD5E1;
+      --ok: #34D399;
+      --ok-ink: #A7F3D0;
+      --ok-bg: rgba(16, 185, 129, 0.14);
+      --ok-border: rgba(16, 185, 129, 0.35);
+      --warn: #FBBF24;
+      --warn-ink: #FDE68A;
+      --warn-bg: rgba(245, 158, 11, 0.14);
+      --warn-border: rgba(245, 158, 11, 0.35);
+      --danger: #F87171;
+      --danger-ink: #FECACA;
+      --danger-bg: rgba(239, 68, 68, 0.14);
+      --danger-border: rgba(239, 68, 68, 0.4);
+      --chart-grid: #1E293B;
+      --chart-axis: #94A3B8;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 16px 40px rgba(0, 0, 0, 0.55);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    ::selection {
+      background: var(--accent-soft);
+      color: var(--ink);
+    }
+
+    html {
+      font-size: 15px;
+      scrollbar-color: var(--border) var(--bg);
+      scrollbar-width: thin;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: var(--radius);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--ink-muted);
+    }
 
     body {
       font-family: var(--font-sans);
       background-color: var(--bg);
-      background-image:
-        radial-gradient(ellipse 90% 45% at 50% -10%, rgba(14, 165, 233, 0.08), transparent 70%);
-      color: var(--text);
-      padding: 16px 20px 28px;
-      line-height: 1.45;
+      color: var(--ink);
       min-height: 100vh;
+      line-height: 1.45;
+      display: flex;
     }
 
-    .container {
-      max-width: 1480px;
-      margin: 0 auto;
+    a, button, input, select {
+      font-family: inherit;
+    }
+
+    a {
+      text-underline-offset: 3px;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
     }
 
     .mono,
-    .oc-value,
-    .m-val,
-    .ind-val,
-    #rtc-sync-time,
-    .legend-item strong {
+    .num {
       font-family: var(--font-mono);
       font-variant-numeric: tabular-nums;
     }
 
-    /* ================================================================
-       TOP COMMAND HEADER
-       ================================================================ */
-    .header {
+    body.mode-simple .advanced-only { display: none !important; }
+    body.mode-advanced .simple-only { display: none !important; }
+    .hidden { display: none !important; }
+
+    #panel-telemetry {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column;
       gap: 14px;
-      background: linear-gradient(180deg, #131a25 0%, #0f141c 100%);
-      border: 1px solid var(--border);
-      border-top: 2px solid var(--accent);
-      border-radius: 10px;
-      padding: 13px 18px;
-      margin-bottom: 12px;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
     }
 
-    .brand {
+    /* =====================================================================
+       LEFT SWITCHGEAR NAVY RAIL
+       ===================================================================== */
+    .rail {
+      width: 248px;
+      flex-shrink: 0;
+      background-color: var(--rail-bg);
+      color: var(--rail-text);
+      border-right: 1px solid var(--rail-border);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      z-index: 40;
+    }
+
+    .rail-top {
+      padding: 18px 16px;
+    }
+
+    .rail-brand {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--rail-border);
     }
 
-    .brand-mark {
+    .rail-brand-mark {
+      color: #93C5FD;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 5px 9px;
-      border-radius: 6px;
-      background: var(--accent-soft);
-      border: 1px solid rgba(14, 165, 233, 0.35);
-      color: var(--accent);
-      font-family: var(--font-mono);
+      flex-shrink: 0;
+    }
+
+    .rail-brand-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: -0.01em;
+    }
+
+    .rail-brand-sub {
       font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
+      color: var(--rail-muted);
+      margin-top: 1px;
     }
 
-    .header h1 {
-      font-size: 1.08rem;
-      font-weight: 700;
-      letter-spacing: 0.01em;
-      color: var(--text);
-    }
-
-    .header .sub {
-      color: var(--muted);
-      font-size: 0.78rem;
-      margin-top: 2px;
-    }
-
-    /* ================================================================
-       CONTROL TOOLBAR (DEVICE DROPDOWN + PORT + RTC SYNC + CSV/DB)
-       ================================================================ */
-    .control-bar {
+    .rail-nav {
+      margin-top: 16px;
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .rail-nav-btn {
+      width: 100%;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      color: #CBD5E1;
+      padding: 10px 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 14px;
-      margin-bottom: 14px;
+      gap: 10px;
+      transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
     }
 
-    .control-group {
-      display: flex;
-      flex-wrap: wrap;
+    .rail-nav-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #FFFFFF;
+    }
+
+    .rail-nav-btn.active {
+      background: #005FB8;
+      border-color: rgba(147, 197, 253, 0.45);
+      color: #FFFFFF;
+    }
+
+    .rail-nav-label {
+      display: inline-flex;
       align-items: center;
+      gap: 9px;
+    }
+
+    .rail-nav-tag {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.72rem;
+      padding: 1px 6px;
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.14);
+      color: #FFFFFF;
+    }
+
+    .rail-foot {
+      padding: 16px;
+      border-top: 1px solid var(--rail-border);
+      display: flex;
+      flex-direction: column;
       gap: 10px;
     }
 
-    .divider-v {
-      width: 1px;
-      height: 22px;
-      background: var(--border);
-    }
-
-    .field-group {
+    .rail-user-box {
       display: flex;
       align-items: center;
-      gap: 7px;
-    }
-
-    .field-group label {
-      font-size: 0.72rem;
-      color: var(--muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-
-    select {
-      background: var(--cell);
-      color: var(--text);
-      border: 1px solid var(--border-strong);
-      border-radius: 7px;
-      padding: 6px 10px;
-      font-size: 0.83rem;
-      font-family: var(--font-sans);
-      outline: none;
-      transition: border-color 0.15s;
-    }
-
-    select:focus { border-color: var(--accent); }
-
-    .device-select-control {
-      min-width: 240px;
-      font-weight: 600;
-      border-color: rgba(14, 165, 233, 0.55);
-      background: #0c131d;
-    }
-
-    .actions {
-      display: flex;
+      justify-content: space-between;
       gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
     }
 
-    .btn {
-      background: var(--surface-elevated);
-      color: var(--text-dim);
-      border: 1px solid var(--border-strong);
-      padding: 6px 11px;
-      border-radius: 7px;
-      font-size: 0.8rem;
+    .rail-user-name {
+      font-size: 0.88rem;
       font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background 0.15s, border-color 0.15s, color 0.15s;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
+      color: #FFFFFF;
+      overflow: hidden;
+      text-overflow: ellipsis;
       white-space: nowrap;
     }
 
-    .btn:hover {
-      background: #1b2433;
-      border-color: #3d4f6b;
-      color: var(--text);
+    .role-chip {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(191, 219, 254, 0.35);
+      background: rgba(255, 255, 255, 0.1);
+      color: #FFFFFF;
+      text-transform: uppercase;
     }
 
-    .btn-sm {
-      padding: 5px 10px;
+    .role-chip.admin {
+      background: #0F766E;
+      border-color: #2DD4BF;
+    }
+
+    .rail-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .rail-btn {
+      background: rgba(255, 255, 255, 0.08);
+      color: #F8FAFC;
+      border: 1px solid rgba(191, 219, 254, 0.25);
+      border-radius: var(--radius);
+      padding: 7px 8px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: background 150ms ease, border-color 150ms ease;
+    }
+
+    .rail-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(191, 219, 254, 0.55);
+    }
+
+    .rail-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      z-index: 35;
+    }
+
+    .rail-backdrop.show {
+      display: block;
+    }
+
+    /* =====================================================================
+       MAIN SHELL & TOP COMMAND HEADER
+       ===================================================================== */
+    .workspace {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      min-height: 56px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 16px;
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 25;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: nowrap;
+      min-width: 0;
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: var(--surface-subtle);
+      color: var(--ink);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      height: 32px;
+      padding: 0 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      gap: 6px;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .topbar h1 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.015em;
+      white-space: nowrap;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: nowrap;
+    }
+
+    .topbar .btn-sm {
+      padding: 4px 8px;
       font-size: 0.76rem;
     }
 
-    .btn-primary {
-      background: var(--accent-deep);
+    .content-area {
+      padding: 16px 20px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-width: 1520px;
+      width: 100%;
+    }
+
+    /* =====================================================================
+       STANDARD CONTROLS, SELECTS & SEMANTIC BADGES
+       ===================================================================== */
+    select, input[type="text"], input[type="password"] {
+      background: var(--surface);
+      color: var(--ink);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 6px 10px;
+      font-size: 0.85rem;
+      caret-color: var(--accent);
+      transition: border-color 150ms ease;
+    }
+
+    select:hover:not(:disabled),
+    input[type="text"]:hover:not(:disabled),
+    input[type="password"]:hover:not(:disabled) {
+      border-color: var(--ink-muted);
+    }
+
+    select:focus,
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      outline: none;
       border-color: var(--accent);
-      color: #fff;
     }
 
-    .btn-primary:hover { background: var(--accent); }
-
-    .btn-success {
-      background: #059669;
-      border-color: var(--green);
-      color: #fff;
+    select:disabled,
+    input:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background: var(--surface-subtle);
     }
 
-    .btn-success:hover { background: var(--green); }
-
-    .btn-amber {
-      background: #b45309;
-      border-color: var(--amber);
-      color: #fff;
+    .device-select-control {
+      min-width: 155px;
+      max-width: 205px;
+      font-weight: 600;
     }
 
-    .btn-amber:hover { background: #d97706; }
+    #port-select {
+      max-width: 340px;
+      text-overflow: ellipsis;
+    }
+
+    .btn {
+      background: var(--surface);
+      color: var(--ink-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 6px 11px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--surface-subtle);
+      border-color: var(--ink-muted);
+      color: var(--ink);
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .btn-sm {
+      padding: 5px 9px;
+      font-size: 0.78rem;
+    }
+
+    .btn-primary {
+      background: var(--btn-accent-bg);
+      border-color: var(--btn-accent-bg);
+      color: #FFFFFF;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--btn-accent-hover);
+      border-color: var(--btn-accent-hover);
+      color: #FFFFFF;
+    }
+
+    .btn-warn {
+      background: var(--warn-bg);
+      border-color: var(--warn-border);
+      color: var(--warn-ink);
+    }
+
+    .btn-warn:hover:not(:disabled) {
+      background: var(--warn-bg);
+      border-color: var(--warn);
+      color: var(--warn-ink);
+    }
 
     .btn-danger {
-      background: #b91c1c;
-      border-color: var(--red);
-      color: #fff;
+      background: var(--btn-danger-bg);
+      border-color: var(--btn-danger-bg);
+      color: #FFFFFF;
     }
 
-    .btn-danger:hover { background: var(--red); }
+    .btn-danger:hover:not(:disabled) {
+      background: var(--btn-danger-hover);
+      border-color: var(--btn-danger-hover);
+      color: #FFFFFF;
+    }
+
+    .btn-ok {
+      background: var(--btn-ok-bg);
+      border-color: var(--btn-ok-bg);
+      color: #FFFFFF;
+    }
+
+    .btn-ok:hover:not(:disabled) {
+      background: var(--btn-ok-hover);
+      border-color: var(--btn-ok-hover);
+      color: #FFFFFF;
+    }
+
+    .mode-switch {
+      display: inline-flex;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface-subtle);
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .mode-btn {
+      background: transparent;
+      color: var(--ink-muted);
+      border: none;
+      border-radius: 3px;
+      padding: 4px 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 150ms ease, color 150ms ease;
+    }
+
+    .mode-btn:hover {
+      color: var(--ink);
+    }
+
+    .mode-btn.active {
+      background: var(--btn-accent-bg);
+      color: #FFFFFF;
+    }
 
     .badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 5px 10px;
-      border-radius: 6px;
-      font-size: 0.77rem;
+      padding: 4px 9px;
+      border-radius: var(--radius);
+      font-size: 0.78rem;
       font-weight: 600;
-      background: var(--green-soft);
-      color: #34d399;
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      white-space: nowrap;
+      border: 1px solid var(--ok-border);
+      background: var(--ok-bg);
+      color: var(--ok-ink);
+    }
+
+    .badge.warn {
+      border-color: var(--warn-border);
+      background: var(--warn-bg);
+      color: var(--warn-ink);
     }
 
     .badge.err {
-      background: var(--red-soft);
-      color: #fca5a5;
-      border-color: rgba(239, 68, 68, 0.35);
+      border-color: var(--danger-border);
+      background: var(--danger-bg);
+      color: var(--danger-ink);
     }
 
     .badge.neutral {
-      background: #111824;
-      color: var(--text-dim);
       border-color: var(--border);
+      background: var(--surface-subtle);
+      color: var(--ink-secondary);
     }
 
-    .dot {
+    .status-dot {
       width: 7px;
       height: 7px;
       border-radius: 50%;
       background: currentColor;
-      animation: pulse 2s infinite;
+      flex-shrink: 0;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.35; }
-    }
-
-    /* Segmented Toggle Mod Simplu / Mod Avansat */
-    .mode-switch {
-      display: inline-flex;
-      background: var(--cell);
-      border: 1px solid var(--border-strong);
-      border-radius: 8px;
-      padding: 3px;
-      gap: 3px;
-    }
-
-    .mode-btn {
-      background: transparent;
-      color: var(--muted);
-      border: none;
-      padding: 5px 11px;
-      border-radius: 5px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .mode-btn:hover { color: var(--text); }
-
-    .mode-btn.active {
-      background: var(--accent-deep);
-      color: #fff;
-      box-shadow: 0 1px 6px rgba(14, 165, 233, 0.3);
-    }
-
-    body.mode-simple .advanced-only { display: none !important; }
-    body.mode-advanced .simple-only { display: none !important; }
-
-    /* ================================================================
-       ALERT & HALTED BANNERS
-       ================================================================ */
-    .halted-banner,
-    .alarm-banner {
-      display: none;
-      border: 1px solid rgba(239, 68, 68, 0.75);
-      border-left: 4px solid var(--red);
-      border-radius: 10px;
-      padding: 13px 18px;
-      margin-bottom: 14px;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .halted-banner { background: rgba(239, 68, 68, 0.12); }
-
-    .alarm-banner {
-      background: linear-gradient(90deg, rgba(220, 38, 38, 0.16) 0%, rgba(180, 83, 9, 0.12) 100%);
-      animation: alarmPulse 1.6s infinite;
-    }
-
-    .halted-banner.show,
-    .alarm-banner.show { display: flex; }
-
-    .halted-banner h3,
-    .alarm-banner h3 { color: #fca5a5; font-size: 0.96rem; }
-
-    .halted-banner p { color: #fecaca; font-size: 0.84rem; margin-top: 3px; }
-
-    .alarm-list {
-      margin-top: 5px;
-      padding-left: 18px;
-      color: #fde68a;
-      font-size: 0.83rem;
-    }
-
-    @keyframes alarmPulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.35); }
-      50% { box-shadow: 0 0 16px 2px rgba(239, 68, 68, 0.28); }
-    }
-
-    /* ================================================================
-       PANELS & TELEMETRY HERO STRIP
-       ================================================================ */
-    .panel {
+    /* =====================================================================
+       SHEETS & HAIRLINE CONTAINERS (NO NESTED CARDS)
+       ===================================================================== */
+    .sheet {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 15px 18px;
-      margin-bottom: 14px;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
     }
 
-    .panel h2 {
-      font-size: 0.88rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 13px;
-      padding-bottom: 9px;
+    .sheet-head {
+      padding: 10px 16px;
       border-bottom: 1px solid var(--border);
+      background: var(--surface-subtle);
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 10px;
-      color: var(--text-dim);
     }
 
-    .overcurrent-panel {
-      border-left: 4px solid var(--accent);
+    .sheet-head h2 {
+      font-size: 0.94rem;
+      font-weight: 700;
+      color: var(--ink);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .overcurrent-panel.exceeded {
-      border-color: rgba(239, 68, 68, 0.8);
-      border-left-width: 5px;
-      background: linear-gradient(180deg, rgba(239, 68, 68, 0.08) 0%, var(--surface) 100%);
-      animation: alarmPulse 1.6s infinite;
+    .sheet-meta {
+      font-size: 0.8rem;
+      color: var(--ink-muted);
     }
 
-    .oc-metrics {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+    /* Hardware Utility Bar */
+    .hw-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 9px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
       gap: 10px;
     }
 
-    @media (max-width: 900px) {
-      .oc-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .hw-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
     }
 
-    @media (max-width: 540px) {
-      .oc-metrics { grid-template-columns: 1fr; }
+    .field-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
     }
 
-    .oc-stat {
-      background: var(--cell);
-      border: 1px solid #18202c;
-      border-radius: 8px;
-      padding: 11px 13px;
-    }
-
-    .oc-label {
-      font-size: 0.7rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
+    .field-inline label {
+      color: var(--ink-muted);
       font-weight: 600;
     }
 
-    .oc-value {
-      font-size: 1.4rem;
+    .sep-v {
+      width: 1px;
+      height: 20px;
+      background: var(--border);
+    }
+
+    /* Banners (1px flat bordered, zero thick left stripe) */
+    .alert-banner {
+      display: none;
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--danger-border);
+      background: var(--danger-bg);
+      color: var(--danger-ink);
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .alert-banner.show {
+      display: flex;
+    }
+
+    .alert-banner h2 {
+      font-size: 0.94rem;
       font-weight: 700;
-      margin-top: 5px;
-      color: var(--text);
-      line-height: 1.2;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .oc-sub {
+    .alert-list {
+      margin-top: 6px;
+      padding-left: 20px;
+      font-size: 0.84rem;
+    }
+
+    /* =====================================================================
+       SIGNATURE STRIP: RS-485 TOPOLOGY RAIL & Ir LOAD RULER
+       ===================================================================== */
+    .hero-strip {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+    }
+
+    .hero-strip.exceeded {
+      border-color: var(--danger);
+      background: var(--danger-bg);
+    }
+
+    .hero-col {
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .hero-col + .hero-col {
+      border-left: 1px solid var(--border);
+    }
+
+    .hero-col-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .hero-col-head h2 {
+      font-size: 0.94rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .chain-rail {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chain-node {
+      background: var(--surface-subtle);
+      color: var(--ink);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 6px 11px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+    }
+
+    .chain-node:hover {
+      border-color: var(--accent);
+    }
+
+    .chain-node.active {
+      background: var(--btn-accent-bg);
+      border-color: var(--btn-accent-bg);
+      color: #FFFFFF;
+    }
+
+    .chain-node.active:hover {
+      background: var(--btn-accent-hover);
+      border-color: var(--btn-accent-hover);
+      color: #FFFFFF;
+    }
+
+    .chain-node.fault {
+      background: var(--danger-bg);
+      border-color: var(--danger);
+      color: var(--danger-ink);
+      cursor: default;
+    }
+
+    .chain-link {
+      width: 16px;
+      height: 1px;
+      background: var(--border);
+      display: inline-block;
+    }
+
+    .breaker-summary {
+      font-size: 0.84rem;
+      color: var(--ink-secondary);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .ir-numbers {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .ir-stat-label {
       font-size: 0.76rem;
-      color: var(--muted);
-      margin-top: 4px;
+      color: var(--ink-muted);
+      font-weight: 600;
     }
 
-    /* Bară progres gradată cu repere 80% / 100% */
-    .oc-bar-wrap {
+    .ir-stat-val {
+      font-size: 1.32rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-top: 2px;
+      line-height: 1.15;
+    }
+
+    .ir-ruler {
       position: relative;
       height: 10px;
-      background: #070a0f;
-      border: 1px solid #18202c;
-      border-radius: 5px;
-      margin-top: 12px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      border-radius: 2px;
       overflow: hidden;
     }
 
-    .oc-bar-wrap::before {
-      content: "";
+    .ir-ruler-tick-80 {
       position: absolute;
       left: 80%;
       top: 0;
       bottom: 0;
       width: 1px;
-      background: rgba(245, 158, 11, 0.55);
+      background: var(--warn);
       z-index: 2;
     }
 
-    .bar-bg {
-      height: 4px;
-      background: #141c27;
-      border-radius: 2px;
-      margin-top: 8px;
-      overflow: hidden;
-    }
-
-    .bar-fill {
+    .ir-ruler-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--accent-deep), var(--accent));
       width: 0%;
-      transition: width 0.35s ease;
+      background: var(--accent);
+      transition: width 250ms ease, background-color 200ms ease;
     }
 
-    .oc-alert-inline {
-      margin-top: 11px;
-      padding: 9px 13px;
-      border-radius: 7px;
-      background: var(--red-soft);
-      border: 1px solid rgba(239, 68, 68, 0.45);
-      color: #fecaca;
-      font-size: 0.85rem;
+    .ir-ruler-legend {
+      position: relative;
+      height: 18px;
+      font-size: 0.74rem;
+      color: var(--ink-muted);
+      margin-top: 5px;
+    }
+
+    .ir-tick-0 {
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+
+    .ir-tick-80 {
+      position: absolute;
+      left: 80%;
+      top: 0;
+      transform: translateX(-50%);
+      color: var(--warn-ink);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .ir-tick-100 {
+      position: absolute;
+      right: 0;
+      top: 0;
+      white-space: nowrap;
+    }
+
+    .oc-inline-msg {
+      padding: 8px 10px;
+      border-radius: var(--radius);
+      border: 1px solid var(--danger-border);
+      background: var(--danger-bg);
+      color: var(--danger-ink);
+      font-size: 0.82rem;
       font-weight: 600;
     }
 
-    /* ================================================================
-       CHARTS GRID & CARDS
-       ================================================================ */
+    /* =====================================================================
+       CHARTS GRID (HTML5 CANVAS)
+       ===================================================================== */
     .charts-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
     }
 
-    .chart-card {
-      background: var(--cell);
-      border: 1px solid #18202c;
-      border-radius: 9px;
-      padding: 13px 14px;
+    .chart-cell {
+      padding: 14px 16px;
       display: flex;
       flex-direction: column;
-      gap: 9px;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+      border-right: 1px solid var(--border-subtle);
     }
 
-    .chart-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #161e2b;
-      padding-bottom: 7px;
+    .charts-grid .chart-cell:nth-child(2n) {
+      border-right: none;
+    }
+
+    .charts-grid .chart-cell:nth-last-child(-n+2) {
+      border-bottom: none;
     }
 
     .chart-title {
-      font-size: 0.86rem;
-      font-weight: 600;
-      color: var(--text);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--ink);
     }
 
     .chart-legend {
       display: flex;
       flex-wrap: wrap;
-      gap: 7px;
-      font-size: 0.75rem;
-      color: var(--text-dim);
+      gap: 8px;
+      font-size: 0.76rem;
+      color: var(--ink-secondary);
     }
 
     .legend-item {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      background: var(--surface);
-      padding: 3px 8px;
-      border-radius: 5px;
-      border: 1px solid var(--border);
+      gap: 5px;
+      padding: 2px 7px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
     }
 
-    .legend-color {
+    .legend-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
       display: inline-block;
+      flex-shrink: 0;
     }
 
     .chart-canvas-wrap {
       position: relative;
       width: 100%;
       height: 215px;
+      margin-top: auto;
     }
 
     .chart-canvas-wrap canvas {
@@ -555,665 +1003,1243 @@
       display: block;
     }
 
-    /* ================================================================
-       MEASUREMENT CARDS (SIMPLE & ADVANCED)
-       ================================================================ */
+    /* =====================================================================
+       RULED MEASUREMENT SHEETS & TABLES (ZERO NESTED CARDS)
+       ===================================================================== */
+    .simple-columns {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .simple-col {
+      padding: 14px 16px;
+      border-right: 1px solid var(--border);
+    }
+
+    .simple-col:last-child {
+      border-right: none;
+    }
+
+    .simple-col-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--ink-secondary);
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 6px;
+    }
+
     .grid-2 {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 14px;
-      margin-bottom: 14px;
     }
 
-    .grid-2 > .panel { margin-bottom: 0; }
-
-    @media (max-width: 960px) {
-      .charts-grid,
-      .grid-2 { grid-template-columns: 1fr; }
+    .ledger-rows {
+      display: flex;
+      flex-direction: column;
     }
 
-    .simple-metrics-groups {
+    .ledger-row {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
+      grid-template-columns: 1fr auto;
+      gap: 6px 12px;
+      padding: 9px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      align-items: center;
     }
 
-    @media (max-width: 1080px) {
-      .simple-metrics-groups { grid-template-columns: 1fr; }
+    .ledger-row:last-child {
+      border-bottom: none;
     }
 
-    .simple-group {
-      background: rgba(10, 14, 20, 0.55);
-      border: 1px solid #18202c;
-      border-radius: 8px;
-      padding: 11px 12px;
+    .simple-col .ledger-row {
+      padding: 9px 0;
     }
 
-    .simple-group-title {
-      font-size: 0.72rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 9px;
-      font-weight: 700;
-    }
-
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 9px;
-    }
-
-    .metric-box {
-      background: var(--cell);
-      border: 1px solid #18202c;
-      border-radius: 7px;
-      padding: 10px 11px;
-      position: relative;
-    }
-
-    .metric-box.phase-a { border-left: 3px solid #38bdf8; }
-    .metric-box.phase-b { border-left: 3px solid #f59e0b; }
-    .metric-box.phase-c { border-left: 3px solid #10b981; }
-
-    .metric-box .m-name {
-      color: var(--muted);
-      font-size: 0.74rem;
+    .ledger-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.85rem;
+      color: var(--ink-secondary);
       font-weight: 500;
     }
 
-    .metric-box .m-val {
-      font-size: 1.24rem;
+    .phase-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    .phase-dot.phase-a { background: var(--phase-a); }
+    .phase-dot.phase-b { background: var(--phase-b); }
+    .phase-dot.phase-c { background: var(--phase-c); }
+    .phase-dot.phase-n { background: var(--phase-n); }
+
+    .ledger-readout {
+      text-align: right;
+      font-size: 1.06rem;
       font-weight: 700;
-      margin-top: 3px;
-      color: var(--text);
+      color: var(--ink);
     }
 
-    .metric-box .m-unit {
-      font-size: 0.76rem;
-      color: var(--accent);
-      font-weight: 500;
-      margin-left: 4px;
+    .ledger-unit {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--ink-muted);
+      margin-left: 3px;
     }
 
-    /* ================================================================
-       QUALITY INDICATORS (MOD AVANSAT)
-       ================================================================ */
+    .ledger-bar {
+      grid-column: 1 / -1;
+      height: 3px;
+      background: var(--surface-subtle);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .ledger-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+    }
+
+    /* 8 Energy Quality Indicators (4x2 hairline grid) */
     .indicators-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 11px;
     }
 
-    @media (max-width: 1080px) {
-      .indicators-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    }
-
-    @media (max-width: 580px) {
-      .indicators-grid { grid-template-columns: 1fr; }
-    }
-
-    .indicator-card {
-      background: var(--cell);
-      border: 1px solid #18202c;
-      border-left: 3px solid #475569;
-      border-radius: 8px;
-      padding: 11px 13px;
+    .ind-cell {
+      padding: 13px 15px;
+      border-right: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 6px;
+      gap: 7px;
     }
 
-    .indicator-card.st-ok { border-left-color: var(--green); }
-    .indicator-card.st-warn { border-left-color: var(--amber); }
-    .indicator-card.st-danger {
-      border-left-color: var(--red);
-      background: rgba(239, 68, 68, 0.06);
+    .indicators-grid .ind-cell:nth-child(4n) {
+      border-right: none;
     }
 
-    .indicator-card .ind-title {
-      font-size: 0.77rem;
-      color: var(--text-dim);
+    .indicators-grid .ind-cell:nth-last-child(-n+4) {
+      border-bottom: none;
+    }
+
+    .ind-name {
+      font-size: 0.8rem;
       font-weight: 600;
+      color: var(--ink-secondary);
     }
 
-    .indicator-card .ind-val {
-      font-size: 1.08rem;
+    .ind-val {
+      font-size: 1.02rem;
       font-weight: 700;
-      color: var(--text);
+      color: var(--ink);
     }
 
-    .ind-badge {
-      display: inline-block;
-      font-size: 0.72rem;
-      font-weight: 600;
-      padding: 3px 8px;
-      border-radius: 5px;
+    .ind-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
       width: fit-content;
+      padding: 2px 7px;
+      border-radius: var(--radius);
+      font-size: 0.74rem;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--surface-subtle);
+      color: var(--ink-secondary);
     }
 
-    .ind-badge.ok { background: var(--green-soft); color: #34d399; }
-    .ind-badge.warn { background: var(--amber-soft); color: #fbbf24; }
-    .ind-badge.danger { background: var(--red-soft); color: #f87171; }
-    .ind-badge.neutral { background: rgba(148, 163, 184, 0.14); color: #94a3b8; }
+    .ind-pill.ok { background: var(--ok-bg); border-color: var(--ok-border); color: var(--ok-ink); }
+    .ind-pill.warn { background: var(--warn-bg); border-color: var(--warn-border); color: var(--warn-ink); }
+    .ind-pill.danger { background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger-ink); }
+    .ind-pill.info { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
 
-    /* ================================================================
-       TABLES (PROTECTION SETTINGS & EVENTS)
-       ================================================================ */
-    .table-wrap { overflow-x: auto; }
+    /* Tables */
+    .table-wrap {
+      overflow-x: auto;
+    }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.83rem;
+      font-size: 0.84rem;
     }
 
     th, td {
       text-align: left;
-      padding: 8px 9px;
-      border-bottom: 1px solid #161e2b;
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: middle;
     }
 
     th {
-      color: var(--muted);
-      font-weight: 600;
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--ink-muted);
+      background: var(--surface-subtle);
+      border-bottom: 1px solid var(--border);
     }
 
-    tr:hover td { background: rgba(255, 255, 255, 0.02); }
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
 
-    /* ================================================================
-       TOAST NOTIFICATION & CHAIN MODAL
-       ================================================================ */
+    tbody tr:hover td {
+      background: var(--surface-subtle);
+    }
+
+    /* =====================================================================
+       ADMIN & ACCOUNT VIEWS
+       ===================================================================== */
+    .admin-create-bar {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 12px;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-field label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--ink-secondary);
+    }
+
+    .inline-feedback {
+      display: none;
+      margin: 12px 16px 0;
+      padding: 9px 12px;
+      border-radius: var(--radius);
+      font-size: 0.84rem;
+      font-weight: 600;
+      border: 1px solid var(--border);
+    }
+
+    .inline-feedback.show { display: block; }
+    .inline-feedback.ok { background: var(--ok-bg); border-color: var(--ok-border); color: var(--ok-ink); }
+    .inline-feedback.err { background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger-ink); }
+
+    .row-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .inline-pw-row td {
+      background: var(--surface-subtle);
+    }
+
+    .perm-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .perm-chip {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      padding: 3px 8px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface-subtle);
+      color: var(--ink-secondary);
+    }
+
+    /* =====================================================================
+       TOASTS & MODAL
+       ===================================================================== */
     .overcurrent-toast {
       display: none;
       position: fixed;
       top: 16px;
       right: 16px;
-      z-index: 10000;
-      max-width: 450px;
-      background: #1a1014;
-      border: 2px solid var(--red);
-      border-radius: 10px;
+      z-index: 90;
+      max-width: 440px;
+      background: var(--danger-bg);
+      color: var(--danger-ink);
+      border: 1px solid var(--danger);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
       padding: 13px 15px;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75);
       align-items: flex-start;
-      gap: 11px;
+      gap: 10px;
     }
 
-    .overcurrent-toast.show { display: flex; }
-    .toast-icon { font-size: 1.4rem; line-height: 1; }
-    .toast-body { flex: 1; }
-
-    .toast-title {
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: #fca5a5;
-      margin-bottom: 3px;
+    .overcurrent-toast.show {
+      display: flex;
     }
 
-    .toast-msg {
-      font-size: 0.82rem;
-      color: #fee2e2;
-      line-height: 1.4;
+    .app-toast {
+      display: none;
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+      z-index: 85;
+      max-width: 420px;
+      background: var(--rail-bg);
+      color: #FFFFFF;
+      border: 1px solid var(--rail-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+      padding: 10px 14px;
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+
+    .app-toast.show {
+      display: block;
     }
 
     .modal-backdrop {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(5, 7, 10, 0.82);
-      backdrop-filter: blur(4px);
-      z-index: 9999;
+      background: rgba(15, 23, 42, 0.65);
+      z-index: 95;
       align-items: center;
       justify-content: center;
       padding: 20px;
     }
 
-    .modal-backdrop.show { display: flex; }
+    .modal-backdrop.show {
+      display: flex;
+    }
 
     .modal-box {
       background: var(--surface);
-      border: 1px solid var(--border-strong);
-      border-top: 3px solid var(--amber);
-      border-radius: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
       max-width: 540px;
       width: 100%;
       padding: 22px;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
     }
 
     .modal-box h2 {
-      font-size: 1.12rem;
-      color: #fde68a;
-      margin-bottom: 12px;
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .modal-count-box {
-      background: var(--cell);
+    .modal-summary {
+      margin: 14px 0;
+      padding: 12px 14px;
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px 15px;
-      margin: 12px 0;
+      background: var(--surface-subtle);
+      border-radius: var(--radius);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
     }
 
-    .modal-count-box .big-num {
-      font-family: var(--font-mono);
-      font-size: 1.85rem;
+    .modal-count {
+      font-size: 1.75rem;
       font-weight: 800;
       color: var(--accent);
     }
 
-    .modal-msg {
-      color: var(--text-dim);
-      font-size: 0.9rem;
-      margin-bottom: 14px;
-      line-height: 1.5;
+    .modal-actions {
+      margin-top: 16px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
-    .modal-actions {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      flex-wrap: wrap;
-      margin-top: 16px;
+    /* =====================================================================
+       RESPONSIVE BREAKPOINTS
+       ===================================================================== */
+    @media (max-width: 1180px) {
+      .topbar {
+        flex-wrap: wrap;
+      }
+
+      .topbar-right {
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (max-width: 1120px) {
+      .hero-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-col + .hero-col {
+        border-left: none;
+        border-top: 1px solid var(--border);
+      }
+
+      .indicators-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .indicators-grid .ind-cell:nth-child(4n) {
+        border-right: 1px solid var(--border-subtle);
+      }
+
+      .indicators-grid .ind-cell:nth-child(2n) {
+        border-right: none;
+      }
+
+      .indicators-grid .ind-cell:nth-last-child(-n+4) {
+        border-bottom: 1px solid var(--border-subtle);
+      }
+
+      .indicators-grid .ind-cell:nth-last-child(-n+2) {
+        border-bottom: none;
+      }
+    }
+
+    @media (max-width: 960px) {
+      .topbar {
+        position: static;
+      }
+
+      .topbar-left {
+        flex-wrap: wrap;
+      }
+
+      .rail {
+        position: fixed;
+        left: 0;
+        top: 0;
+        transform: translateX(-100%);
+        transition: transform 200ms ease;
+      }
+
+      .rail.open {
+        transform: translateX(0);
+      }
+
+      .mobile-menu-btn {
+        display: inline-flex;
+      }
+
+      .charts-grid,
+      .simple-columns,
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .charts-grid .chart-cell {
+        border-right: none;
+      }
+
+      .charts-grid .chart-cell:nth-last-child(-n+2) {
+        border-bottom: 1px solid var(--border-subtle);
+      }
+
+      .charts-grid .chart-cell:last-child {
+        border-bottom: none;
+      }
+
+      .simple-col {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .simple-col:last-child {
+        border-bottom: none;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .topbar {
+        padding: 8px 14px;
+      }
+
+      .ir-tick-label {
+        display: none;
+      }
+
+      .content-area {
+        padding: 12px 14px 24px;
+      }
+
+      .ir-numbers,
+      .indicators-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .indicators-grid .ind-cell {
+        border-right: none !important;
+      }
+
+      .indicators-grid .ind-cell:nth-last-child(-n+2) {
+        border-bottom: 1px solid var(--border-subtle);
+      }
+
+      .indicators-grid .ind-cell:last-child {
+        border-bottom: none;
+      }
+
+      .device-select-control {
+        min-width: 165px;
+        max-width: 215px;
+      }
+
+      #port-select {
+        max-width: 205px;
+      }
+
+      .field-inline label {
+        white-space: nowrap;
+      }
     }
   </style>
 </head>
 <body class="mode-simple">
+  <div class="rail-backdrop" id="rail-backdrop"></div>
 
-  <!-- NOTIFICARE TOAST: DEPĂȘIRE PRAG MAXIM AMPERAJ -->
-  <div class="overcurrent-toast" id="overcurrent-toast" role="alert" aria-live="assertive">
-    <div class="toast-icon">⚠️</div>
-    <div class="toast-body">
-      <div class="toast-title">NOTIFICARE: PRAG MAXIM DE AMPERAJ DEPĂȘIT!</div>
-      <div class="toast-msg" id="overcurrent-toast-msg">Sarcina actuală a depășit limita maximă setată în registru.</div>
-    </div>
-    <button class="btn btn-sm btn-amber" onclick="dismissOvercurrentToast()">OK</button>
-  </div>
-
-  <!-- POP-UP MODAL: Verificare lanț dispozitive / întrerupere RS-485 -->
-  <div class="modal-backdrop" id="chain-modal">
-    <div class="modal-box">
-      <h2 id="modal-title">⚠️ Verificare Lanț Dispozitive (Modbus Daisy-Chain)</h2>
-      <div class="modal-count-box">
+  <aside class="rail" id="sidebar-rail" aria-label="Meniu principal">
+    <div class="rail-top">
+      <div class="rail-brand">
+        <span class="rail-brand-mark" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+            <path d="M9 17V13"></path>
+            <path d="M9 9V7"></path>
+            <path d="M9 13l5-4"></path>
+            <path d="M15 17V7"></path>
+          </svg>
+        </span>
         <div>
-          <div style="color:var(--muted);font-size:0.74rem;text-transform:uppercase;letter-spacing:0.05em">Dispozitive Detectate</div>
-          <div id="modal-chain-range" style="font-size:0.86rem;color:var(--text-dim);margin-top:3px">—</div>
-        </div>
-        <div class="big-num" id="modal-total-count">0</div>
-      </div>
-      <div class="modal-msg" id="modal-message"></div>
-      <div class="modal-actions">
-        <button class="btn btn-danger" onclick="respondChainAlert('problem')">
-          🛑 Problemă! (Oprește citirea)
-        </button>
-        <button class="btn btn-success" onclick="respondChainAlert('ok')">
-          ✅ OK — Continuă citirea
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <div class="container">
-    <!-- HEADER COMPACT -->
-    <header class="header">
-      <div class="brand">
-        <span class="brand-mark">EATON PXR25</span>
-        <div>
-          <h1>NZMH4-PX1600-TAZ — Telemetrie Multi-Device</h1>
-          <div class="sub" id="conn-subtitle">Modbus RTU USB-RS485 • Actualizare la 2s</div>
+          <div class="rail-brand-title">Eaton PXR25</div>
+          <div class="rail-brand-sub">NZMH4-PX1600-TAZ • SME</div>
         </div>
       </div>
-      <div class="actions">
+
+      <nav class="rail-nav" aria-label="Secțiuni aplicație">
+        <button type="button" class="rail-nav-btn active" id="nav-telemetry" onclick="switchSection('telemetry')">
+          <span class="rail-nav-label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+            <span>Telemetrie</span>
+          </span>
+          <span class="rail-nav-tag" id="rail-chain-tag">0</span>
+        </button>
+
+        <button type="button" class="rail-nav-btn hidden" id="nav-admin" onclick="switchSection('admin')">
+          <span class="rail-nav-label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span>Utilizatori &amp; Audit</span>
+          </span>
+          <span class="rail-nav-tag">ADMIN</span>
+        </button>
+
+        <button type="button" class="rail-nav-btn" id="nav-account" onclick="switchSection('account')">
+          <span class="rail-nav-label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <span>Cont &amp; Parolă</span>
+          </span>
+        </button>
+      </nav>
+    </div>
+
+    <div class="rail-foot">
+      <div class="rail-user-box">
+        <span class="rail-user-name" id="rail-username">-</span>
+        <span class="role-chip" id="rail-role-badge">-</span>
+      </div>
+      <div class="rail-actions">
+        <button type="button" class="rail-btn" id="btn-theme-toggle" onclick="toggleTheme()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2"></path>
+            <path d="M12 20v2"></path>
+            <path d="m4.93 4.93 1.41 1.41"></path>
+            <path d="m17.66 17.66 1.41 1.41"></path>
+            <path d="M2 12h2"></path>
+            <path d="M20 12h2"></path>
+          </svg>
+          <span id="theme-label">Temă: Zi</span>
+        </button>
+        <button type="button" class="rail-btn" id="btn-logout" onclick="logoutUser()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Ieșire</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="workspace">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button type="button" class="mobile-menu-btn" id="btn-mobile-nav" aria-label="Deschide meniul">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+          <span>Meniu</span>
+        </button>
+        <h1 id="page-heading">Telemetrie PXR25</h1>
+        <span id="conn-badge" class="badge neutral"><span class="status-dot"></span> <span id="conn-text">Conectare...</span></span>
+      </div>
+
+      <div class="topbar-right">
+        <select id="device-select" class="device-select-control" aria-label="Dispozitiv activ" onchange="selectView(this.value)">
+          <option value="1">Slave ID #1</option>
+        </select>
+
         <div class="mode-switch" role="group" aria-label="Mod Vizualizare">
-          <button class="mode-btn active" id="btn-mode-simple" onclick="setViewMode('simple')">🟢 Mod Simplu</button>
-          <button class="mode-btn" id="btn-mode-advanced" onclick="setViewMode('advanced')">🛠️ Mod Avansat</button>
+          <button type="button" class="mode-btn active" id="btn-mode-simple" onclick="setViewMode('simple')">Mod Simplu</button>
+          <button type="button" class="mode-btn" id="btn-mode-advanced" onclick="setViewMode('advanced')">Mod Avansat</button>
         </div>
-        <span id="conn-badge" class="badge"><span class="dot"></span> <span id="conn-text">Conectare...</span></span>
-        <button class="btn btn-sm" id="btn-sound-toggle" onclick="toggleSoundAlert()" title="Activează/Dezactivează alerta sonoră">
-          🔔 Alertă: ACTIVĂ
-        </button>
-        <button class="btn btn-sm advanced-only" onclick="testSoundAlert()" title="Testează sunetul de alarmă">
-          🔊 Test
-        </button>
-        <button class="btn btn-sm" id="btn-demo-stream" onclick="toggleDemoChartStream()" title="Generează date simulate fără hardware">
-          ▶️ Mod Demo Live
-        </button>
-        <button class="btn btn-sm" id="btn-demo-overcurrent" onclick="toggleDemoOvercurrent()" style="display:none" title="Simulează depășirea pragului maxim de amperaj">
-          🔥 Simulează Depășire Prag
-        </button>
+
+        <button type="button" class="btn btn-sm" id="btn-demo-stream" onclick="toggleDemoChartStream()">Mod Demo Live</button>
+        <button type="button" class="btn btn-sm hidden" id="btn-demo-overcurrent" onclick="toggleDemoOvercurrent()">Simulează depășire Ir</button>
+
+        <button type="button" class="btn btn-sm" id="btn-sound-toggle" onclick="toggleSoundAlert()">Alertă: Activă</button>
+        <button type="button" class="btn btn-sm" onclick="testSoundAlert()">Test sunet</button>
+        <a class="btn btn-sm btn-primary" href="/api/csv" target="_blank" rel="noopener">Export CSV</a>
       </div>
     </header>
 
-    <!-- BANNER ALERTA SONORĂ & STARE DE ALARMĂ ACTIVĂ -->
-    <div class="alarm-banner" id="alarm-banner">
-      <div>
-        <h3>🚨 STARE DE ALARMĂ ACTIVĂ ÎN SISTEM</h3>
-        <ul class="alarm-list" id="alarm-reasons-list"></ul>
-      </div>
-      <button class="btn btn-amber" onclick="acknowledgeCurrentAlarm()">
-        🔕 Confirmă & Oprește Sunetul
-      </button>
-    </div>
-
-    <!-- BANNER CITIRE OPRITĂ PENTRU INTERVENȚIE HARDWARE -->
-    <div class="halted-banner" id="halted-banner">
-      <div>
-        <h3>🛑 CITIREA A FOST OPRITĂ PENTRU REPARAȚII HARDWARE</h3>
-        <p id="halted-reason">Magistrala RS-485 este oprită complet.</p>
-      </div>
-      <button class="btn btn-success" onclick="resumeReading()">
-        🔄 Reia Scanarea & Citirea
-      </button>
-    </div>
-
-    <!-- BARA UNIFICATĂ: DROPDOWN DISPOZITIV, PORT USB, CEAS SERVER & CSV/DB -->
-    <div class="control-bar">
-      <div class="control-group">
-        <div class="field-group">
-          <label for="device-select">Dispozitiv:</label>
-          <select id="device-select" class="device-select-control" onchange="selectView(this.value)">
-            <option value="1">🔌 Slave ID #1</option>
-          </select>
-          <span class="mono" id="chain-count-chip" style="font-size:0.76rem;color:var(--muted)">(0 active)</span>
-        </div>
-
-        <span class="divider-v"></span>
-
-        <div class="field-group">
-          <label for="port-select">Port USB:</label>
-          <select id="port-select" onchange="applyConnection()">
-            <option value="">Se scanează...</option>
-          </select>
-          <button class="btn btn-sm" onclick="loadPorts(true)" title="Rescanează porturile USB">↻</button>
-        </div>
-
-        <div class="field-group advanced-only">
-          <label for="baud-select">Baud:</label>
-          <select id="baud-select" onchange="applyConnection()">
-            <option value="9600">9600</option>
-            <option value="19200" selected>19200</option>
-            <option value="38400">38400</option>
-            <option value="57600">57600</option>
-          </select>
-        </div>
-
-        <button class="btn btn-sm btn-primary" onclick="rescanChain()">🔍 Conectează / Rescanează</button>
-      </div>
-
-      <div class="control-group">
-        <span class="badge neutral" id="rtc-sync-badge" title="Sincronizat automat cu serverul (Reg 402921 / 0x0B68)">
-          🕒 Ora Server: <strong id="rtc-sync-time">—</strong>
-        </span>
-        <button class="btn btn-sm" onclick="syncDeviceTimeNow()" title="Scrie data și ora serverului pe dispozitive">
-          🔄 Sincronizează Ora
-        </button>
-        <span id="db-badge" class="badge advanced-only"><span class="dot"></span> <span id="db-status-text">DB: —</span></span>
-        <a class="btn btn-sm btn-primary advanced-only" href="/api/csv" target="_blank">⬇ CSV</a>
-      </div>
-    </div>
-
-    <!-- HERO TELEMETRY STRIP: STARE DISJUNCTOR & PRAG MAXIM AMPERAJ -->
-    <section class="panel overcurrent-panel" id="overcurrent-panel">
-      <h2>
-        <span>
-          ⚡ Stare Disjunctor & Prag Maxim Amperaj
-          <span id="oc-reg-label" class="mono advanced-only" style="color:var(--muted);font-size:0.76rem"> — Reg 403007 (0x0BBE)</span>
-        </span>
-        <span class="ind-badge ok" id="oc-status-badge">În limite normale</span>
-      </h2>
-      <div class="oc-metrics">
-        <div class="oc-stat">
-          <div class="oc-label">Stare Disjunctor & Cauză</div>
-          <div class="oc-value" id="st-prim" style="font-size:1.05rem;color:var(--accent);font-family:var(--font-sans)">—</div>
-          <div class="oc-sub" id="st-cause">—</div>
-        </div>
-        <div class="oc-stat">
-          <div class="oc-label">Sarcină Actuală (max IA, IB, IC)</div>
-          <div class="oc-value" id="oc-current-load">0.0 A</div>
-        </div>
-        <div class="oc-stat">
-          <div class="oc-label">Prag Maxim Setat (Ir)</div>
-          <div class="oc-value" id="oc-max-limit" style="color:var(--accent)">1600.0 A</div>
-        </div>
-        <div class="oc-stat">
-          <div class="oc-label">Grad Încărcare față de Prag</div>
-          <div class="oc-value" id="oc-load-pct">0.0 %</div>
-          <div class="oc-sub advanced-only">
-            PXR: <span id="st-sec">—</span> • Citire: <span id="st-time">—</span>
-          </div>
-        </div>
-      </div>
-      <div class="oc-bar-wrap" title="Repere la 80% (Atenție) și 100% (Prag Ir)">
-        <div class="bar-fill" id="oc-bar-fill" style="width:0%"></div>
-      </div>
-      <div id="oc-alert-inline" class="oc-alert-inline" style="display:none"></div>
-    </section>
-
-    <!-- GRAFICE LIVE (2 GRAFICE ÎN MOD SIMPLU, 4 GRAFICE ÎN MOD AVANSAT) -->
-    <section class="panel" id="modular-charts-panel">
-      <h2>
-        <span>
-          📈 <span class="simple-only">Grafice Esențiale</span><span class="advanced-only">Grafice Tehnice</span> —
-          <span id="charts-context-label" style="color:var(--accent)">Slave ID #1</span>
-        </span>
-        <div class="field-group advanced-only">
-          <label for="chart-window-select" style="font-size:0.72rem">Fereastră:</label>
-          <select id="chart-window-select" onchange="changeHistoryWindow(this.value)" style="padding:4px 8px;font-size:0.78rem">
-            <option value="30">30 citiri (1 min)</option>
-            <option value="60" selected>60 citiri (2 min)</option>
-            <option value="120">120 citiri (4 min)</option>
-          </select>
-        </div>
-      </h2>
-      <div class="charts-grid" id="charts-grid"></div>
-    </section>
-
-    <!-- VEDERE DISPOZITIV INDIVIDUAL -->
-    <div id="view-device">
-      <!-- MOD SIMPLU: 1 SINGUR PANOU COMPACT CU CELE 10 MĂSURĂTORI ESENȚIALE -->
-      <section class="panel simple-only">
-        <h2>
-          <span>📊 Măsurători Esențiale în Timp Real</span>
-          <span class="mono" id="simple-limit-label" style="font-size:0.76rem;color:var(--muted)">Prag Ir = 1600 A</span>
-        </h2>
-        <div class="simple-metrics-groups">
-          <div class="simple-group">
-            <div class="simple-group-title">Curenți pe Faze (A)</div>
-            <div class="metrics-grid" id="simple-grid-currents"></div>
-          </div>
-          <div class="simple-group">
-            <div class="simple-group-title">Tensiuni Linie-Linie (V)</div>
-            <div class="metrics-grid" id="simple-grid-voltages"></div>
-          </div>
-          <div class="simple-group">
-            <div class="simple-group-title">Putere, cos φ, Frecvență & Energie</div>
-            <div class="metrics-grid" id="simple-grid-power-energy"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- MOD AVANSAT: MĂSURĂTORI COMPLETE + CALITATE ENERGIE + PROTECȚII + EVENIMENTE -->
-      <div class="advanced-only">
-        <div class="grid-2">
-          <section class="panel">
+    <main class="content-area">
+      <!-- SECȚIUNEA 1: TELEMETRIE -->
+      <div id="panel-telemetry">
+        <div class="alert-banner" id="alarm-banner" role="alert">
+          <div>
             <h2>
-              <span>Curenți Compleți (A)</span>
-              <span class="mono" id="dev-currents-limit-label" style="font-size:0.76rem;color:var(--muted)">Prag Ir = 1600 A</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <span>Stare de alarmă activă în sistem</span>
             </h2>
-            <div class="metrics-grid" id="dev-grid-currents"></div>
-          </section>
-          <section class="panel">
-            <h2><span>Tensiuni Linie-Linie & Fază-Nul (V)</span></h2>
-            <div class="metrics-grid" id="dev-grid-voltages"></div>
-          </section>
+            <ul class="alert-list" id="alarm-reasons-list"></ul>
+          </div>
+          <button type="button" class="btn btn-warn" onclick="acknowledgeCurrentAlarm()">Confirmă și oprește sunetul</button>
         </div>
 
-        <div class="grid-2">
-          <section class="panel">
-            <h2><span>Puteri, Factor de Putere & Frecvență</span></h2>
-            <div class="metrics-grid" id="dev-grid-powers"></div>
-          </section>
-          <section class="panel">
-            <h2><span>Contoare de Energie (Clasa 1)</span></h2>
-            <div class="metrics-grid" id="dev-grid-energy"></div>
-          </section>
+        <div class="alert-banner" id="halted-banner" role="status">
+          <div>
+            <h2>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <rect x="9" y="9" width="6" height="6"></rect>
+              </svg>
+              <span>Citirea a fost oprită pentru intervenție hardware</span>
+            </h2>
+            <p id="halted-reason" style="font-size:0.84rem;margin-top:4px;">Magistrala RS-485 este oprită complet.</p>
+          </div>
+          <button type="button" class="btn btn-ok admin-only-control" id="btn-resume-reading" onclick="resumeReading()">Reia scanarea și citirea</button>
         </div>
 
-        <section class="panel">
-          <h2>
-            <span>⚡ Indicatori de Calitate a Energiei</span>
-            <span class="mono" style="font-size:0.74rem;color:var(--muted)">NEMA • EN 50160 • ANRE (cos φ ≥ 0.92)</span>
-          </h2>
-          <div class="indicators-grid" id="dev-grid-indicators"></div>
+        <!-- Bară control hardware RS-485, RTC și TimescaleDB -->
+        <section class="hw-bar" aria-label="Control magistrală și sincronizare">
+          <div class="hw-group">
+            <div class="field-inline">
+              <label for="port-select">Port USB:</label>
+              <select id="port-select" onchange="applyConnection()">
+                <option value="">Se scanează...</option>
+              </select>
+              <button type="button" class="btn btn-sm" id="btn-refresh-ports" onclick="loadPorts(true)" title="Rescanează porturile USB" aria-label="Rescanează porturile USB">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 12a9 9 0 1 1-2.64-6.36"></path>
+                  <polyline points="21 3 21 9 15 9"></polyline>
+                </svg>
+              </button>
+            </div>
+
+            <div class="field-inline advanced-only">
+              <label for="baud-select">Baud:</label>
+              <select id="baud-select" onchange="applyConnection()">
+                <option value="9600">9600</option>
+                <option value="19200" selected>19200</option>
+                <option value="38400">38400</option>
+                <option value="57600">57600</option>
+              </select>
+            </div>
+
+            <button type="button" class="btn btn-sm btn-primary" id="btn-rescan-chain" onclick="rescanChain()">Conectează / Rescanează</button>
+            <span class="badge neutral hidden" id="readonly-hw-note">Mod observare (rol user)</span>
+          </div>
+
+          <div class="hw-group">
+            <span class="badge neutral" id="rtc-sync-badge" title="Sincronizat automat cu serverul (Reg 402921 / 0x0B68)">
+              Ora server: <strong class="mono" id="rtc-sync-time">-</strong>
+            </span>
+            <button type="button" class="btn btn-sm" id="btn-sync-time" onclick="syncDeviceTimeNow()">Sincronizează ora</button>
+            <span class="sep-v advanced-only"></span>
+            <span id="db-badge" class="badge neutral advanced-only"><span class="status-dot"></span> <span id="db-status-text">DB: -</span></span>
+            <button type="button" class="btn btn-sm advanced-only" id="btn-db-flush" onclick="flushDatabaseNow()">Flush DB</button>
+          </div>
         </section>
 
-        <div class="grid-2">
-          <section class="panel">
+        <!-- Bandă Topologie RS-485 Daisy-Chain & Riglă Prag Maxim Ir -->
+        <section class="sheet hero-strip" id="overcurrent-panel">
+          <div class="hero-col">
+            <div class="hero-col-head">
+              <h2>Topologie magistrală RS-485 și stare disjunctor</h2>
+              <span class="badge neutral" id="st-prim-badge"><span id="st-prim">-</span></span>
+            </div>
+            <div class="chain-rail" id="chain-topology-nodes" aria-label="Dispozitive în lanț"></div>
+            <div class="breaker-summary">
+              <span>Cauză: <strong id="st-cause">-</strong></span>
+              <span class="advanced-only">• Unitate PXR: <strong id="st-sec">-</strong></span>
+              <span class="advanced-only">• Citire: <strong class="mono" id="st-time">-</strong></span>
+              <span class="advanced-only" id="conn-subtitle" style="color:var(--ink-muted)"></span>
+            </div>
+          </div>
+
+          <div class="hero-col">
+            <div class="hero-col-head">
+              <h2>
+                Sarcină maximă față de prag Ir
+                <span id="oc-reg-label" class="mono advanced-only" style="font-size:0.78rem;color:var(--ink-muted);font-weight:500;"> (Reg 403007 / 0x0BBE)</span>
+              </h2>
+              <span class="ind-pill ok" id="oc-status-badge">În limite normale</span>
+            </div>
+
+            <div class="ir-numbers">
+              <div>
+                <div class="ir-stat-label">Sarcină actuală (max)</div>
+                <div class="ir-stat-val mono" id="oc-current-load">0.0 A</div>
+              </div>
+              <div>
+                <div class="ir-stat-label">Prag setat (Ir)</div>
+                <div class="ir-stat-val mono" id="oc-max-limit" style="color:var(--accent)">1600.0 A</div>
+              </div>
+              <div>
+                <div class="ir-stat-label">Încărcare</div>
+                <div class="ir-stat-val mono" id="oc-load-pct">0.0 %</div>
+              </div>
+            </div>
+
+            <div>
+              <div class="ir-ruler" title="Repere la 80% (Atenție) și 100% (Prag Ir)">
+                <div class="ir-ruler-tick-80"></div>
+                <div class="ir-ruler-fill" id="oc-bar-fill"></div>
+              </div>
+              <div class="ir-ruler-legend">
+                <span class="ir-tick-0 mono">0%</span>
+                <span class="ir-tick-80"><span class="mono">80%</span><span class="ir-tick-label"> Atenție</span></span>
+                <span class="ir-tick-100"><span class="mono">100%</span> Ir</span>
+              </div>
+            </div>
+
+            <div id="oc-alert-inline" class="oc-inline-msg hidden"></div>
+          </div>
+        </section>
+
+        <!-- Grafice Live Canvas -->
+        <section class="sheet" id="modular-charts-panel">
+          <div class="sheet-head">
             <h2>
-              <span>Setări de Protecție Active (Tabel 27)</span>
-              <button class="btn btn-sm" onclick="refreshSettings()">🔄 Reîncarcă Protecții & Istoric</button>
+              <span>Grafice live: <span id="charts-context-label" style="color:var(--accent)">Slave ID #1</span></span>
             </h2>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Parametru</th>
-                    <th>Registru</th>
-                    <th>Valoare</th>
-                  </tr>
-                </thead>
-                <tbody id="table-settings">
-                  <tr><td colspan="3" style="color:var(--muted)">Se încarcă setările de protecție...</td></tr>
-                </tbody>
-              </table>
+            <div class="field-inline advanced-only">
+              <label for="chart-window-select">Fereastră:</label>
+              <select id="chart-window-select" onchange="changeHistoryWindow(this.value)">
+                <option value="30">30 citiri (1 min)</option>
+                <option value="60" selected>60 citiri (2 min)</option>
+                <option value="120">120 citiri (4 min)</option>
+              </select>
+            </div>
+          </div>
+          <div class="charts-grid" id="charts-grid"></div>
+        </section>
+
+        <!-- Măsurători & Diagnosticare -->
+        <div id="view-device" style="display:flex;flex-direction:column;gap:14px;">
+          <!-- MOD SIMPLU: Foaie unificată cu 3 coloane -->
+          <section class="sheet simple-only">
+            <div class="sheet-head">
+              <h2>Măsurători esențiale în timp real</h2>
+              <span class="mono sheet-meta" id="simple-limit-label">Prag Ir = 1600 A</span>
+            </div>
+            <div class="simple-columns">
+              <div class="simple-col">
+                <div class="simple-col-title">Curenți pe faze (A)</div>
+                <div class="ledger-rows" id="simple-grid-currents"></div>
+              </div>
+              <div class="simple-col">
+                <div class="simple-col-title">Tensiuni linie-linie (V)</div>
+                <div class="ledger-rows" id="simple-grid-voltages"></div>
+              </div>
+              <div class="simple-col">
+                <div class="simple-col-title">Putere, cos φ, frecvență și energie</div>
+                <div class="ledger-rows" id="simple-grid-power-energy"></div>
+              </div>
             </div>
           </section>
 
-          <section class="panel">
-            <h2><span>Istoric Declanșări & Evenimente (Tabel 31/32)</span></h2>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Tip / ID</th>
-                    <th>Dată / Oră</th>
-                    <th>Cauză / Eveniment</th>
-                    <th>Curenți</th>
-                  </tr>
-                </thead>
-                <tbody id="table-events">
-                  <tr><td colspan="4" style="color:var(--muted)">Se încarcă istoricul de declanșări...</td></tr>
-                </tbody>
-              </table>
+          <!-- MOD AVANSAT: Toți parametrii, 8 KPI calitate, protecții și evenimente -->
+          <div class="advanced-only" style="display:flex;flex-direction:column;gap:14px;">
+            <div class="grid-2">
+              <section class="sheet">
+                <div class="sheet-head">
+                  <h2>Curenți compleți (A)</h2>
+                  <span class="mono sheet-meta" id="dev-currents-limit-label">Prag Ir = 1600 A</span>
+                </div>
+                <div class="ledger-rows" id="dev-grid-currents"></div>
+              </section>
+              <section class="sheet">
+                <div class="sheet-head">
+                  <h2>Tensiuni linie-linie și fază-nul (V)</h2>
+                </div>
+                <div class="ledger-rows" id="dev-grid-voltages"></div>
+              </section>
+            </div>
+
+            <div class="grid-2">
+              <section class="sheet">
+                <div class="sheet-head">
+                  <h2>Puteri, factor de putere și frecvență</h2>
+                </div>
+                <div class="ledger-rows" id="dev-grid-powers"></div>
+              </section>
+              <section class="sheet">
+                <div class="sheet-head">
+                  <h2>Contoare de energie (Clasa 1)</h2>
+                </div>
+                <div class="ledger-rows" id="dev-grid-energy"></div>
+              </section>
+            </div>
+
+            <section class="sheet">
+              <div class="sheet-head">
+                <h2>Indicatori de calitate a energiei (8 KPI)</h2>
+                <span class="sheet-meta">NEMA • EN 50160 • ANRE (<span class="mono">cos φ ≥ 0.92</span>)</span>
+              </div>
+              <div class="indicators-grid" id="dev-grid-indicators"></div>
+            </section>
+
+            <div class="grid-2">
+              <section class="sheet">
+                <div class="sheet-head">
+                  <h2>Setări de protecție active (Tabel 27)</h2>
+                  <button type="button" class="btn btn-sm" id="btn-refresh-settings" onclick="refreshSettings()">Reîncarcă protecții</button>
+                </div>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Parametru</th>
+                        <th>Registru</th>
+                        <th>Valoare</th>
+                      </tr>
+                    </thead>
+                    <tbody id="table-settings">
+                      <tr><td colspan="3" style="color:var(--ink-muted)">Se încarcă setările de protecție...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <section class="sheet">
+                <div class="sheet-head">
+                  <h2>Istoric declanșări și evenimente (Tabel 31/32)</h2>
+                </div>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Tip / ID</th>
+                        <th>Dată / Oră</th>
+                        <th>Cauză / Eveniment</th>
+                        <th>Curenți</th>
+                      </tr>
+                    </thead>
+                    <tbody id="table-events">
+                      <tr><td colspan="4" style="color:var(--ink-muted)">Se încarcă istoricul de declanșări...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECȚIUNEA 2: ADMINISTRARE UTILIZATORI & AUDIT (ADMIN ONLY) -->
+      <div id="panel-admin" class="hidden" style="display:flex;flex-direction:column;gap:14px;">
+        <section class="sheet">
+          <div class="sheet-head">
+            <h2>Administrare conturi utilizatori</h2>
+            <button type="button" class="btn btn-sm" onclick="loadAdminData()">Reîmprospătează</button>
+          </div>
+
+          <div class="inline-feedback" id="admin-feedback" role="status"></div>
+
+          <form class="admin-create-bar" id="create-user-form">
+            <div class="form-field">
+              <label for="new-user-name">Nume utilizator (3–32 car.)</label>
+              <input id="new-user-name" type="text" required placeholder="ex: student_lab2" />
+            </div>
+            <div class="form-field">
+              <label for="new-user-pass">Parolă (min. 8 car., literă + cifră)</label>
+              <input id="new-user-pass" type="password" required placeholder="••••••••" />
+            </div>
+            <div class="form-field">
+              <label for="new-user-role">Rol</label>
+              <select id="new-user-role">
+                <option value="user">user (observare &amp; demo)</option>
+                <option value="admin">admin (control complet)</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn-create-user">Adaugă utilizator</button>
+          </form>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Utilizator</th>
+                  <th>Rol</th>
+                  <th>Stare cont</th>
+                  <th>Ultima autentificare</th>
+                  <th>Acțiuni</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body">
+                <tr><td colspan="6" style="color:var(--ink-muted)">Se încarcă lista utilizatorilor...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="sheet">
+          <div class="sheet-head">
+            <h2>Jurnal de audit securitate și control hardware</h2>
+            <span class="sheet-meta">Ultimele <span class="mono">50</span> evenimente</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Timestamp (UTC)</th>
+                  <th>Actor</th>
+                  <th>Acțiune</th>
+                  <th>Țintă</th>
+                  <th>Detalii</th>
+                  <th>IP</th>
+                </tr>
+              </thead>
+              <tbody id="audit-table-body">
+                <tr><td colspan="6" style="color:var(--ink-muted)">Se încarcă jurnalul de audit...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- SECȚIUNEA 3: CONT & PAROLĂ -->
+      <div id="panel-account" class="hidden">
+        <div class="grid-2">
+          <section class="sheet">
+            <div class="sheet-head">
+              <h2>Profil sesiune activă</h2>
+            </div>
+            <div class="ledger-rows">
+              <div class="ledger-row">
+                <span class="ledger-label">Nume utilizator</span>
+                <span class="ledger-readout mono" id="acct-username">-</span>
+              </div>
+              <div class="ledger-row">
+                <span class="ledger-label">Rol asignat</span>
+                <span class="ledger-readout mono" id="acct-role">-</span>
+              </div>
+              <div class="ledger-row">
+                <span class="ledger-label">Cont creat la</span>
+                <span class="ledger-readout mono" style="font-size:0.88rem;" id="acct-created">-</span>
+              </div>
+              <div class="ledger-row">
+                <span class="ledger-label">Ultima autentificare</span>
+                <span class="ledger-readout mono" style="font-size:0.88rem;" id="acct-last-login">-</span>
+              </div>
+              <div class="ledger-row" style="grid-template-columns:1fr;">
+                <span class="ledger-label">Permisiuni active (RBAC)</span>
+                <div class="perm-list" id="account-perms-list"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="sheet">
+            <div class="sheet-head">
+              <h2>Schimbă parola contului</h2>
+            </div>
+            <div style="padding:16px;">
+              <form id="change-pw-form" style="display:flex;flex-direction:column;gap:14px;">
+                <div class="form-field">
+                  <label for="cp-current">Parola actuală</label>
+                  <input id="cp-current" type="password" required autocomplete="current-password" />
+                </div>
+                <div class="form-field">
+                  <label for="cp-new">Parolă nouă (min. 8 caractere, literă + cifră)</label>
+                  <input id="cp-new" type="password" required autocomplete="new-password" />
+                </div>
+                <div class="form-field">
+                  <label for="cp-confirm">Confirmă parola nouă</label>
+                  <input id="cp-confirm" type="password" required autocomplete="new-password" />
+                </div>
+                <div class="inline-feedback" id="change-pw-feedback" style="margin:0;" role="status"></div>
+                <div>
+                  <button type="submit" class="btn btn-primary">Actualizează parola</button>
+                </div>
+              </form>
             </div>
           </section>
         </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- TOAST DEPĂȘIRE PRAG AMPERAJ Ir -->
+  <div class="overcurrent-toast" id="overcurrent-toast" role="alert" aria-live="assertive">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px" aria-hidden="true">
+      <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+      <line x1="12" y1="9" x2="12" y2="13"></line>
+      <line x1="12" y1="17" x2="12.01" y2="17"></line>
+    </svg>
+    <div style="flex:1;">
+      <div style="font-size:0.86rem;font-weight:700;">Prag maxim de amperaj depășit</div>
+      <div id="overcurrent-toast-msg" style="font-size:0.82rem;margin-top:3px;">Sarcina actuală a depășit limita maximă setată în registru.</div>
+    </div>
+    <button type="button" class="btn btn-sm btn-danger" onclick="dismissOvercurrentToast()">OK</button>
+  </div>
+
+  <div class="app-toast" id="app-toast" role="status" aria-live="polite"></div>
+
+  <!-- MODAL VERIFICARE LANȚ DAISY-CHAIN RS-485 -->
+  <div class="modal-backdrop" id="chain-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-box">
+      <h2 id="modal-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="color:var(--warn)" aria-hidden="true">
+          <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        <span>Verificare lanț dispozitive (Modbus Daisy-Chain)</span>
+      </h2>
+      <div class="modal-summary">
+        <div>
+          <div style="font-size:0.76rem;color:var(--ink-muted);font-weight:600;">Dispozitive detectate</div>
+          <div id="modal-chain-range" class="mono" style="font-size:0.88rem;margin-top:2px;">-</div>
+        </div>
+        <div class="modal-count mono" id="modal-total-count">0</div>
+      </div>
+      <div id="modal-message" style="font-size:0.9rem;color:var(--ink-secondary);line-height:1.5;"></div>
+      <div class="modal-actions" id="modal-admin-actions">
+        <button type="button" class="btn btn-danger" onclick="respondChainAlert('problem')">Problemă (Oprește citirea)</button>
+        <button type="button" class="btn btn-ok" onclick="respondChainAlert('ok')">OK, Continuă citirea</button>
+      </div>
+      <div class="modal-actions hidden" id="modal-user-actions">
+        <span style="font-size:0.8rem;color:var(--ink-muted);margin-right:auto;">Confirmarea hardware necesită rol administrator.</span>
+        <button type="button" class="btn" onclick="dismissChainModalClient()">Am înțeles</button>
       </div>
     </div>
   </div>
 
 <script>
+let currentUser = null;
+let userPermissions = new Set();
+let csrfToken = '';
+let activeSection = 'telemetry';
 let currentView = '1';
 let latestData = null;
+let chainModalDismissedLocally = false;
+let resetRowOpenUserId = null;
+let confirmDeleteUserId = null;
 
-// ============================================================================
-// 1. SPECIFICAȚII GRAFICE (MOD SIMPLU vs. MOD AVANSAT) ȘI PREFERINȚE UI
-// ============================================================================
-const STORAGE_KEY = 'eaton_pxr_ui_prefs_v1';
+const THEME_STORAGE_KEY = 'sme_theme_v1';
+const STORAGE_KEY = 'eaton_pxr_ui_prefs_v2';
 
-const SIMPLE_CHART_SPECS = [
-  {
-    id: 'simple_currents',
-    title: 'Curenți pe Faze (IA, IB, IC) & Prag Maxim (Ir)',
-    unit: 'A',
-    source: 'values',
-    showLimitLine: true,
-    series: [
-      { key: 'I_A', label: 'IA (L1)', color: '#38bdf8' },
-      { key: 'I_B', label: 'IB (L2)', color: '#f59e0b' },
-      { key: 'I_C', label: 'IC (L3)', color: '#10b981' }
-    ]
-  },
-  {
-    id: 'simple_voltages',
-    title: 'Tensiuni Linie-Linie (VAB, VBC, VCA)',
-    unit: 'V',
-    source: 'values',
-    showLimitLine: false,
-    series: [
-      { key: 'V_AB', label: 'VAB (L1-L2)', color: '#38bdf8' },
-      { key: 'V_BC', label: 'VBC (L2-L3)', color: '#f59e0b' },
-      { key: 'V_CA', label: 'VCA (L3-L1)', color: '#10b981' }
-    ]
+function hasPerm(perm) {
+  return userPermissions.has(perm);
+}
+
+function escapeHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function showAppToast(message) {
+  const el = document.getElementById('app-toast');
+  if (!el) return;
+  el.textContent = message;
+  el.classList.add('show');
+  clearTimeout(showAppToast._timer);
+  showAppToast._timer = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+async function apiFetch(url, options = {}) {
+  const method = (options.method || 'GET').toUpperCase();
+  const headers = Object.assign({}, options.headers || {});
+  if (method !== 'GET' && method !== 'HEAD') {
+    if (!headers['Content-Type']) headers['Content-Type'] = 'application/json';
+    if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
   }
-];
-
-const ADVANCED_CHART_SPECS = [
-  {
-    id: 'adv_currents',
-    title: 'Curenți de Fază, Nul & Defect (IA, IB, IC, IN, IG) + Prag Ir',
-    unit: 'A',
-    source: 'values',
-    showLimitLine: true,
-    series: [
-      { key: 'I_A', label: 'IA', color: '#38bdf8' },
-      { key: 'I_B', label: 'IB', color: '#f59e0b' },
-      { key: 'I_C', label: 'IC', color: '#10b981' },
-      { key: 'I_N', label: 'IN', color: '#a855f7' },
-      { key: 'I_G', label: 'IG', color: '#ef4444' }
-    ]
-  },
-  {
-    id: 'adv_voltages',
-    title: 'Tensiuni Linie-Linie (VAB, VBC, VCA)',
-    unit: 'V',
-    source: 'values',
-    showLimitLine: false,
-    series: [
-      { key: 'V_AB', label: 'VAB', color: '#38bdf8' },
-      { key: 'V_BC', label: 'VBC', color: '#f59e0b' },
-      { key: 'V_CA', label: 'VCA', color: '#10b981' }
-    ]
-  },
-  {
-    id: 'adv_powers',
-    title: 'Profil Puteri Electrice (P Activă, Q Reactivă, S Aparentă)',
-    unit: 'W/VA',
-    source: 'values',
-    showLimitLine: false,
-    series: [
-      { key: 'P_TOT', label: 'P (W)', color: '#10b981' },
-      { key: 'Q_TOT', label: 'Q (VAR)', color: '#f59e0b' },
-      { key: 'S_TOT', label: 'S (VA)', color: '#38bdf8' }
-    ]
-  },
-  {
-    id: 'adv_quality',
-    title: 'Calitate & Stabilitate: Încărcare (% Ir), Dezechilibru I (%) & Frecvență (Hz)',
-    unit: '%',
-    source: 'mixed',
-    showLimitLine: false,
-    series: [
-      { key: 'LOAD_PCT', label: 'Încărcare (%)', color: '#38bdf8', source: 'indicators', rightAxis: false },
-      { key: 'I_UNBAL', label: 'Dezechilibru I (%)', color: '#ef4444', source: 'indicators', rightAxis: false },
-      { key: 'FREQ', label: 'Frecvență (Hz)', color: '#a855f7', source: 'values', rightAxis: true }
-    ]
+  const res = await fetch(url, {
+    ...options,
+    method,
+    headers,
+    cache: 'no-store'
+  });
+  if (res.status === 401) {
+    window.location.href = '/login';
   }
-];
+  return res;
+}
 
+/* =========================================================================
+   1. NAVIGARE RAIL, TEMĂ ZI/NOAPTE ȘI PERMISIUNI RBAC
+   ========================================================================= */
+const railEl = document.getElementById('sidebar-rail');
+const railBackdrop = document.getElementById('rail-backdrop');
+const mobileMenuBtn = document.getElementById('btn-mobile-nav');
+
+function closeMobileRail() {
+  if (railEl) railEl.classList.remove('open');
+  if (railBackdrop) railBackdrop.classList.remove('show');
+}
+
+if (mobileMenuBtn) {
+  mobileMenuBtn.addEventListener('click', () => {
+    railEl.classList.toggle('open');
+    railBackdrop.classList.toggle('show');
+  });
+}
+if (railBackdrop) {
+  railBackdrop.addEventListener('click', closeMobileRail);
+}
+
+function switchSection(sec) {
+  if (sec === 'admin' && !hasPerm('users:manage')) return;
+  activeSection = sec;
+  document.getElementById('panel-telemetry').classList.toggle('hidden', sec !== 'telemetry');
+  document.getElementById('panel-admin').classList.toggle('hidden', sec !== 'admin');
+  document.getElementById('panel-account').classList.toggle('hidden', sec !== 'account');
+
+  const topbarRight = document.querySelector('.topbar-right');
+  if (topbarRight) topbarRight.classList.toggle('hidden', sec !== 'telemetry');
+
+  document.getElementById('nav-telemetry').classList.toggle('active', sec === 'telemetry');
+  document.getElementById('nav-admin').classList.toggle('active', sec === 'admin');
+  document.getElementById('nav-account').classList.toggle('active', sec === 'account');
+
+  const h1 = document.getElementById('page-heading');
+  if (sec === 'admin') {
+    h1.textContent = 'Administrare utilizatori și audit';
+    loadAdminData();
+  } else if (sec === 'account') {
+    h1.textContent = 'Cont și securitate parolă';
+  } else {
+    h1.textContent = 'Telemetrie PXR25';
+    setTimeout(drawAllEnabledCharts, 20);
+  }
+  closeMobileRail();
+}
+
+function applyTheme(theme) {
+  const isDark = theme === 'dark';
+  if (isDark) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+  const lbl = document.getElementById('theme-label');
+  if (lbl) lbl.textContent = isDark ? 'Temă: Noapte' : 'Temă: Zi';
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, isDark ? 'dark' : 'light');
+  } catch (e) {}
+}
+
+function toggleTheme() {
+  const next = uiConfig.theme === 'dark' ? 'light' : 'dark';
+  uiConfig.theme = next;
+  applyTheme(next);
+  saveUiConfig();
+  drawAllEnabledCharts();
+}
+
+function applyRbacToControls() {
+  const isAdminUsers = hasPerm('users:manage');
+  const canHw = hasPerm('hardware:control');
+  const canDbFlush = hasPerm('db:flush');
+
+  document.getElementById('nav-admin').classList.toggle('hidden', !isAdminUsers);
+  document.getElementById('readonly-hw-note').classList.toggle('hidden', canHw);
+
+  ['port-select', 'baud-select', 'btn-refresh-ports', 'btn-rescan-chain', 'btn-sync-time', 'btn-refresh-settings', 'btn-resume-reading'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = !canHw;
+  });
+
+  const flushBtn = document.getElementById('btn-db-flush');
+  if (flushBtn) flushBtn.disabled = !canDbFlush;
+
+  const modalAdmin = document.getElementById('modal-admin-actions');
+  const modalUser = document.getElementById('modal-user-actions');
+  if (modalAdmin && modalUser) {
+    modalAdmin.classList.toggle('hidden', !canHw);
+    modalUser.classList.toggle('hidden', canHw);
+  }
+}
+
+async function logoutUser() {
+  try {
+    await apiFetch('/api/auth/logout', { method: 'POST', body: '{}' });
+  } catch (e) {}
+  window.location.href = '/login';
+}
+
+/* =========================================================================
+   2. PREFERINȚE UI (PER UTILIZATOR) & MOD SIMPLU / AVANSAT
+   ========================================================================= */
 function getDefaultUiConfig() {
+  let storedTheme = 'light';
+  try {
+    if (localStorage.getItem(THEME_STORAGE_KEY) === 'dark') storedTheme = 'dark';
+  } catch (e) {}
   return {
     viewMode: 'simple',
     historyWindow: 60,
-    soundEnabled: true
+    soundEnabled: true,
+    theme: storedTheme
   };
 }
 
@@ -1225,7 +2251,8 @@ function sanitizeUiConfig(raw) {
   return {
     viewMode: raw.viewMode === 'advanced' ? 'advanced' : 'simple',
     historyWindow: [30, 60, 120].includes(Number(raw.historyWindow)) ? Number(raw.historyWindow) : 60,
-    soundEnabled: raw.soundEnabled !== undefined ? Boolean(raw.soundEnabled) : true
+    soundEnabled: raw.soundEnabled !== undefined ? Boolean(raw.soundEnabled) : true,
+    theme: raw.theme === 'dark' ? 'dark' : (raw.theme === 'light' ? 'light' : def.theme)
   };
 }
 
@@ -1233,10 +2260,8 @@ function applyViewModeClass() {
   const isAdv = uiConfig.viewMode === 'advanced';
   document.body.classList.toggle('mode-simple', !isAdv);
   document.body.classList.toggle('mode-advanced', isAdv);
-  const btnSimple = document.getElementById('btn-mode-simple');
-  const btnAdv = document.getElementById('btn-mode-advanced');
-  if (btnSimple) btnSimple.classList.toggle('active', !isAdv);
-  if (btnAdv) btnAdv.classList.toggle('active', isAdv);
+  document.getElementById('btn-mode-simple').classList.toggle('active', !isAdv);
+  document.getElementById('btn-mode-advanced').classList.toggle('active', isAdv);
 }
 
 function setViewMode(mode) {
@@ -1253,9 +2278,8 @@ async function loadSavedUiConfig() {
     const localRaw = localStorage.getItem(STORAGE_KEY);
     if (localRaw) loaded = JSON.parse(localRaw);
   } catch (e) {}
-
   try {
-    const res = await fetch('/api/ui-config', { cache: 'no-store' });
+    const res = await apiFetch('/api/ui-config');
     if (res.ok) {
       const serverCfg = await res.json();
       if (serverCfg && typeof serverCfg === 'object' && Object.keys(serverCfg).length > 0) {
@@ -1267,6 +2291,7 @@ async function loadSavedUiConfig() {
   uiConfig = sanitizeUiConfig(loaded);
   const winSel = document.getElementById('chart-window-select');
   if (winSel) winSel.value = String(uiConfig.historyWindow);
+  applyTheme(uiConfig.theme);
   applyViewModeClass();
   updateSoundButtonUi();
   renderChartsStructure();
@@ -1277,9 +2302,8 @@ async function saveUiConfig() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(uiConfig));
   } catch (e) {}
   try {
-    await fetch('/api/ui-config', {
+    await apiFetch('/api/ui-config', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(uiConfig)
     });
   } catch (e) {}
@@ -1291,14 +2315,100 @@ function changeHistoryWindow(val) {
   drawAllEnabledCharts();
 }
 
+/* =========================================================================
+   3. SPECIFICAȚII & RANDARE GRAFICE HTML5 CANVAS (ADAPTIVE ZI/NOAPTE)
+   ========================================================================= */
+function getThemeColor(varName, fallback) {
+  const val = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+  return val || fallback;
+}
+
+const SIMPLE_CHART_SPECS = [
+  {
+    id: 'simple_currents',
+    title: 'Curenți pe faze (IA, IB, IC) și prag Ir',
+    unit: 'A',
+    source: 'values',
+    showLimitLine: true,
+    series: [
+      { key: 'I_A', label: 'IA (L1)', cssVar: '--phase-a', fallback: '#005FB8' },
+      { key: 'I_B', label: 'IB (L2)', cssVar: '--phase-b', fallback: '#B45309' },
+      { key: 'I_C', label: 'IC (L3)', cssVar: '--phase-c', fallback: '#0F766E' }
+    ]
+  },
+  {
+    id: 'simple_voltages',
+    title: 'Tensiuni linie-linie (VAB, VBC, VCA)',
+    unit: 'V',
+    source: 'values',
+    showLimitLine: false,
+    series: [
+      { key: 'V_AB', label: 'VAB (L1-L2)', cssVar: '--phase-a', fallback: '#005FB8' },
+      { key: 'V_BC', label: 'VBC (L2-L3)', cssVar: '--phase-b', fallback: '#B45309' },
+      { key: 'V_CA', label: 'VCA (L3-L1)', cssVar: '--phase-c', fallback: '#0F766E' }
+    ]
+  }
+];
+
+const ADVANCED_CHART_SPECS = [
+  {
+    id: 'adv_currents',
+    title: 'Curenți fază, nul și defect (IA, IB, IC, IN, IG)',
+    unit: 'A',
+    source: 'values',
+    showLimitLine: true,
+    series: [
+      { key: 'I_A', label: 'IA', cssVar: '--phase-a', fallback: '#005FB8' },
+      { key: 'I_B', label: 'IB', cssVar: '--phase-b', fallback: '#B45309' },
+      { key: 'I_C', label: 'IC', cssVar: '--phase-c', fallback: '#0F766E' },
+      { key: 'I_N', label: 'IN', cssVar: '--phase-n', fallback: '#6D28D9' },
+      { key: 'I_G', label: 'IG', cssVar: '--phase-g', fallback: '#475569' }
+    ]
+  },
+  {
+    id: 'adv_voltages',
+    title: 'Tensiuni linie-linie (VAB, VBC, VCA)',
+    unit: 'V',
+    source: 'values',
+    showLimitLine: false,
+    series: [
+      { key: 'V_AB', label: 'VAB', cssVar: '--phase-a', fallback: '#005FB8' },
+      { key: 'V_BC', label: 'VBC', cssVar: '--phase-b', fallback: '#B45309' },
+      { key: 'V_CA', label: 'VCA', cssVar: '--phase-c', fallback: '#0F766E' }
+    ]
+  },
+  {
+    id: 'adv_powers',
+    title: 'Profil puteri electrice (P activă, Q reactivă, S aparentă)',
+    unit: 'W/VA',
+    source: 'values',
+    showLimitLine: false,
+    series: [
+      { key: 'P_TOT', label: 'P (W)', cssVar: '--phase-c', fallback: '#0F766E' },
+      { key: 'Q_TOT', label: 'Q (VAR)', cssVar: '--phase-b', fallback: '#B45309' },
+      { key: 'S_TOT', label: 'S (VA)', cssVar: '--phase-a', fallback: '#005FB8' }
+    ]
+  },
+  {
+    id: 'adv_quality',
+    title: 'Încărcare (% Ir), dezechilibru I (%) și frecvență (Hz)',
+    unit: '%',
+    source: 'mixed',
+    showLimitLine: false,
+    series: [
+      { key: 'LOAD_PCT', label: 'Încărcare (%)', cssVar: '--phase-a', fallback: '#005FB8', source: 'indicators', rightAxis: false },
+      { key: 'I_UNBAL', label: 'Dezechilibru I (%)', cssVar: '--warn', fallback: '#B45309', source: 'indicators', rightAxis: false },
+      { key: 'FREQ', label: 'Frecvență (Hz)', cssVar: '--phase-n', fallback: '#6D28D9', source: 'values', rightAxis: true }
+    ]
+  }
+];
+
 function renderChartsStructure() {
   const grid = document.getElementById('charts-grid');
   const specs = uiConfig.viewMode === 'advanced' ? ADVANCED_CHART_SPECS : SIMPLE_CHART_SPECS;
   grid.innerHTML = specs.map(spec => `
-    <div class="chart-card" id="chart-card-${spec.id}">
-      <div class="chart-header">
-        <span class="chart-title">${spec.title}</span>
-      </div>
+    <div class="chart-cell" id="chart-card-${spec.id}">
+      <div class="chart-title">${escapeHtml(spec.title)}</div>
       <div class="chart-legend" id="chart-legend-${spec.id}"></div>
       <div class="chart-canvas-wrap">
         <canvas id="chart-canvas-${spec.id}"></canvas>
@@ -1307,9 +2417,6 @@ function renderChartsStructure() {
   `).join('');
 }
 
-// ============================================================================
-// 2. MOTOR DE RANDARE GRAFICE LIVE (HTML5 CANVAS HIGH-DPI)
-// ============================================================================
 let demoStreamTimer = null;
 let demoHistoryBuffer = [];
 let demoSimulateOvercurrent = false;
@@ -1328,14 +2435,7 @@ function getActiveHistorySeries() {
     return demoHistoryBuffer.slice(-win);
   }
   if (!latestData || !latestData.history) return [];
-  const arr = latestData.history[String(currentView)] || [];
-  return arr.slice(-win);
-}
-
-function hexToRgba(hex, alpha) {
-  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  if (!m) return `rgba(56, 189, 248, ${alpha})`;
-  return `rgba(${parseInt(m[1], 16)}, ${parseInt(m[2], 16)}, ${parseInt(m[3], 16)}, ${alpha})`;
+  return (latestData.history[String(currentView)] || []).slice(-win);
 }
 
 function drawSingleChart(spec, isSimple) {
@@ -1359,10 +2459,16 @@ function drawSingleChart(spec, isSimple) {
   ctx.scale(dpr, dpr);
   ctx.clearRect(0, 0, width, height);
 
+  const gridColor = getThemeColor('--chart-grid', '#E2E8F0');
+  const axisColor = getThemeColor('--chart-axis', '#475569');
+  const dangerColor = getThemeColor('--danger', '#C81E1E');
+  const rightAxisColor = getThemeColor('--phase-n', '#6D28D9');
+
   let leftNums = [];
   let rightNums = [];
   const hasRightAxis = spec.series.some(s => s.rightAxis);
   const extractedSeries = spec.series.map(s => {
+    const color = getThemeColor(s.cssVar, s.fallback);
     const srcKind = s.source || spec.source;
     const vals = points.map(pt => {
       const bag = srcKind === 'indicators' ? (pt.indicators || {}) : (pt.values || {});
@@ -1375,48 +2481,40 @@ function drawSingleChart(spec, isSimple) {
       else leftNums.push(...valid);
     }
     const lastVal = valid.length > 0 ? valid[valid.length - 1] : null;
-    return { ...s, vals, lastVal };
+    return { ...s, color, vals, lastVal };
   });
 
   const activeLimit = getActiveMaxCurrentLimit();
   const drawLimitLine = Boolean(spec.showLimitLine && activeLimit > 0);
   const maxMeasuredLeft = leftNums.length > 0 ? Math.max(...leftNums) : 0;
   const includeLimitInScale = drawLimitLine && maxMeasuredLeft >= activeLimit * 0.65;
-  if (includeLimitInScale) {
-    leftNums.push(activeLimit);
-  }
+  if (includeLimitInScale) leftNums.push(activeLimit);
 
   let legHtml = extractedSeries.map(s => {
     const unitTxt = s.key === 'FREQ' ? 'Hz' : (s.key.includes('PCT') || s.key.includes('UNBAL') ? '%' : spec.unit);
     const decimals = (s.key === 'FREQ' || s.key === 'PF_TOT') ? 2 : (isSimple ? 1 : 2);
     const valTxt = s.lastVal !== null
-      ? `<strong>${s.lastVal.toFixed(decimals)} ${unitTxt}</strong>`
-      : `<span style="color:var(--muted)">—</span>`;
+      ? `<strong class="mono">${s.lastVal.toFixed(decimals)} ${unitTxt}</strong>`
+      : `<span style="color:var(--ink-muted)">—</span>`;
     return `
       <span class="legend-item">
-        <span class="legend-color" style="background:${s.color}"></span>
-        <span>${s.label}: ${valTxt}</span>
+        <span class="legend-dot" style="background:${s.color}"></span>
+        <span>${escapeHtml(s.label)}: ${valTxt}</span>
       </span>
     `;
   }).join('');
+
   if (drawLimitLine) {
     legHtml += `
-      <span class="legend-item" style="border-color:rgba(239,68,68,0.45)">
-        <span class="legend-color" style="background:#ef4444"></span>
-        <span>Prag Ir: <strong>${activeLimit.toFixed(0)} A</strong></span>
+      <span class="legend-item" style="border-color:var(--danger-border)">
+        <span class="legend-dot" style="background:${dangerColor}"></span>
+        <span>Prag Ir: <strong class="mono">${activeLimit.toFixed(0)} A</strong></span>
       </span>
     `;
   }
   legendEl.innerHTML = legHtml;
 
-  const padL = isSimple ? 46 : 54;
-  const padR = hasRightAxis ? 48 : 14;
-  const padT = 14;
-  const padB = 24;
-  const plotW = width - padL - padR;
-  const plotH = height - padT - padB;
-
-  function calcBounds(nums, defaultMax = 100) {
+  function calcBounds(nums, defaultMax = 100, clampZero = false) {
     let mn = nums.length ? Math.min(...nums) : 0;
     let mx = nums.length ? Math.max(...nums) : defaultMax;
     if (Math.abs(mx - mn) < 1e-3) {
@@ -1428,21 +2526,45 @@ function drawSingleChart(spec, isSimple) {
       mn -= margin;
       mx += margin;
     }
+    if (clampZero && mn < 0) mn = 0;
     if (isSimple && mn > 0 && mn < mx * 0.25) mn = 0;
     return [mn, mx];
   }
 
-  const [yMin, yMax] = calcBounds(leftNums, 100);
-  const [yMinR, yMaxR] = calcBounds(rightNums, 50);
+  function fmtAxisVal(val) {
+    const absV = Math.abs(val);
+    if (absV >= 10000) return `${(val / 1000).toFixed(1)}k`;
+    return isSimple ? val.toFixed(0) : val.toFixed(1);
+  }
 
-  ctx.strokeStyle = '#182130';
-  ctx.lineWidth = 1;
+  const allLeftNonNeg = leftNums.length > 0 && leftNums.every(v => v >= 0);
+  const allRightNonNeg = rightNums.length > 0 && rightNums.every(v => v >= 0);
+  const [yMin, yMax] = calcBounds(leftNums, 100, allLeftNonNeg);
+  const [yMinR, yMaxR] = calcBounds(rightNums, 50, allRightNonNeg);
+
+  ctx.font = '11px "Cascadia Mono", Consolas, monospace';
   const gridRows = isSimple ? 2 : 3;
+  const tickLabelsL = [];
+  let maxTickW = 36;
+  for (let r = 0; r <= gridRows; r++) {
+    const valL = yMax - ((yMax - yMin) * r) / gridRows;
+    const lbl = fmtAxisVal(valL);
+    tickLabelsL.push(lbl);
+    maxTickW = Math.max(maxTickW, ctx.measureText(lbl).width);
+  }
 
-  ctx.font = '11px "JetBrains Mono", Consolas, monospace';
+  const padL = Math.ceil(maxTickW + 14);
+  const padR = hasRightAxis ? 52 : 16;
+  const padT = 14;
+  const padB = 24;
+  const plotW = width - padL - padR;
+  const plotH = height - padT - padB;
+
+  ctx.strokeStyle = gridColor;
+  ctx.lineWidth = 1;
+
   for (let r = 0; r <= gridRows; r++) {
     const y = padT + (plotH * r) / gridRows;
-    const valL = yMax - ((yMax - yMin) * r) / gridRows;
     ctx.beginPath();
     ctx.setLineDash([3, 4]);
     ctx.moveTo(padL, y);
@@ -1450,22 +2572,22 @@ function drawSingleChart(spec, isSimple) {
     ctx.stroke();
     ctx.setLineDash([]);
     ctx.textAlign = 'right';
-    ctx.fillStyle = '#8b9bb4';
-    ctx.fillText(isSimple ? valL.toFixed(0) : valL.toFixed(1), padL - 7, y + 4);
+    ctx.fillStyle = axisColor;
+    ctx.fillText(tickLabelsL[r], padL - 7, y + 4);
     if (hasRightAxis) {
       const valR = yMaxR - ((yMaxR - yMinR) * r) / gridRows;
       ctx.textAlign = 'left';
-      ctx.fillStyle = '#c084fc';
+      ctx.fillStyle = rightAxisColor;
       ctx.fillText(valR.toFixed(2), padL + plotW + 6, y + 4);
     }
   }
 
   if (points.length === 0 || (leftNums.length === 0 && rightNums.length === 0)) {
-    ctx.fillStyle = '#64748b';
+    ctx.fillStyle = axisColor;
     ctx.textAlign = 'center';
-    ctx.font = '12.5px sans-serif';
+    ctx.font = '12.5px "Segoe UI", system-ui, sans-serif';
     ctx.fillText(
-      'În așteptarea citirilor (sau apasă „▶️ Mod Demo Live” pentru testare)...',
+      'În așteptarea citirilor Modbus (sau apasă „Mod Demo Live” pentru testare)',
       padL + plotW / 2,
       padT + plotH / 2
     );
@@ -1473,15 +2595,19 @@ function drawSingleChart(spec, isSimple) {
     return;
   }
 
-  ctx.textAlign = 'center';
-  ctx.fillStyle = '#8b9bb4';
+  ctx.fillStyle = axisColor;
   const stepX = points.length > 1 ? plotW / (points.length - 1) : plotW;
   const labelIndices = isSimple
     ? [0, points.length - 1]
     : [0, Math.floor((points.length - 1) / 2), points.length - 1];
-  [...new Set(labelIndices)].forEach(i => {
+  const uniqueIdx = [...new Set(labelIndices)];
+  uniqueIdx.forEach((i, pos) => {
     if (points[i]) {
       const x = points.length > 1 ? padL + i * stepX : padL + plotW / 2;
+      if (uniqueIdx.length === 1) ctx.textAlign = 'center';
+      else if (pos === 0) ctx.textAlign = 'left';
+      else if (pos === uniqueIdx.length - 1) ctx.textAlign = 'right';
+      else ctx.textAlign = 'center';
       ctx.fillText(points[i].t || '', x, height - 6);
     }
   });
@@ -1489,23 +2615,18 @@ function drawSingleChart(spec, isSimple) {
   if (includeLimitInScale && yMax > yMin) {
     const yLim = padT + plotH - ((activeLimit - yMin) / (yMax - yMin)) * plotH;
     ctx.save();
-    ctx.strokeStyle = '#ef4444';
-    ctx.lineWidth = 1.6;
+    ctx.strokeStyle = dangerColor;
+    ctx.lineWidth = 1.5;
     ctx.setLineDash([6, 4]);
     ctx.beginPath();
     ctx.moveTo(padL, yLim);
     ctx.lineTo(padL + plotW, yLim);
     ctx.stroke();
     ctx.setLineDash([]);
-    const lblText = `Prag Ir: ${activeLimit.toFixed(0)} A`;
-    ctx.font = '600 10.5px sans-serif';
-    const tw = ctx.measureText(lblText).width;
-    const tagY = Math.max(padT + 2, yLim - 19);
-    ctx.fillStyle = 'rgba(127, 29, 29, 0.85)';
-    ctx.fillRect(padL + 6, tagY, tw + 10, 16);
-    ctx.fillStyle = '#fecaca';
+    ctx.fillStyle = dangerColor;
+    ctx.font = '600 10.5px "Segoe UI", system-ui, sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText(lblText, padL + 11, tagY + 12);
+    ctx.fillText(`Prag Ir: ${activeLimit.toFixed(0)} A`, padL + 8, Math.max(padT + 12, yLim - 5));
     ctx.restore();
   }
 
@@ -1519,22 +2640,7 @@ function drawSingleChart(spec, isSimple) {
       const y = padT + plotH - ((v - sMin) / (sMax - sMin)) * plotH;
       coords.push({ x, y });
     });
-
     if (coords.length === 0) return;
-
-    // Gradient subtil sub curba principală în Mod Simplu
-    if (isSimple && coords.length > 1) {
-      const grad = ctx.createLinearGradient(0, padT, 0, padT + plotH);
-      grad.addColorStop(0, hexToRgba(s.color, 0.12));
-      grad.addColorStop(1, hexToRgba(s.color, 0.0));
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.moveTo(coords[0].x, padT + plotH);
-      coords.forEach(pt => ctx.lineTo(pt.x, pt.y));
-      ctx.lineTo(coords[coords.length - 1].x, padT + plotH);
-      ctx.closePath();
-      ctx.fill();
-    }
 
     ctx.strokeStyle = s.color;
     ctx.lineWidth = isSimple ? 2.4 : 2.0;
@@ -1547,13 +2653,9 @@ function drawSingleChart(spec, isSimple) {
     ctx.stroke();
 
     const lastPt = coords[coords.length - 1];
-    ctx.fillStyle = hexToRgba(s.color, 0.24);
-    ctx.beginPath();
-    ctx.arc(lastPt.x, lastPt.y, 6.5, 0, Math.PI * 2);
-    ctx.fill();
     ctx.fillStyle = s.color;
     ctx.beginPath();
-    ctx.arc(lastPt.x, lastPt.y, 3.4, 0, Math.PI * 2);
+    ctx.arc(lastPt.x, lastPt.y, 3.3, 0, Math.PI * 2);
     ctx.fill();
   });
 
@@ -1574,36 +2676,39 @@ function drawAllEnabledCharts() {
 
 window.addEventListener('resize', () => drawAllEnabledCharts());
 
+/* =========================================================================
+   4. MOD DEMO LIVE & ALERTE SONORE WEB AUDIO API
+   ========================================================================= */
 function toggleDemoOvercurrent() {
   demoSimulateOvercurrent = !demoSimulateOvercurrent;
   const btn = document.getElementById('btn-demo-overcurrent');
-  if (btn) {
-    if (demoSimulateOvercurrent) {
-      btn.textContent = '✅ Revino la Sarcină Normală';
-      btn.classList.add('btn-danger');
-      if ('Notification' in window && Notification.permission === 'default') {
-        try { Notification.requestPermission(); } catch (e) {}
-      }
-    } else {
-      btn.textContent = '🔥 Simulează Depășire Prag';
-      btn.classList.remove('btn-danger');
+  if (!btn) return;
+  if (demoSimulateOvercurrent) {
+    btn.textContent = 'Revino la sarcină normală';
+    btn.classList.add('btn-danger');
+    if ('Notification' in window && Notification.permission === 'default') {
+      try { Notification.requestPermission(); } catch (e) {}
     }
+  } else {
+    btn.textContent = 'Simulează depășire Ir';
+    btn.classList.remove('btn-danger');
   }
 }
 
 function toggleDemoChartStream() {
   const btn = document.getElementById('btn-demo-stream');
   const ocBtn = document.getElementById('btn-demo-overcurrent');
+
   if (demoStreamTimer !== null) {
     clearInterval(demoStreamTimer);
     demoStreamTimer = null;
     demoHistoryBuffer = [];
     demoSimulateOvercurrent = false;
-    btn.textContent = '▶️ Mod Demo Live';
-    btn.classList.remove('btn-amber');
+    btn.textContent = 'Mod Demo Live';
+    btn.classList.remove('btn-warn');
     if (ocBtn) {
-      ocBtn.style.display = 'none';
-      ocBtn.textContent = '🔥 Simulează Depășire Prag';
+      ocBtn.classList.add('hidden');
+      ocBtn.textContent = 'Simulează depășire Ir';
       ocBtn.classList.remove('btn-danger');
     }
     handleOvercurrentNotifications([]);
@@ -1611,9 +2716,9 @@ function toggleDemoChartStream() {
     return;
   }
 
-  btn.textContent = '⏹️ Oprește Demo';
-  btn.classList.add('btn-amber');
-  if (ocBtn) ocBtn.style.display = 'inline-flex';
+  btn.textContent = 'Oprește Demo';
+  btn.classList.add('btn-warn');
+  if (ocBtn) ocBtn.classList.remove('hidden');
   demoHistoryBuffer = [];
 
   const pushDemoPoint = (sendFetch = true) => {
@@ -1668,11 +2773,9 @@ function toggleDemoChartStream() {
     drawAllEnabledCharts();
 
     if (!sendFetch) return;
-
     const lastPt = demoHistoryBuffer[demoHistoryBuffer.length - 1];
-    fetch('/api/db-enqueue-demo', {
+    apiFetch('/api/db-enqueue-demo', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         slave_id: Number(currentView) || 1,
         max_current_limit_a: demoMaxLimitA,
@@ -1694,20 +2797,19 @@ function toggleDemoChartStream() {
 
         renderSimpleMeasurements(dm, demoMaxLimitA);
         renderEnergyIndicators('dev-grid-indicators', demoRes.indicators || []);
-        renderCards('dev-grid-currents', dm.filter(m => m.category === 'currents'), demoMaxLimitA, 2);
-        renderCards('dev-grid-voltages', dm.filter(m => m.category === 'voltages'), 450, 2);
-        renderCards('dev-grid-powers', dm.filter(m => m.category === 'powers'), 0, 2);
-        renderCards('dev-grid-energy', dm.filter(m => m.category === 'energy'), 0, 2);
+        renderLedgerRows('dev-grid-currents', dm.filter(m => m.category === 'currents'), demoMaxLimitA, 2);
+        renderLedgerRows('dev-grid-voltages', dm.filter(m => m.category === 'voltages'), 450, 2);
+        renderLedgerRows('dev-grid-powers', dm.filter(m => m.category === 'powers'), 0, 2);
+        renderLedgerRows('dev-grid-energy', dm.filter(m => m.category === 'energy'), 0, 2);
 
-        const rtcEl = document.getElementById('rtc-sync-time');
-        if (rtcEl) rtcEl.textContent = srvTime;
+        document.getElementById('rtc-sync-time').textContent = srvTime;
         document.getElementById('st-time').textContent = srvTime;
         document.getElementById('st-prim').textContent = demoRes.overcurrent_alert?.exceeded
-          ? 'Alarmă Suprasarcină (Demo)'
+          ? 'Alarmă suprasarcină (Demo)'
           : 'Închis (Closed) [Demo]';
         document.getElementById('st-sec').textContent = 'Alimentat / Normal [Demo]';
         document.getElementById('st-cause').textContent = demoRes.overcurrent_alert?.exceeded
-          ? 'Depășire Prag Amperaj Ir'
+          ? 'Depășire prag amperaj Ir'
           : 'Normal [0x0000]';
 
         if (demoRes.overcurrent_alert) {
@@ -1728,31 +2830,15 @@ function toggleDemoChartStream() {
   demoStreamTimer = setInterval(() => pushDemoPoint(true), 2000);
 }
 
-function escapeHtml(str) {
-  return String(str ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-// ============================================================================
-// 3. SISTEM DE ALERTĂ SONORĂ (WEB AUDIO API)
-// ============================================================================
 let audioCtx = null;
 let acknowledgedAlarmSignature = '';
 
 function ensureAudioContext() {
   if (!audioCtx) {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (AudioContextClass) {
-      audioCtx = new AudioContextClass();
-    }
+    if (AudioContextClass) audioCtx = new AudioContextClass();
   }
-  if (audioCtx && audioCtx.state === 'suspended') {
-    audioCtx.resume();
-  }
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
   return audioCtx;
 }
 
@@ -1768,7 +2854,7 @@ function playAlarmBeepSequence(severity = 'critical') {
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(f, now + idx * 0.18);
       gain.gain.setValueAtTime(0.001, now + idx * 0.18);
-      gain.gain.exponentialRampToValueAtTime(0.18, now + idx * 0.18 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.16, now + idx * 0.18 + 0.02);
       gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.18 + 0.15);
       osc.connect(gain);
       gain.connect(ctx.destination);
@@ -1782,10 +2868,10 @@ function updateSoundButtonUi() {
   const btn = document.getElementById('btn-sound-toggle');
   if (!btn) return;
   if (uiConfig.soundEnabled) {
-    btn.textContent = '🔔 Alertă: ACTIVĂ';
+    btn.textContent = 'Alertă: Activă';
     btn.classList.remove('btn-danger');
   } else {
-    btn.textContent = '🔕 Alertă: MUTE';
+    btn.textContent = 'Alertă: Mută';
     btn.classList.add('btn-danger');
   }
 }
@@ -1819,19 +2905,16 @@ function handleAlarmState(data) {
     banner.classList.remove('show');
     return;
   }
-
   listEl.innerHTML = (alarm.reasons || []).map(r => `<li>${escapeHtml(r)}</li>`).join('');
   if (alarm.signature !== acknowledgedAlarmSignature) {
     banner.classList.add('show');
-    if (uiConfig.soundEnabled) {
-      playAlarmBeepSequence(alarm.severity || 'critical');
-    }
+    if (uiConfig.soundEnabled) playAlarmBeepSequence(alarm.severity || 'critical');
   }
 }
 
-// ============================================================================
-// 4. NOTIFICARE PRAG MAXIM AMPERAJ, DROPDOWN DISPOZITIVE & SINCRONIZARE CEAS
-// ============================================================================
+/* =========================================================================
+   5. TELEMETRIE, TOPOLOGIE DAISY-CHAIN & RANDARE MĂSURĂTORI
+   ========================================================================= */
 let dismissedOcSignature = '';
 let lastBrowserNotifiedSignature = '';
 
@@ -1855,9 +2938,7 @@ function handleOvercurrentNotifications(alertsList) {
 
   const fullMessage = exceededList.map(a => a.message).filter(Boolean).join(' | ');
   if (toastMsgEl) toastMsgEl.textContent = fullMessage;
-  if (toast && fullMessage !== dismissedOcSignature) {
-    toast.classList.add('show');
-  }
+  if (toast && fullMessage !== dismissedOcSignature) toast.classList.add('show');
 
   if (
     fullMessage &&
@@ -1867,9 +2948,36 @@ function handleOvercurrentNotifications(alertsList) {
   ) {
     lastBrowserNotifiedSignature = fullMessage;
     try {
-      new Notification('⚠️ Prag Maxim Amperaj Depășit!', { body: fullMessage });
+      new Notification('Prag maxim amperaj depășit', { body: fullMessage });
     } catch (e) {}
   }
+}
+
+function renderChainTopologyNodes(activeIds, devices, chainAlert) {
+  const container = document.getElementById('chain-topology-nodes');
+  if (!container) return;
+
+  if (!activeIds || activeIds.length === 0) {
+    container.innerHTML = `
+      <span class="chain-node active mono">Slave #1 (în așteptare)</span>
+    `;
+    return;
+  }
+
+  let html = activeIds.map((sid, idx) => {
+    const dev = (devices || {})[String(sid)] || {};
+    const meas = dev.measurements || [];
+    const curVals = meas.filter(m => ['I_A', 'I_B', 'I_C'].includes(m.key) && m.value !== null).map(m => Number(m.value));
+    const iMaxTxt = curVals.length ? `${Math.max(...curVals).toFixed(0)} A` : '—';
+    const isSel = String(sid) === String(currentView);
+    const link = idx > 0 ? '<span class="chain-link" aria-hidden="true"></span>' : '';
+    return `${link}<button type="button" class="chain-node mono ${isSel ? 'active' : ''}" onclick="selectView('${sid}')">#${sid} • ${iMaxTxt}</button>`;
+  }).join('');
+
+  if (chainAlert && chainAlert.reason === 'chain_break' && chainAlert.stopped_at_id) {
+    html += `<span class="chain-link" aria-hidden="true"></span><span class="chain-node fault mono">Stop #${escapeHtml(chainAlert.stopped_at_id)}</span>`;
+  }
+  container.innerHTML = html;
 }
 
 function renderOvercurrentPanel(ocAlert, regLabel) {
@@ -1891,106 +2999,65 @@ function renderOvercurrentPanel(ocAlert, regLabel) {
   if (regEl) regEl.textContent = ` — Reg ${oc.register || regLabel || '403007 (0x0BBE)'}`;
   if (curEl) {
     curEl.textContent = `${curLoad.toFixed(1)} A`;
-    curEl.style.color = exceeded ? 'var(--red)' : 'var(--text)';
+    curEl.style.color = exceeded ? 'var(--danger)' : 'var(--ink)';
   }
   if (limEl) limEl.textContent = `${maxLimit.toFixed(1)} A`;
   if (pctEl) {
     pctEl.textContent = `${loadPct.toFixed(1)} %`;
-    pctEl.style.color = exceeded ? 'var(--red)' : (loadPct >= 80 ? 'var(--amber)' : 'var(--green)');
+    pctEl.style.color = exceeded ? 'var(--danger)' : (loadPct >= 80 ? 'var(--warn)' : 'var(--ok)');
   }
-
   if (barEl) {
     barEl.style.width = `${Math.min(100, Math.max(0, loadPct)).toFixed(1)}%`;
-    barEl.style.background = exceeded
-      ? 'linear-gradient(90deg, #dc2626, #ef4444)'
-      : (loadPct >= 80
-        ? 'linear-gradient(90deg, #d97706, #f59e0b)'
-        : 'linear-gradient(90deg, #0284c7, #0ea5e9)');
+    barEl.style.backgroundColor = exceeded ? 'var(--danger)' : (loadPct >= 80 ? 'var(--warn)' : 'var(--accent)');
   }
-
   if (panel) panel.classList.toggle('exceeded', exceeded);
   if (badge) {
-    badge.className = exceeded ? 'ind-badge danger' : (loadPct >= 80 ? 'ind-badge warn' : 'ind-badge ok');
+    badge.className = exceeded ? 'ind-pill danger' : (loadPct >= 80 ? 'ind-pill warn' : 'ind-pill ok');
     badge.textContent = exceeded
-      ? '⚠️ PRAG DEPĂȘIT!'
+      ? 'Prag Ir depășit'
       : (loadPct >= 80 ? 'Încărcare ridicată' : 'În limite normale');
   }
   if (inlineEl) {
     if (exceeded && oc.message) {
-      inlineEl.style.display = 'block';
-      inlineEl.textContent = `⚠️ ${oc.message}`;
+      inlineEl.classList.remove('hidden');
+      inlineEl.textContent = oc.message;
     } else {
-      inlineEl.style.display = 'none';
+      inlineEl.classList.add('hidden');
       inlineEl.textContent = '';
     }
   }
 }
 
-async function syncDeviceTimeNow() {
-  try {
-    const res = await fetch('/api/sync-time', { method: 'POST' });
-    if (res.ok) {
-      const info = await res.json();
-      const rtcEl = document.getElementById('rtc-sync-time');
-      if (rtcEl && info.synced_at) {
-        rtcEl.textContent = `${info.synced_at} ✓`;
-      }
-    }
-    await fetchDashboardData();
-  } catch (e) {}
-}
-
-const PRIMARY_INDICATOR_KEYS = ['LOAD_PCT', 'I_UNBAL', 'V_LL_UNBAL', 'PF_QUALITY'];
-
-function renderEnergyIndicators(containerId, indicators) {
-  const el = document.getElementById(containerId);
-  if (!el) return;
-  const filtered = (indicators || []).filter(ind => PRIMARY_INDICATOR_KEYS.includes(ind.key));
-  if (!filtered.length) {
-    el.innerHTML = '<div style="color:var(--muted)">În așteptarea datelor pentru indicatorii de calitate...</div>';
-    return;
-  }
-  el.innerHTML = filtered.map(ind => {
-    const st = ind.status || 'neutral';
-    return `
-      <div class="indicator-card st-${st}">
-        <div class="ind-title">${escapeHtml(ind.name)}</div>
-        <div class="ind-val">${escapeHtml(ind.formatted)}</div>
-        <span class="ind-badge ${st}">${escapeHtml(ind.status_label)}</span>
-      </div>
-    `;
-  }).join('');
-}
-
-function getPhaseClass(key) {
-  if (key === 'I_A' || key === 'V_AB') return 'phase-a';
-  if (key === 'I_B' || key === 'V_BC') return 'phase-b';
-  if (key === 'I_C' || key === 'V_CA') return 'phase-c';
+function getPhaseDotClass(key) {
+  if (key === 'I_A' || key === 'V_AB' || key === 'V_AN') return 'phase-a';
+  if (key === 'I_B' || key === 'V_BC' || key === 'V_BN') return 'phase-b';
+  if (key === 'I_C' || key === 'V_CA' || key === 'V_CN') return 'phase-c';
+  if (key === 'I_N') return 'phase-n';
   return '';
 }
 
-function renderCards(containerId, items, showBarMax, decimals = 2) {
+function renderLedgerRows(containerId, items, showBarMax, decimals = 2) {
   const el = document.getElementById(containerId);
   if (!el) return;
   if (!items || !items.length) {
-    el.innerHTML = '<div style="color:var(--muted)">Fără date</div>';
+    el.innerHTML = '<div class="ledger-row"><span style="color:var(--ink-muted)">Fără date</span></div>';
     return;
   }
   el.innerHTML = items.map(item => {
     const itemDec = (item.key === 'PF_TOT' || item.key === 'FREQ') ? 2 : decimals;
-    const valStr = (item.value === null || item.value === undefined)
-      ? '<span style="color:var(--muted);font-size:0.88rem">Indisponibil</span>'
-      : `${Number(item.value).toFixed(itemDec)}<span class="m-unit">${escapeHtml(item.unit || '')}</span>`;
+    const valHtml = (item.value === null || item.value === undefined)
+      ? '<span style="color:var(--ink-muted);font-size:0.86rem;font-weight:500;">Indisponibil</span>'
+      : `${Number(item.value).toFixed(itemDec)}<span class="ledger-unit">${escapeHtml(item.unit || '')}</span>`;
     let barHtml = '';
     if (showBarMax && item.value !== null && item.value !== undefined) {
       const pct = Math.min(100, Math.max(0, (Math.abs(item.value) / showBarMax) * 100));
-      barHtml = `<div class="bar-bg"><div class="bar-fill" style="width:${pct.toFixed(1)}%"></div></div>`;
+      barHtml = `<div class="ledger-bar"><div class="ledger-bar-fill" style="width:${pct.toFixed(1)}%"></div></div>`;
     }
-    const phaseCls = getPhaseClass(item.key);
+    const dotCls = getPhaseDotClass(item.key);
     return `
-      <div class="metric-box ${phaseCls}">
-        <div class="m-name">${escapeHtml(item.name)}</div>
-        <div class="m-val">${valStr}</div>
+      <div class="ledger-row">
+        <span class="ledger-label"><span class="phase-dot ${dotCls}" aria-hidden="true"></span>${escapeHtml(item.name)}</span>
+        <span class="ledger-readout mono">${valHtml}</span>
         ${barHtml}
       </div>
     `;
@@ -2005,111 +3072,33 @@ function renderSimpleMeasurements(meas, maxLimit) {
   const limEl = document.getElementById('simple-limit-label');
   if (limEl) limEl.textContent = `Prag Ir = ${Number(maxLimit || 1600).toFixed(0)} A`;
 
-  renderCards('simple-grid-currents', pick(['I_A', 'I_B', 'I_C']), maxLimit, 1);
-  renderCards('simple-grid-voltages', pick(['V_AB', 'V_BC', 'V_CA']), 450, 1);
-  renderCards('simple-grid-power-energy', pick(['P_TOT', 'PF_TOT', 'FREQ', 'E_TOT']), 0, 1);
+  renderLedgerRows('simple-grid-currents', pick(['I_A', 'I_B', 'I_C']), maxLimit, 1);
+  renderLedgerRows('simple-grid-voltages', pick(['V_AB', 'V_BC', 'V_CA']), 450, 1);
+  renderLedgerRows('simple-grid-power-energy', pick(['P_TOT', 'PF_TOT', 'FREQ', 'E_TOT']), 0, 1);
 }
 
-function selectView(viewKey) {
-  currentView = String(viewKey);
-  if (latestData) {
-    renderAll(latestData);
-  } else {
-    drawAllEnabledCharts();
+function renderEnergyIndicators(containerId, indicators) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  if (!indicators || !indicators.length) {
+    el.innerHTML = '<div class="ind-cell" style="grid-column:1/-1;color:var(--ink-muted)">În așteptarea datelor pentru indicatorii de calitate...</div>';
+    return;
   }
-}
-
-async function loadPorts(autoSelectUsb = false) {
-  try {
-    const res = await fetch('/api/ports', { cache: 'no-store' });
-    const info = await res.json();
-    const sel = document.getElementById('port-select');
-    const ports = info.ports || [];
-
-    if (ports.length === 0) {
-      const cp = escapeHtml(info.current_port || 'COM5');
-      sel.innerHTML = `<option value="${cp}">${cp} (Indisponibil)</option>`;
-    } else {
-      sel.innerHTML = ports.map(p => {
-        const tag = p.is_usb ? ' ★ [USB]' : '';
-        const devEsc = escapeHtml(p.device);
-        const descEsc = escapeHtml(p.description);
-        return `<option value="${devEsc}">${devEsc} — ${descEsc}${tag}</option>`;
-      }).join('');
-
-      const hasCurrent = ports.some(p => p.device === info.current_port);
-      if (hasCurrent && !autoSelectUsb) {
-        sel.value = info.current_port;
-      } else {
-        const usbPort = ports.find(p => p.is_usb);
-        if (usbPort) {
-          sel.value = usbPort.device;
-          if (usbPort.device !== info.current_port) {
-            applyConnection();
-          }
-        } else if (hasCurrent) {
-          sel.value = info.current_port;
-        }
-      }
-    }
-
-    if (info.baudrate) {
-      document.getElementById('baud-select').value = String(info.baudrate);
-    }
-  } catch (e) {}
-}
-
-async function applyConnection() {
-  const port = document.getElementById('port-select').value;
-  const baudrate = parseInt(document.getElementById('baud-select').value || '19200', 10);
-  if (!port) return;
-  try {
-    await fetch('/api/connect', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ port, baudrate })
-    });
-    await fetchDashboardData();
-  } catch (e) {}
-}
-
-async function rescanChain() {
-  const port = document.getElementById('port-select').value;
-  const baudrate = parseInt(document.getElementById('baud-select').value || '19200', 10);
-  try {
-    await fetch('/api/scan-chain', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ port, baudrate })
-    });
-    await fetchDashboardData();
-  } catch (e) {}
-}
-
-async function respondChainAlert(action) {
-  ensureAudioContext();
-  if (action === 'problem') acknowledgeCurrentAlarm();
-  try {
-    await fetch('/api/chain-alert-action', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action })
-    });
-    document.getElementById('chain-modal').classList.remove('show');
-    await fetchDashboardData();
-  } catch (e) {}
-}
-
-async function resumeReading() {
-  try {
-    await fetch('/api/resume-reading', { method: 'POST' });
-    await fetchDashboardData();
-  } catch (e) {}
+  el.innerHTML = indicators.map(ind => {
+    const st = ind.status || 'neutral';
+    return `
+      <div class="ind-cell" title="${escapeHtml(ind.formula_hint || '')}">
+        <div class="ind-name">${escapeHtml(ind.name)}</div>
+        <div class="ind-val mono">${escapeHtml(ind.formatted)}</div>
+        <span class="ind-pill ${st}">${escapeHtml(ind.status_label)}</span>
+      </div>
+    `;
+  }).join('');
 }
 
 function renderDeviceDropdown(activeIds, devices) {
   const sel = document.getElementById('device-select');
-  const chip = document.getElementById('chain-count-chip');
+  const railTag = document.getElementById('rail-chain-tag');
   if (!sel) return;
 
   if (activeIds.length > 0 && !activeIds.map(String).includes(String(currentView))) {
@@ -2119,7 +3108,7 @@ function renderDeviceDropdown(activeIds, devices) {
   }
 
   if (activeIds.length === 0) {
-    sel.innerHTML = '<option value="1">🔌 Slave ID #1 (Demo / În așteptare)</option>';
+    sel.innerHTML = '<option value="1">Slave ID #1 (în așteptare)</option>';
     currentView = '1';
     sel.value = '1';
   } else {
@@ -2127,21 +3116,29 @@ function renderDeviceDropdown(activeIds, devices) {
       const dev = (devices || {})[String(sid)] || {};
       const st = (dev.status_info || {})['Stare Principală Disjunctor'] || '';
       const shortSt = st ? ` — ${st.split(' [')[0]}` : '';
-      const ocTag = dev.overcurrent_alert && dev.overcurrent_alert.exceeded ? ' [⚠️ PRAG DEPĂȘIT]' : '';
-      return `<option value="${sid}">🔌 Slave ID #${sid}${escapeHtml(shortSt)}${ocTag}</option>`;
+      const ocTag = dev.overcurrent_alert && dev.overcurrent_alert.exceeded ? ' [DEPĂȘIRE Ir]' : '';
+      return `<option value="${sid}">Slave ID #${sid}${escapeHtml(shortSt)}${ocTag}</option>`;
     }).join('');
     sel.value = String(currentView);
   }
 
-  if (chip) {
-    chip.textContent = `(${activeIds.length} active)`;
+  if (railTag) railTag.textContent = String(activeIds.length);
+  if (activeSection === 'telemetry') {
+    document.getElementById('page-heading').textContent = 'Telemetrie PXR25';
   }
+}
+
+function selectView(viewKey) {
+  currentView = String(viewKey);
+  if (latestData) renderAll(latestData);
+  else drawAllEnabledCharts();
 }
 
 function renderAll(data) {
   const activeIds = data.active_ids || [];
   const devices = data.devices || {};
   renderDeviceDropdown(activeIds, devices);
+  renderChainTopologyNodes(activeIds, devices, data.chain_alert);
 
   handleAlarmState(data);
   if (demoStreamTimer === null) {
@@ -2159,7 +3156,7 @@ function renderAll(data) {
 
   const alertObj = data.chain_alert || {};
   const modal = document.getElementById('chain-modal');
-  if (alertObj.pending && !data.halted) {
+  if (alertObj.pending && !data.halted && !chainModalDismissedLocally) {
     modal.classList.add('show');
     document.getElementById('modal-total-count').textContent = String(alertObj.detected_count || 0);
     if (alertObj.detected_count > 0) {
@@ -2172,6 +3169,7 @@ function renderAll(data) {
     }
     document.getElementById('modal-message').textContent = alertObj.message || '';
   } else {
+    if (!alertObj.pending) chainModalDismissedLocally = false;
     modal.classList.remove('show');
   }
 
@@ -2179,7 +3177,7 @@ function renderAll(data) {
   const connText = document.getElementById('conn-text');
   if (data.halted) {
     badge.className = 'badge err';
-    connText.textContent = 'OPRIT HARDWARE';
+    connText.textContent = 'Oprit hardware';
   } else if (data.ok && activeIds.length > 0) {
     badge.className = 'badge';
     connText.textContent = `Online ${data.current_port} (${activeIds.length} disp.)`;
@@ -2188,15 +3186,17 @@ function renderAll(data) {
     connText.textContent = data.last_error || 'Deconectat';
   }
 
-  document.getElementById('conn-subtitle').textContent =
-    `${data.connection_desc || 'Modbus RTU USB-RS485'} • Actualizare la 2s`;
+  const subEl = document.getElementById('conn-subtitle');
+  if (subEl) subEl.textContent = `• ${data.connection_desc || 'Modbus RTU USB-RS485'}`;
 
   const dbSt = data.db_status || {};
   const dbBadge = document.getElementById('db-badge');
   const dbTxt = document.getElementById('db-status-text');
   if (dbBadge && dbTxt) {
     dbBadge.className = dbSt.connected ? 'badge advanced-only' : 'badge err advanced-only';
-    dbTxt.textContent = dbSt.connected ? 'DB: Online' : 'DB: Offline';
+    dbTxt.textContent = dbSt.connected
+      ? `DB: Online (${dbSt.queue_size || 0} în coadă)`
+      : 'DB: Offline';
   }
 
   drawAllEnabledCharts();
@@ -2206,13 +3206,18 @@ function renderAll(data) {
     ? dev.time_synced_at
     : (data.last_time_sync || '—');
   const rtcEl = document.getElementById('rtc-sync-time');
-  if (rtcEl && demoStreamTimer === null) {
-    rtcEl.textContent = syncedAt;
-  }
+  if (rtcEl && demoStreamTimer === null) rtcEl.textContent = syncedAt;
 
   if (demoStreamTimer === null) {
     const st = dev.status_info || {};
-    document.getElementById('st-prim').textContent = st['Stare Principală Disjunctor'] || '—';
+    const primStr = st['Stare Principală Disjunctor'] || '—';
+    document.getElementById('st-prim').textContent = primStr;
+    const stPrimBadge = document.getElementById('st-prim-badge');
+    if (stPrimBadge) {
+      const isFault = primStr.includes('0x03') || primStr.includes('0x04') || primStr.includes('Alarm');
+      const isClosed = primStr.includes('0x02');
+      stPrimBadge.className = isFault ? 'badge err' : (isClosed ? 'badge' : 'badge neutral');
+    }
     document.getElementById('st-sec').textContent = st['Stare Secundară Unitate PXR'] || '—';
     document.getElementById('st-cause').textContent = st['Cauză Stare / Eveniment'] || '—';
     document.getElementById('st-time').textContent = dev.timestamp || '—';
@@ -2229,10 +3234,10 @@ function renderAll(data) {
     const meas = dev.measurements || [];
     renderSimpleMeasurements(meas, maxLimit);
     renderEnergyIndicators('dev-grid-indicators', dev.energy_indicators || []);
-    renderCards('dev-grid-currents', meas.filter(m => m.category === 'currents'), maxLimit, 2);
-    renderCards('dev-grid-voltages', meas.filter(m => m.category === 'voltages'), 450, 2);
-    renderCards('dev-grid-powers', meas.filter(m => m.category === 'powers'), 0, 2);
-    renderCards('dev-grid-energy', meas.filter(m => m.category === 'energy'), 0, 2);
+    renderLedgerRows('dev-grid-currents', meas.filter(m => m.category === 'currents'), maxLimit, 2);
+    renderLedgerRows('dev-grid-voltages', meas.filter(m => m.category === 'voltages'), 450, 2);
+    renderLedgerRows('dev-grid-powers', meas.filter(m => m.category === 'powers'), 0, 2);
+    renderLedgerRows('dev-grid-energy', meas.filter(m => m.category === 'energy'), 0, 2);
   }
 
   const settings = dev.protection_settings || [];
@@ -2242,11 +3247,11 @@ function renderAll(data) {
       <tr>
         <td><strong>${escapeHtml(s.name)}</strong></td>
         <td class="mono">${escapeHtml(s.register)}</td>
-        <td class="mono" style="color:var(--accent);font-weight:600">${escapeHtml(s.formatted)}</td>
+        <td class="mono" style="color:var(--accent);font-weight:700">${escapeHtml(s.formatted)}</td>
       </tr>
     `).join('');
   } else {
-    tbodyS.innerHTML = '<tr><td colspan="3" style="color:var(--muted)">Nu există setări de protecție citite pentru acest dispozitiv.</td></tr>';
+    tbodyS.innerHTML = '<tr><td colspan="3" style="color:var(--ink-muted)">Nu există setări de protecție citite pentru acest dispozitiv.</td></tr>';
   }
 
   const events = dev.event_history || [];
@@ -2261,30 +3266,425 @@ function renderAll(data) {
       </tr>
     `).join('');
   } else {
-    tbodyE.innerHTML = '<tr><td colspan="4" style="color:var(--muted)">Niciun eveniment înregistrat.</td></tr>';
+    tbodyE.innerHTML = '<tr><td colspan="4" style="color:var(--ink-muted)">Niciun eveniment înregistrat.</td></tr>';
+  }
+}
+
+/* =========================================================================
+   6. ACȚIUNI HARDWARE & TELEMETRIE API
+   ========================================================================= */
+async function loadPorts(autoSelectUsb = false) {
+  try {
+    const res = await apiFetch('/api/ports');
+    if (!res.ok) return;
+    const info = await res.json();
+    const sel = document.getElementById('port-select');
+    const ports = info.ports || [];
+
+    if (ports.length === 0) {
+      const cp = escapeHtml(info.current_port || 'COM5');
+      sel.innerHTML = `<option value="${cp}">${cp} (Indisponibil)</option>`;
+    } else {
+      sel.innerHTML = ports.map(p => {
+        const tag = p.is_usb ? ' [USB]' : '';
+        return `<option value="${escapeHtml(p.device)}">${escapeHtml(p.device)} — ${escapeHtml(p.description)}${tag}</option>`;
+      }).join('');
+
+      const hasCurrent = ports.some(p => p.device === info.current_port);
+      if (hasCurrent && !autoSelectUsb) {
+        sel.value = info.current_port;
+      } else {
+        const usbPort = ports.find(p => p.is_usb);
+        if (usbPort) {
+          sel.value = usbPort.device;
+          if (usbPort.device !== info.current_port && hasPerm('hardware:control')) {
+            applyConnection();
+          }
+        } else if (hasCurrent) {
+          sel.value = info.current_port;
+        }
+      }
+    }
+    if (info.baudrate) {
+      document.getElementById('baud-select').value = String(info.baudrate);
+    }
+  } catch (e) {}
+}
+
+async function applyConnection() {
+  if (!hasPerm('hardware:control')) return;
+  const port = document.getElementById('port-select').value;
+  const baudrate = parseInt(document.getElementById('baud-select').value || '19200', 10);
+  if (!port) return;
+  const res = await apiFetch('/api/connect', {
+    method: 'POST',
+    body: JSON.stringify({ port, baudrate })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    showAppToast(err.error || 'Acțiune interzisă.');
+    return;
+  }
+  showAppToast(`Port actualizat: ${port} (${baudrate} bps)`);
+  await fetchDashboardData();
+}
+
+async function rescanChain() {
+  if (!hasPerm('hardware:control')) return;
+  const port = document.getElementById('port-select').value;
+  const baudrate = parseInt(document.getElementById('baud-select').value || '19200', 10);
+  const res = await apiFetch('/api/scan-chain', {
+    method: 'POST',
+    body: JSON.stringify({ port, baudrate })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    showAppToast(err.error || 'Eroare la rescanarea lanțului.');
+    return;
+  }
+  showAppToast('Scanare lanț RS-485 declanșată.');
+  await fetchDashboardData();
+}
+
+async function respondChainAlert(action) {
+  ensureAudioContext();
+  if (action === 'problem') acknowledgeCurrentAlarm();
+  const res = await apiFetch('/api/chain-alert-action', {
+    method: 'POST',
+    body: JSON.stringify({ action })
+  });
+  if (res.ok) {
+    document.getElementById('chain-modal').classList.remove('show');
+    await fetchDashboardData();
+  } else {
+    const err = await res.json().catch(() => ({}));
+    showAppToast(err.error || 'Permisiune refuzată.');
+  }
+}
+
+function dismissChainModalClient() {
+  chainModalDismissedLocally = true;
+  document.getElementById('chain-modal').classList.remove('show');
+}
+
+async function resumeReading() {
+  if (!hasPerm('hardware:control')) return;
+  const res = await apiFetch('/api/resume-reading', { method: 'POST', body: '{}' });
+  if (res.ok) {
+    showAppToast('Achiziția RS-485 a fost reluată.');
+    await fetchDashboardData();
+  }
+}
+
+async function syncDeviceTimeNow() {
+  if (!hasPerm('hardware:control')) return;
+  const res = await apiFetch('/api/sync-time', { method: 'POST', body: '{}' });
+  if (res.ok) {
+    const info = await res.json();
+    const rtcEl = document.getElementById('rtc-sync-time');
+    if (rtcEl && info.synced_at) rtcEl.textContent = `${info.synced_at} (sincronizat)`;
+    showAppToast('Ceasul RTC al dispozitivelor a fost marcat pentru sincronizare.');
+    await fetchDashboardData();
+  } else {
+    const err = await res.json().catch(() => ({}));
+    showAppToast(err.error || 'Eroare la sincronizarea ceasului.');
+  }
+}
+
+async function flushDatabaseNow() {
+  if (!hasPerm('db:flush')) return;
+  const res = await apiFetch('/api/db-flush', { method: 'POST', body: '{}' });
+  if (res.ok) {
+    showAppToast('Coada RAM către TimescaleDB a fost golită.');
+    await fetchDashboardData();
+  }
+}
+
+async function refreshSettings() {
+  if (!hasPerm('hardware:control')) return;
+  const res = await apiFetch('/api/refresh-settings', { method: 'POST', body: '{}' });
+  if (res.ok) {
+    showAppToast('Reîncărcare setări de protecție programată.');
+    await fetchDashboardData();
   }
 }
 
 async function fetchDashboardData() {
   try {
-    const res = await fetch('/api/data', { cache: 'no-store' });
+    const res = await apiFetch('/api/data');
+    if (!res.ok) return;
     latestData = await res.json();
     renderAll(latestData);
   } catch (err) {}
 }
 
-async function refreshSettings() {
+/* =========================================================================
+   7. ADMINISTRARE UTILIZATORI, AUDIT & PROFIL CONT
+   ========================================================================= */
+function setFeedback(elId, message, isOk) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (!message) {
+    el.className = 'inline-feedback';
+    el.textContent = '';
+    return;
+  }
+  el.className = `inline-feedback show ${isOk ? 'ok' : 'err'}`;
+  el.textContent = message;
+}
+
+function renderUsersTable(users) {
+  const tbody = document.getElementById('users-table-body');
+  if (!tbody) return;
+  if (!users || !users.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--ink-muted)">Nu există utilizatori în baza de date.</td></tr>';
+    return;
+  }
+
+  const rowsHtml = [];
+  users.forEach(u => {
+    const isSelf = currentUser && Number(u.id) === Number(currentUser.id);
+    const stateBadge = u.is_locked
+      ? '<span class="ind-pill warn">Blocat temporar</span>'
+      : (u.is_active ? '<span class="ind-pill ok">Activ</span>' : '<span class="ind-pill danger">Dezactivat</span>');
+    const roleBadge = u.role === 'admin'
+      ? '<span class="ind-pill info mono">admin</span>'
+      : '<span class="ind-pill mono">user</span>';
+    const nextRole = u.role === 'admin' ? 'user' : 'admin';
+
+    const delButtons = confirmDeleteUserId === u.id
+      ? `<button type="button" class="btn btn-sm btn-danger" onclick="adminDeleteUser(${u.id})">Confirmă ștergerea</button>
+         <button type="button" class="btn btn-sm" onclick="cancelInlineUserDialogs()">Anulează</button>`
+      : `<button type="button" class="btn btn-sm" ${isSelf || u.role === 'admin' ? 'disabled title="Administratorii și propriul cont nu pot fi șterse"' : ''} onclick="askDeleteUser(${u.id})">Șterge</button>`;
+
+    rowsHtml.push(`
+      <tr>
+        <td class="mono">${u.id}</td>
+        <td><strong>${escapeHtml(u.username)}</strong>${isSelf ? ' <span class="sheet-meta">(tu)</span>' : ''}</td>
+        <td>${roleBadge}</td>
+        <td>${stateBadge}</td>
+        <td class="mono">${escapeHtml(u.last_login_at || '—')}</td>
+        <td>
+          <div class="row-actions">
+            <button type="button" class="btn btn-sm" ${isSelf ? 'disabled title="Nu îți poți modifica propriul rol"' : ''} onclick="adminPatchUser(${u.id}, { role: '${nextRole}' })">
+              Comută rol
+            </button>
+            <button type="button" class="btn btn-sm" ${isSelf ? 'disabled title="Nu îți poți dezactiva propriul cont"' : ''} onclick="adminPatchUser(${u.id}, { is_active: ${!u.is_active} })">
+              ${u.is_active ? 'Dezactivează' : 'Activează'}
+            </button>
+            ${u.is_locked ? `<button type="button" class="btn btn-sm btn-warn" onclick="adminPatchUser(${u.id}, { unlock: true })">Deblochează</button>` : ''}
+            <button type="button" class="btn btn-sm" onclick="toggleResetRow(${u.id})">Resetare parolă</button>
+            ${delButtons}
+          </div>
+        </td>
+      </tr>
+    `);
+
+    if (resetRowOpenUserId === u.id) {
+      rowsHtml.push(`
+        <tr class="inline-pw-row">
+          <td colspan="6">
+            <form onsubmit="submitAdminResetPassword(event, ${u.id})" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <label for="reset-pw-${u.id}" style="font-size:0.82rem;font-weight:600;">Parolă nouă pentru <strong>${escapeHtml(u.username)}</strong>:</label>
+              <input id="reset-pw-${u.id}" type="password" required placeholder="Min. 8 car., literă + cifră" style="min-width:230px;" />
+              <button type="submit" class="btn btn-sm btn-primary">Salvează și revocă sesiuni</button>
+              <button type="button" class="btn btn-sm" onclick="cancelInlineUserDialogs()">Anulează</button>
+            </form>
+          </td>
+        </tr>
+      `);
+    }
+  });
+  tbody.innerHTML = rowsHtml.join('');
+}
+
+function toggleResetRow(userId) {
+  confirmDeleteUserId = null;
+  resetRowOpenUserId = (resetRowOpenUserId === userId) ? null : userId;
+  if (window._cachedAdminUsers) renderUsersTable(window._cachedAdminUsers);
+}
+
+function askDeleteUser(userId) {
+  resetRowOpenUserId = null;
+  confirmDeleteUserId = userId;
+  if (window._cachedAdminUsers) renderUsersTable(window._cachedAdminUsers);
+}
+
+function cancelInlineUserDialogs() {
+  resetRowOpenUserId = null;
+  confirmDeleteUserId = null;
+  if (window._cachedAdminUsers) renderUsersTable(window._cachedAdminUsers);
+}
+
+async function adminPatchUser(userId, payload) {
+  const res = await apiFetch(`/api/users/${userId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json().catch(() => ({}));
+  if (res.ok) {
+    setFeedback('admin-feedback', data.message || 'Utilizator actualizat.', true);
+    loadAdminData();
+  } else {
+    setFeedback('admin-feedback', data.error || 'Actualizarea a eșuat.', false);
+  }
+}
+
+async function submitAdminResetPassword(event, userId) {
+  event.preventDefault();
+  const inp = document.getElementById(`reset-pw-${userId}`);
+  const newPassword = inp ? inp.value : '';
+  const res = await apiFetch(`/api/users/${userId}/reset-password`, {
+    method: 'POST',
+    body: JSON.stringify({ new_password: newPassword })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (res.ok) {
+    resetRowOpenUserId = null;
+    setFeedback('admin-feedback', data.message || 'Parola a fost resetată.', true);
+    loadAdminData();
+  } else {
+    setFeedback('admin-feedback', data.error || 'Resetarea parolei a eșuat.', false);
+  }
+}
+
+async function adminDeleteUser(userId) {
+  const res = await apiFetch(`/api/users/${userId}`, { method: 'DELETE' });
+  const data = await res.json().catch(() => ({}));
+  confirmDeleteUserId = null;
+  if (res.ok) {
+    setFeedback('admin-feedback', data.message || 'Utilizator șters.', true);
+    loadAdminData();
+  } else {
+    setFeedback('admin-feedback', data.error || 'Ștergerea a eșuat.', false);
+  }
+}
+
+function renderAuditTable(logs) {
+  const tbody = document.getElementById('audit-table-body');
+  if (!tbody) return;
+  if (!logs || !logs.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--ink-muted)">Nu există intrări în jurnal.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = logs.map(l => `
+    <tr>
+      <td class="mono">${escapeHtml(l.timestamp)}</td>
+      <td><strong>${escapeHtml(l.actor)}</strong></td>
+      <td class="mono">${escapeHtml(l.action)}</td>
+      <td class="mono">${escapeHtml(l.target || '—')}</td>
+      <td>${escapeHtml(l.details || '—')}</td>
+      <td class="mono">${escapeHtml(l.ip_address || '—')}</td>
+    </tr>
+  `).join('');
+}
+
+async function loadAdminData() {
+  if (!hasPerm('users:manage')) return;
   try {
-    await fetch('/api/refresh-settings', { method: 'POST' });
-    await fetchDashboardData();
+    const [uRes, aRes] = await Promise.all([
+      apiFetch('/api/users'),
+      apiFetch('/api/audit-logs?limit=50')
+    ]);
+    if (uRes.ok) {
+      const uData = await uRes.json();
+      window._cachedAdminUsers = uData.users || [];
+      renderUsersTable(window._cachedAdminUsers);
+    }
+    if (aRes.ok) {
+      const aData = await aRes.json();
+      renderAuditTable(aData.logs || []);
+    }
   } catch (e) {}
 }
 
-loadSavedUiConfig().then(() => {
-  loadPorts(false);
-  fetchDashboardData();
-  setInterval(fetchDashboardData, 2000);
+document.getElementById('create-user-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const username = document.getElementById('new-user-name').value;
+  const password = document.getElementById('new-user-pass').value;
+  const role = document.getElementById('new-user-role').value;
+
+  const res = await apiFetch('/api/users', {
+    method: 'POST',
+    body: JSON.stringify({ username, password, role })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (res.ok) {
+    document.getElementById('new-user-name').value = '';
+    document.getElementById('new-user-pass').value = '';
+    setFeedback('admin-feedback', data.message || 'Utilizator adăugat.', true);
+    loadAdminData();
+  } else {
+    setFeedback('admin-feedback', data.error || 'Nu s-a putut crea utilizatorul.', false);
+  }
 });
+
+document.getElementById('change-pw-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const curPw = document.getElementById('cp-current').value;
+  const newPw = document.getElementById('cp-new').value;
+  const confPw = document.getElementById('cp-confirm').value;
+
+  if (newPw !== confPw) {
+    setFeedback('change-pw-feedback', 'Parolele noi nu coincid!', false);
+    return;
+  }
+  const res = await apiFetch('/api/auth/change-password', {
+    method: 'POST',
+    body: JSON.stringify({ current_password: curPw, new_password: newPw })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (res.ok) {
+    document.getElementById('cp-current').value = '';
+    document.getElementById('cp-new').value = '';
+    document.getElementById('cp-confirm').value = '';
+    setFeedback('change-pw-feedback', data.message || 'Parola a fost actualizată.', true);
+  } else {
+    setFeedback('change-pw-feedback', data.error || 'Schimbarea parolei a eșuat.', false);
+  }
+});
+
+function populateProfileView() {
+  if (!currentUser) return;
+  document.getElementById('rail-username').textContent = currentUser.username;
+  const roleBadge = document.getElementById('rail-role-badge');
+  roleBadge.textContent = currentUser.role;
+  roleBadge.classList.toggle('admin', currentUser.role === 'admin');
+
+  document.getElementById('acct-username').textContent = currentUser.username;
+  document.getElementById('acct-role').textContent = currentUser.role;
+  document.getElementById('acct-created').textContent = currentUser.created_at || '—';
+  document.getElementById('acct-last-login').textContent = currentUser.last_login_at || '—';
+
+  const permsList = document.getElementById('account-perms-list');
+  permsList.innerHTML = Array.from(userPermissions).map(
+    p => `<span class="perm-chip">${escapeHtml(p)}</span>`
+  ).join('');
+}
+
+/* =========================================================================
+   8. BOOTSTRAP SESIUNE & PORNIRE ACHIZIȚIE LIVE
+   ========================================================================= */
+async function bootstrapApp() {
+  const meRes = await apiFetch('/api/auth/me');
+  if (!meRes.ok) {
+    window.location.href = '/login';
+    return;
+  }
+  const me = await meRes.json();
+  currentUser = me.user;
+  userPermissions = new Set(me.permissions || []);
+  csrfToken = me.csrf_token || '';
+
+  populateProfileView();
+  applyRbacToControls();
+  await loadSavedUiConfig();
+  await loadPorts(false);
+  await fetchDashboardData();
+  setInterval(fetchDashboardData, 2000);
+}
+
+bootstrapApp();
 </script>
 </body>
 </html>

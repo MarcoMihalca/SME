@@ -10,3 +10,6 @@ ui_preferences.json
 *.db
 *.db-wal
 *.db-shm
+.impeccable/questions/
+.impeccable/mocks/
+.impeccable/review/
