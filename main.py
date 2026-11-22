@@ -23,6 +23,6 @@ if hasattr(sys.stderr, "reconfigure"):
 
 from eaton_pxr.cli import run_cli
 
-
+# .\.venv\Scripts\python.exe main.py
 if __name__ == "__main__":
     sys.exit(run_cli())
