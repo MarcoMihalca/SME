@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Autentificare — Eaton PXR25 SME</title>
+</head>
+<body>
+  <main>
+    <h1>Autentificare SME</h1>
+    <form id="login-form">
+      <label for="username">Nume utilizator</label>
+      <input id="username" name="username" type="text" required autocomplete="username" />
+      <label for="password">Parolă</label>
+      <input id="password" name="password" type="password" required autocomplete="current-password" />
+      <button type="submit">Autentificare</button>
+      <p id="login-error" role="alert"></p>
+    </form>
+  </main>
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const errEl = document.getElementById('login-error');
+      errEl.textContent = '';
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        window.location.href = '/';
+      } else {
+        errEl.textContent = data.error || 'Autentificare eșuată.';
+      }
+    });
+  </script>
+</body>
+</html>
