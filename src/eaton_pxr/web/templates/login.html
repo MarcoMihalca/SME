@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Autentificare — Eaton NZMH4-PX1600-TAZ (SME)</title>
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('sme_theme_v1');
+        if (saved === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <style>
+    :root {
+      --bg: #F7F8FA;
+      --surface: #FFFFFF;
+      --surface-subtle: #F1F5F9;
+      --rail-bg: #0F294A;
+      --rail-border: #1E3A5F;
+      --rail-text: #F8FAFC;
+      --rail-muted: #BFDBFE;
+      --ink: #0F172A;
+      --ink-secondary: #334155;
+      --ink-muted: #475569;
+      --border: #CBD5E1;
+      --border-subtle: #E2E8F0;
+      --accent: #005FB8;
+      --accent-hover: #004C97;
+      --accent-solid: #005FB8;
+      --accent-solid-hover: #004C97;
+      --accent-soft: #EBF4FF;
+      --ok: #0F766E;
+      --danger: #991B1B;
+      --danger-bg: #FEF2F2;
+      --danger-border: #FECACA;
+      --radius: 4px;
+      --font-sans: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Roboto", sans-serif;
+      --font-mono: "Cascadia Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+      --shadow-sm: 0 2px 6px rgba(15, 41, 74, 0.06);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0C131D;
+      --surface: #131C2B;
+      --surface-subtle: #1A2538;
+      --rail-bg: #081324;
+      --rail-border: #1E324F;
+      --rail-text: #F1F5F9;
+      --rail-muted: #93C5FD;
+      --ink: #F1F5F9;
+      --ink-secondary: #CBD5E1;
+      --ink-muted: #94A3B8;
+      --border: #263449;
+      --border-subtle: #1E293B;
+      --accent: #3898EC;
+      --accent-hover: #60AEF5;
+      --accent-solid: #0B66C3;
+      --accent-solid-hover: #0953A0;
+      --accent-soft: rgba(56, 152, 236, 0.14);
+      --ok: #34D399;
+      --danger: #FECACA;
+      --danger-bg: rgba(239, 68, 68, 0.14);
+      --danger-border: rgba(239, 68, 68, 0.45);
+      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.35);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    ::selection {
+      background: var(--accent-soft);
+      color: var(--ink);
+    }
+
+    html {
+      font-size: 16px;
+      scrollbar-color: var(--border) var(--bg);
+      scrollbar-width: thin;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: var(--radius);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--ink-muted);
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      line-height: 1.5;
+      display: grid;
+      grid-template-columns: minmax(340px, 44%) 1fr;
+    }
+
+    a, button, input {
+      font-family: inherit;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Spec Panel (Left Switchgear Navy) */
+    .spec-panel {
+      background-color: var(--rail-bg);
+      color: var(--rail-text);
+      border-right: 1px solid var(--rail-border);
+      padding: 36px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 32px;
+    }
+
+    .brand-lockup {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      color: #93C5FD;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .brand-lockup h1 {
+      font-size: 1.62rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      color: #FFFFFF;
+    }
+
+    .spec-lead {
+      margin-top: 16px;
+      font-size: 0.95rem;
+      color: #CBD5E1;
+      max-width: 48ch;
+      line-height: 1.55;
+    }
+
+    .spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 28px;
+      border-top: 1px solid var(--rail-border);
+    }
+
+    .spec-table tr {
+      border-bottom: 1px solid var(--rail-border);
+    }
+
+    .spec-table th {
+      text-align: left;
+      padding: 12px 12px 12px 0;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--rail-muted);
+      width: 36%;
+      vertical-align: top;
+    }
+
+    .spec-table td {
+      padding: 12px 0;
+      font-size: 0.88rem;
+      color: #F8FAFC;
+    }
+
+    .spec-foot {
+      border-top: 1px solid var(--rail-border);
+      padding-top: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 0.82rem;
+      color: var(--rail-muted);
+    }
+
+    .offline-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #E2E8F0;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10B981;
+      display: inline-block;
+    }
+
+    .theme-btn {
+      background: rgba(255, 255, 255, 0.08);
+      color: #F8FAFC;
+      border: 1px solid rgba(191, 219, 254, 0.3);
+      border-radius: var(--radius);
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: background 150ms ease, border-color 150ms ease;
+    }
+
+    .theme-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(191, 219, 254, 0.6);
+    }
+
+    /* Right Auth Workspace */
+    .auth-workspace {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 24px;
+    }
+
+    .auth-sheet {
+      width: 100%;
+      max-width: 420px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 32px;
+    }
+
+    .auth-sheet h2 {
+      font-size: 1.38rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+
+    .auth-sub {
+      margin-top: 6px;
+      font-size: 0.9rem;
+      color: var(--ink-muted);
+    }
+
+    .form-stack {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--ink-secondary);
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .field input {
+      width: 100%;
+      height: 42px;
+      padding: 8px 12px;
+      font-size: 0.95rem;
+      color: var(--ink);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      caret-color: var(--accent);
+      transition: border-color 150ms ease;
+    }
+
+    .field input.has-toggle {
+      padding-right: 44px;
+    }
+
+    .field input:hover {
+      border-color: var(--ink-muted);
+    }
+
+    .field input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .pw-toggle {
+      position: absolute;
+      right: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 34px;
+      height: 34px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      color: var(--ink-muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 150ms ease, background 150ms ease;
+    }
+
+    .pw-toggle:hover {
+      color: var(--ink);
+      background: var(--surface-subtle);
+    }
+
+    .error-banner {
+      display: none;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 11px 12px;
+      border-radius: var(--radius);
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      color: var(--danger);
+      font-size: 0.86rem;
+      font-weight: 500;
+    }
+
+    .error-banner.show {
+      display: flex;
+    }
+
+    .btn-submit {
+      width: 100%;
+      height: 44px;
+      background: var(--accent-solid);
+      color: #FFFFFF;
+      border: 1px solid var(--accent-solid);
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 150ms ease, border-color 150ms ease;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: var(--accent-solid-hover);
+      border-color: var(--accent-solid-hover);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .auth-foot {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 860px) {
+      body {
+        grid-template-columns: 1fr;
+      }
+
+      .spec-panel {
+        padding: 24px 20px;
+        border-right: none;
+        border-bottom: 1px solid var(--rail-border);
+        gap: 20px;
+      }
+
+      .spec-table {
+        margin-top: 16px;
+      }
+
+      .auth-workspace {
+        padding: 24px 16px 36px;
+      }
+
+      .auth-sheet {
+        padding: 24px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <aside class="spec-panel">
+    <div>
+      <div class="brand-lockup">
+        <span class="brand-mark" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+            <path d="M9 17V13"></path>
+            <path d="M9 9V7"></path>
+            <path d="M9 13l5-4"></path>
+            <path d="M15 17V7"></path>
+          </svg>
+        </span>
+        <h1>Eaton NZMH4-PX1600-TAZ</h1>
+      </div>
+      <p class="spec-lead">
+        Sistem de monitorizare energetică multi-device pentru unități electronice PXR25 și module NZM4-XBSM-TAZ-N conectate în lanț RS-485.
+      </p>
+
+      <table class="spec-table" aria-label="Specificații sistem">
+        <tbody>
+          <tr>
+            <th>Protocol magistrală</th>
+            <td>Modbus RTU USB–RS485 (daisy-chain Slave #1..#247)</td>
+          </tr>
+          <tr>
+            <th>Diagnosticare rețea</th>
+            <td>EN 50160 • NEMA • Încadrare ANRE (<span class="mono">cos φ ≥ 0.92</span>)</td>
+          </tr>
+          <tr>
+            <th>Control acces RBAC</th>
+            <td><span class="mono">user</span> (telemetrie &amp; demo) / <span class="mono">admin</span> (RS-485, DB, utilizatori)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="spec-foot">
+      <span class="offline-status">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span>Serviciu local HTTP • Fără dependențe externe</span>
+      </span>
+      <button type="button" class="theme-btn" id="btn-theme-toggle" aria-label="Comută tema Zi/Noapte">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2"></path>
+          <path d="M12 20v2"></path>
+          <path d="m4.93 4.93 1.41 1.41"></path>
+          <path d="m17.66 17.66 1.41 1.41"></path>
+          <path d="M2 12h2"></path>
+          <path d="M20 12h2"></path>
+          <path d="m6.34 17.66-1.41 1.41"></path>
+          <path d="m19.07 4.93-1.41 1.41"></path>
+        </svg>
+        <span id="theme-toggle-label">Temă: Zi</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="auth-workspace">
+    <section class="auth-sheet" aria-labelledby="auth-heading">
+      <h2 id="auth-heading">Autentificare</h2>
+      <p class="auth-sub">Introdu credențialele contului tău SME pentru acces la panoul de telemetrie.</p>
+
+      <form class="form-stack" id="login-form" novalidate>
+        <div class="field">
+          <label for="username">Nume utilizator</label>
+          <div class="input-wrap">
+            <input
+              id="username"
+              name="username"
+              type="text"
+              autocomplete="username"
+              required
+              autofocus
+              placeholder="ex: admin"
+            />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="password">Parolă</label>
+          <div class="input-wrap">
+            <input
+              id="password"
+              name="password"
+              type="password"
+              class="has-toggle"
+              autocomplete="current-password"
+              required
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              class="pw-toggle"
+              id="btn-toggle-pw"
+              aria-label="Afișează parola"
+              aria-pressed="false"
+            >
+              <svg id="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="error-banner" id="login-error" role="alert" aria-live="polite">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span id="login-error-text"></span>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btn-login">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+            <polyline points="10 17 15 12 10 7"></polyline>
+            <line x1="15" y1="12" x2="3" y2="12"></line>
+          </svg>
+          <span id="btn-login-label">Intră în sistem</span>
+        </button>
+      </form>
+
+      <div class="auth-foot">
+        <span>Sesiune <span class="mono">HttpOnly</span> + CSRF</span>
+        <span class="mono">Login/users.db</span>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      const THEME_KEY = 'sme_theme_v1';
+      const themeBtn = document.getElementById('btn-theme-toggle');
+      const themeLbl = document.getElementById('theme-toggle-label');
+
+      function applyTheme(theme) {
+        const isDark = theme === 'dark';
+        if (isDark) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+        }
+        if (themeLbl) {
+          themeLbl.textContent = isDark ? 'Temă: Noapte' : 'Temă: Zi';
+        }
+      }
+
+      const initialTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+      applyTheme(initialTheme);
+
+      if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+          const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+          applyTheme(next);
+          try {
+            localStorage.setItem(THEME_KEY, next);
+          } catch (e) {}
+        });
+      }
+
+      const pwInput = document.getElementById('password');
+      const pwToggle = document.getElementById('btn-toggle-pw');
+      if (pwInput && pwToggle) {
+        pwToggle.addEventListener('click', () => {
+          const showing = pwInput.type === 'text';
+          pwInput.type = showing ? 'password' : 'text';
+          pwToggle.setAttribute('aria-pressed', showing ? 'false' : 'true');
+          pwToggle.setAttribute('aria-label', showing ? 'Afișează parola' : 'Ascunde parola');
+        });
+      }
+
+      const form = document.getElementById('login-form');
+      const userEl = document.getElementById('username');
+      const errBox = document.getElementById('login-error');
+      const errText = document.getElementById('login-error-text');
+      const submitBtn = document.getElementById('btn-login');
+      const submitLbl = document.getElementById('btn-login-label');
+
+      function setError(message) {
+        if (message) {
+          errText.textContent = message;
+          errBox.classList.add('show');
+        } else {
+          errText.textContent = '';
+          errBox.classList.remove('show');
+        }
+      }
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const username = userEl.value.trim();
+        const password = pwInput.value;
+
+        if (!username || !password) {
+          setError('Completează numele de utilizator și parola.');
+          if (!username) userEl.focus();
+          else pwInput.focus();
+          return;
+        }
+
+        setError('');
+        submitBtn.disabled = true;
+        submitLbl.textContent = 'Se autentifică...';
+
+        try {
+          const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+          });
+          const data = await res.json().catch(() => ({}));
+          if (res.ok) {
+            window.location.href = '/';
+            return;
+          }
+          setError(data.error || 'Autentificare eșuată. Verifică datele introduse.');
+          pwInput.value = '';
+          pwInput.focus();
+        } catch (err) {
+          setError('Conexiunea cu serverul SME a eșuat. Verifică dacă serviciul rulează.');
+        } finally {
+          submitBtn.disabled = false;
+          submitLbl.textContent = 'Intră în sistem';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

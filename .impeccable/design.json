@@ -1,0 +1,555 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-22T14:48:00Z",
+  "title": "Design System: Eaton PXR25 SME Switchgear SCADA",
+  "extensions": {
+    "colorMeta": {
+      "switchgear-cobalt": {
+        "role": "primary",
+        "displayName": "Switchgear Cobalt",
+        "canonical": "#005FB8",
+        "tonalRamp": [
+          "#071E3D",
+          "#093366",
+          "#004C97",
+          "#005FB8",
+          "#247BD4",
+          "#5CA5F2",
+          "#93C5FD",
+          "#EBF4FF"
+        ]
+      },
+      "switchgear-cobalt-deep": {
+        "role": "primary",
+        "displayName": "Switchgear Cobalt Deep",
+        "canonical": "#004C97",
+        "tonalRamp": [
+          "#04152E",
+          "#06254E",
+          "#003973",
+          "#004C97",
+          "#0B66C3",
+          "#3898EC",
+          "#7CC0F8",
+          "#E0F0FE"
+        ]
+      },
+      "switchgear-cobalt-solid-dark": {
+        "role": "primary",
+        "displayName": "Dark Solid Control Cobalt",
+        "canonical": "#0B66C3",
+        "tonalRamp": [
+          "#051B36",
+          "#072D5A",
+          "#0953A0",
+          "#0B66C3",
+          "#2681DC",
+          "#60AEF5",
+          "#93C5FD",
+          "#EBF4FF"
+        ]
+      },
+      "cobalt-tint": {
+        "role": "primary",
+        "displayName": "Cobalt Selection Tint",
+        "canonical": "#EBF4FF",
+        "tonalRamp": [
+          "#0B1E36",
+          "#133259",
+          "#1E4980",
+          "#346AB0",
+          "#5C92D6",
+          "#93BEF0",
+          "#C9E1FB",
+          "#EBF4FF"
+        ]
+      },
+      "switchgear-navy": {
+        "role": "secondary",
+        "displayName": "Switchgear Navy",
+        "canonical": "#0F294A",
+        "tonalRamp": [
+          "#050C17",
+          "#081324",
+          "#0F294A",
+          "#1E3A5F",
+          "#2E5280",
+          "#4A74A8",
+          "#8FB2DC",
+          "#E2E8F0"
+        ]
+      },
+      "navy-divider": {
+        "role": "secondary",
+        "displayName": "Navy Rail Divider",
+        "canonical": "#1E3A5F",
+        "tonalRamp": [
+          "#08101C",
+          "#0E1C30",
+          "#152945",
+          "#1E3A5F",
+          "#2E5280",
+          "#527BB0",
+          "#93B5E0",
+          "#E2ECFA"
+        ]
+      },
+      "navy-night": {
+        "role": "secondary",
+        "displayName": "Night Mode Switchgear Rail",
+        "canonical": "#081324",
+        "tonalRamp": [
+          "#040810",
+          "#081324",
+          "#0E1F38",
+          "#1E324F",
+          "#324F78",
+          "#5479AB",
+          "#8FB0DB",
+          "#DCE7F7"
+        ]
+      },
+      "porcelain-canvas": {
+        "role": "neutral",
+        "displayName": "Porcelain Lab Canvas",
+        "canonical": "#F7F8FA",
+        "tonalRamp": [
+          "#0C131D",
+          "#1E293B",
+          "#475569",
+          "#64748B",
+          "#94A3B8",
+          "#CBD5E1",
+          "#E2E8F0",
+          "#F7F8FA"
+        ]
+      },
+      "porcelain-sheet": {
+        "role": "neutral",
+        "displayName": "Porcelain Worksheet White",
+        "canonical": "#FFFFFF",
+        "tonalRamp": [
+          "#0F172A",
+          "#334155",
+          "#475569",
+          "#64748B",
+          "#94A3B8",
+          "#CBD5E1",
+          "#F1F5F9",
+          "#FFFFFF"
+        ]
+      },
+      "porcelain-subtle": {
+        "role": "neutral",
+        "displayName": "Porcelain Header Band",
+        "canonical": "#F1F5F9",
+        "tonalRamp": [
+          "#0C131D",
+          "#1A2538",
+          "#334155",
+          "#64748B",
+          "#94A3B8",
+          "#CBD5E1",
+          "#E2E8F0",
+          "#F1F5F9"
+        ]
+      },
+      "ink-slate": {
+        "role": "neutral",
+        "displayName": "Ink Slate Primary",
+        "canonical": "#0F172A",
+        "tonalRamp": [
+          "#090D16",
+          "#0F172A",
+          "#1E293B",
+          "#334155",
+          "#475569",
+          "#64748B",
+          "#94A3B8",
+          "#E2E8F0"
+        ]
+      },
+      "ink-secondary": {
+        "role": "neutral",
+        "displayName": "Ink Secondary",
+        "canonical": "#334155",
+        "tonalRamp": [
+          "#0F172A",
+          "#1E293B",
+          "#334155",
+          "#475569",
+          "#64748B",
+          "#94A3B8",
+          "#CBD5E1",
+          "#F1F5F9"
+        ]
+      },
+      "ink-muted": {
+        "role": "neutral",
+        "displayName": "Ink Muted & Earth Slate",
+        "canonical": "#475569",
+        "tonalRamp": [
+          "#111827",
+          "#1E293B",
+          "#334155",
+          "#475569",
+          "#64748B",
+          "#94A3B8",
+          "#CBD5E1",
+          "#F1F5F9"
+        ]
+      },
+      "steel-hairline": {
+        "role": "neutral",
+        "displayName": "Steel Hairline",
+        "canonical": "#CBD5E1",
+        "tonalRamp": [
+          "#1E293B",
+          "#263449",
+          "#475569",
+          "#64748B",
+          "#94A3B8",
+          "#CBD5E1",
+          "#E2E8F0",
+          "#F8FAFC"
+        ]
+      },
+      "hairline-subtle": {
+        "role": "neutral",
+        "displayName": "Subtle Grid Hairline",
+        "canonical": "#E2E8F0",
+        "tonalRamp": [
+          "#1E293B",
+          "#334155",
+          "#475569",
+          "#64748B",
+          "#94A3B8",
+          "#CBD5E1",
+          "#E2E8F0",
+          "#F8FAFC"
+        ]
+      },
+      "dark-canvas": {
+        "role": "neutral",
+        "displayName": "Control Room Dark Canvas",
+        "canonical": "#0C131D",
+        "tonalRamp": [
+          "#06090F",
+          "#0C131D",
+          "#131C2B",
+          "#1A2538",
+          "#263449",
+          "#475569",
+          "#94A3B8",
+          "#F1F5F9"
+        ]
+      },
+      "dark-sheet": {
+        "role": "neutral",
+        "displayName": "Dark Worksheet Surface",
+        "canonical": "#131C2B",
+        "tonalRamp": [
+          "#0A1019",
+          "#131C2B",
+          "#1A2538",
+          "#263449",
+          "#3B4D6B",
+          "#64748B",
+          "#CBD5E1",
+          "#F1F5F9"
+        ]
+      },
+      "dark-border": {
+        "role": "neutral",
+        "displayName": "Dark Steel Hairline",
+        "canonical": "#263449",
+        "tonalRamp": [
+          "#0C131D",
+          "#1A2538",
+          "#263449",
+          "#364863",
+          "#526685",
+          "#788EAD",
+          "#B0C0D9",
+          "#E2E8F0"
+        ]
+      },
+      "iec-l1-blue": {
+        "role": "secondary",
+        "displayName": "IEC Phase L1 Blue",
+        "canonical": "#005FB8",
+        "tonalRamp": [
+          "#062140",
+          "#004C97",
+          "#005FB8",
+          "#0B75D6",
+          "#3898EC",
+          "#38BDF8",
+          "#93C5FD",
+          "#EBF4FF"
+        ]
+      },
+      "iec-l2-amber": {
+        "role": "secondary",
+        "displayName": "IEC Phase L2 & Attention Amber",
+        "canonical": "#B45309",
+        "tonalRamp": [
+          "#451A03",
+          "#78350F",
+          "#92400E",
+          "#B45309",
+          "#D97706",
+          "#F59E0B",
+          "#FDE68A",
+          "#FFFBEB"
+        ]
+      },
+      "iec-l3-teal": {
+        "role": "secondary",
+        "displayName": "IEC Phase L3 & Normal Teal",
+        "canonical": "#0F766E",
+        "tonalRamp": [
+          "#042F2E",
+          "#064E3B",
+          "#065F46",
+          "#0F766E",
+          "#0D9488",
+          "#34D399",
+          "#99F6E4",
+          "#ECFDF5"
+        ]
+      },
+      "iec-neutral-violet": {
+        "role": "secondary",
+        "displayName": "Neutral Conductor Violet",
+        "canonical": "#6D28D9",
+        "tonalRamp": [
+          "#2E1065",
+          "#4C1D95",
+          "#5B21B6",
+          "#6D28D9",
+          "#8B5CF6",
+          "#C084FC",
+          "#DDD6FE",
+          "#F5F3FF"
+        ]
+      },
+      "iec-ground-slate": {
+        "role": "neutral",
+        "displayName": "Earth-Fault Slate Pen",
+        "canonical": "#475569",
+        "tonalRamp": [
+          "#0F172A",
+          "#1E293B",
+          "#334155",
+          "#475569",
+          "#64748B",
+          "#94A3B8",
+          "#CBD5E1",
+          "#F1F5F9"
+        ]
+      },
+      "fault-crimson": {
+        "role": "secondary",
+        "displayName": "Overcurrent Fault Crimson",
+        "canonical": "#C81E1E",
+        "tonalRamp": [
+          "#450A0A",
+          "#7F1D1D",
+          "#991B1B",
+          "#C81E1E",
+          "#DC2626",
+          "#F87171",
+          "#FECACA",
+          "#FEF2F2"
+        ]
+      },
+      "fault-crimson-deep": {
+        "role": "secondary",
+        "displayName": "Fault Ink Deep Crimson",
+        "canonical": "#991B1B",
+        "tonalRamp": [
+          "#450A0A",
+          "#691313",
+          "#991B1B",
+          "#B91C1C",
+          "#DC2626",
+          "#F87171",
+          "#FECACA",
+          "#FEF2F2"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display Switchgear Header",
+        "purpose": "Eaton NZMH4-PX1600-TAZ authentication spec panel title."
+      },
+      "headline": {
+        "displayName": "View & Sheet Headline",
+        "purpose": "Sticky topbar primary view heading and login authentication form heading."
+      },
+      "title": {
+        "displayName": "Sheet & Hero Stat Title",
+        "purpose": "Worksheet headers, chart titles, and Ir load stat values."
+      },
+      "body": {
+        "displayName": "Operational Body Text",
+        "purpose": "Form controls, ledger labels, navigation links, and system descriptions."
+      },
+      "label": {
+        "displayName": "Tabular Instrumentation & Badge Label",
+        "purpose": "Right-aligned measurements, Modbus register addresses, timestamps, and role/KPI chips."
+      }
+    },
+    "shadows": [
+      {
+        "name": "sheet-resting",
+        "value": "0 2px 6px rgba(0, 0, 0, 0.06)",
+        "purpose": "Light resting separation for flat porcelain sheets, hardware bar, and active topology nodes."
+      },
+      {
+        "name": "overlay-floating",
+        "value": "0 12px 32px rgba(0, 0, 0, 0.14)",
+        "purpose": "Elevated fixed toasts and blocking RS-485 bus alert modals."
+      },
+      {
+        "name": "dark-sheet-resting",
+        "value": "0 2px 8px rgba(0, 0, 0, 0.3)",
+        "purpose": "Dark-mode resting sheet separation."
+      },
+      {
+        "name": "dark-overlay-floating",
+        "value": "0 16px 40px rgba(0, 0, 0, 0.55)",
+        "purpose": "Dark-mode floating alerts and modals."
+      }
+    ],
+    "motion": [
+      {
+        "name": "transition-ui",
+        "value": "150ms ease",
+        "purpose": "Hover, border focus, button, and mode switch color transitions."
+      },
+      {
+        "name": "transition-drawer",
+        "value": "200ms ease",
+        "purpose": "Mobile Switchgear Navy rail drawer transform."
+      },
+      {
+        "name": "transition-meter",
+        "value": "250ms ease",
+        "purpose": "Ir overcurrent horizontal ruler and phase load bar width interpolation."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "600px" },
+      { "name": "login-stack", "value": "860px" },
+      { "name": "md", "value": "960px" },
+      { "name": "lg", "value": "1120px" },
+      { "name": "topbar-wrap", "value": "1180px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Action Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary Cobalt control used for RS-485 chain scan, user creation, login submit, and CSV export.",
+      "html": "<button type=\"button\" class=\"ds-btn-primary\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M21 12a9 9 0 1 1-2.64-6.36\"></path><polyline points=\"21 3 21 9 15 9\"></polyline></svg>Conectează / Rescanează</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 11px; border-radius: var(--radius, 4px); border: 1px solid var(--btn-accent-bg, #005FB8); background: var(--btn-accent-bg, #005FB8); color: #FFFFFF; font-size: 0.82rem; font-weight: 600; white-space: nowrap; cursor: pointer; transition: background 150ms ease, border-color 150ms ease; } .ds-btn-primary:hover { background: var(--btn-accent-hover, #004C97); border-color: var(--btn-accent-hover, #004C97); } .ds-btn-primary:focus-visible { outline: 2px solid var(--accent, #005FB8); outline-offset: 2px; }"
+    },
+    {
+      "name": "Semantic Status Action Buttons",
+      "kind": "button",
+      "refersTo": "button-ok",
+      "description": "High-contrast Teal confirmation and Crimson emergency halt actions for RS-485 bus interlocks.",
+      "html": "<div class=\"ds-btn-pair\"><button type=\"button\" class=\"ds-btn-ok\">Reia citirea</button><button type=\"button\" class=\"ds-btn-danger\">Oprește magistrala</button></div>",
+      "css": ".ds-btn-pair { display: inline-flex; gap: 8px; flex-wrap: wrap; } .ds-btn-ok, .ds-btn-danger { padding: 6px 11px; border-radius: var(--radius, 4px); color: #FFFFFF; font-size: 0.82rem; font-weight: 600; white-space: nowrap; cursor: pointer; transition: background 150ms ease, border-color 150ms ease; } .ds-btn-ok { background: var(--btn-ok-bg, #0F766E); border: 1px solid var(--btn-ok-bg, #0F766E); } .ds-btn-ok:hover { background: var(--btn-ok-hover, #065F46); border-color: var(--btn-ok-hover, #065F46); } .ds-btn-danger { background: var(--btn-danger-bg, #C81E1E); border: 1px solid var(--btn-danger-bg, #C81E1E); } .ds-btn-danger:hover { background: var(--btn-danger-hover, #991B1B); border-color: var(--btn-danger-hover, #991B1B); } .ds-btn-ok:focus-visible, .ds-btn-danger:focus-visible { outline: 2px solid var(--accent, #005FB8); outline-offset: 2px; }"
+    },
+    {
+      "name": "Switchgear Form Input",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Crisp 1px bordered text input with Cobalt focus border used across login and user administration forms.",
+      "html": "<div class=\"ds-field\"><label for=\"ds-user\">Nume utilizator</label><input id=\"ds-user\" type=\"text\" placeholder=\"ex: student_lab\" /></div>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 6px; max-width: 280px; } .ds-field label { font-size: 0.82rem; font-weight: 600; color: var(--ink-secondary, #334155); } .ds-field input { height: 38px; padding: 6px 10px; background: var(--surface, #FFFFFF); color: var(--ink, #0F172A); border: 1px solid var(--border, #CBD5E1); border-radius: var(--radius, 4px); font-size: 0.85rem; caret-color: var(--accent, #005FB8); transition: border-color 150ms ease; } .ds-field input:hover { border-color: var(--ink-muted, #475569); } .ds-field input:focus { outline: none; border-color: var(--accent, #005FB8); } .ds-field input:focus-visible { outline: 2px solid var(--accent, #005FB8); outline-offset: 2px; }"
+    },
+    {
+      "name": "Switchgear Navy Rail Navigation",
+      "kind": "nav",
+      "refersTo": "nav-rail-item-active",
+      "description": "Left Switchgear Navy rail navigation buttons pairing inline 1.75px SVG icons with tabular counts or role tags.",
+      "html": "<nav class=\"ds-rail\"><button type=\"button\" class=\"ds-rail-item active\"><span class=\"ds-rail-lbl\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polyline points=\"22 12 18 12 15 21 9 3 6 12 2 12\"></polyline></svg>Telemetrie</span><span class=\"ds-rail-tag\">3</span></button><button type=\"button\" class=\"ds-rail-item\"><span class=\"ds-rail-lbl\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"></path><circle cx=\"9\" cy=\"7\" r=\"4\"></circle></svg>Utilizatori &amp; Audit</span><span class=\"ds-rail-tag\">ADMIN</span></button></nav>",
+      "css": ".ds-rail { width: 248px; padding: 12px; background: var(--rail-bg, #0F294A); display: flex; flex-direction: column; gap: 4px; border-radius: var(--radius, 4px); } .ds-rail-item { width: 100%; background: transparent; border: 1px solid transparent; border-radius: var(--radius, 4px); color: #CBD5E1; padding: 10px 12px; font-size: 0.88rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 10px; transition: background 150ms ease, color 150ms ease; } .ds-rail-item:hover { background: rgba(255, 255, 255, 0.08); color: #FFFFFF; } .ds-rail-item.active { background: var(--accent, #005FB8); color: #FFFFFF; } .ds-rail-item:focus-visible { outline: 2px solid #93C5FD; outline-offset: 2px; } .ds-rail-lbl { display: inline-flex; align-items: center; gap: 8px; } .ds-rail-tag { font-family: var(--font-mono, monospace); font-variant-numeric: tabular-nums; font-size: 0.72rem; padding: 1px 6px; border-radius: 4px; background: rgba(255, 255, 255, 0.14); color: #FFFFFF; }"
+    },
+    {
+      "name": "RBAC Role & KPI Status Pills",
+      "kind": "chip",
+      "refersTo": "ind-pill-info",
+      "description": "1px hairline pills separating Cobalt admin role indicators from Teal/Amber/Crimson telemetry health.",
+      "html": "<div class=\"ds-pill-row\"><span class=\"ds-pill ds-pill-info\">admin</span><span class=\"ds-pill ds-pill-ok\">În limite normale</span><span class=\"ds-pill ds-pill-warn\">Atenție ≥ 80%</span><span class=\"ds-pill ds-pill-danger\">Depășire Ir</span></div>",
+      "css": ".ds-pill-row { display: flex; flex-wrap: wrap; gap: 6px; } .ds-pill { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: var(--radius, 4px); font-size: 0.74rem; font-weight: 600; border: 1px solid var(--border, #CBD5E1); } .ds-pill-info { font-family: var(--font-mono, monospace); background: var(--accent-soft, #EBF4FF); border-color: var(--accent, #005FB8); color: var(--accent, #005FB8); } .ds-pill-ok { background: var(--ok-bg, #ECFDF5); border-color: var(--ok-border, #99F6E4); color: var(--ok-ink, #065F46); } .ds-pill-warn { background: var(--warn-bg, #FFFBEB); border-color: var(--warn-border, #FDE68A); color: var(--warn-ink, #92400E); } .ds-pill-danger { background: var(--danger-bg, #FEF2F2); border-color: var(--danger-border, #FECACA); color: var(--danger-ink, #991B1B); }"
+    },
+    {
+      "name": "Hairline Telemetry Ledger Sheet",
+      "kind": "card",
+      "refersTo": "sheet-card",
+      "description": "Flat porcelain sheet pairing a subtle gray header band with ruled tabular-nums telemetry rows.",
+      "html": "<section class=\"ds-sheet\"><div class=\"ds-sheet-head\"><h2>Curenți pe faze (A)</h2><span class=\"ds-sheet-meta\">Prag Ir = 1600 A</span></div><div class=\"ds-ledger-row\"><span><i class=\"ds-dot\" style=\"background:#005FB8\"></i>Curent Faza L1 (IA)</span><strong>448.0 A</strong></div><div class=\"ds-ledger-row\"><span><i class=\"ds-dot\" style=\"background:#B45309\"></i>Curent Faza L2 (IB)</span><strong>460.4 A</strong></div></section>",
+      "css": ".ds-sheet { background: var(--surface, #FFFFFF); border: 1px solid var(--border, #CBD5E1); border-radius: var(--radius, 4px); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06); overflow: hidden; } .ds-sheet-head { padding: 10px 16px; background: var(--surface-subtle, #F1F5F9); border-bottom: 1px solid var(--border, #CBD5E1); display: flex; justify-content: space-between; align-items: center; } .ds-sheet-head h2 { margin: 0; font-size: 0.94rem; font-weight: 700; color: var(--ink, #0F172A); } .ds-sheet-meta { font-family: var(--font-mono, monospace); font-variant-numeric: tabular-nums; font-size: 0.78rem; color: var(--ink-muted, #475569); } .ds-ledger-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 16px; border-bottom: 1px solid var(--border-subtle, #E2E8F0); font-size: 0.85rem; color: var(--ink-secondary, #334155); } .ds-ledger-row:last-child { border-bottom: none; } .ds-ledger-row strong { font-family: var(--font-mono, monospace); font-variant-numeric: tabular-nums; color: var(--ink, #0F172A); } .ds-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; }"
+    },
+    {
+      "name": "RS-485 Topology Chain & Ir Ruler",
+      "kind": "custom",
+      "description": "Signature operational strip pairing clickable daisy-chain slave buttons with an 80%-ticked Ir load margin ruler.",
+      "html": "<div class=\"ds-sig\"><div class=\"ds-chain\"><button type=\"button\" class=\"ds-node active\">#1 • 460 A</button><span class=\"ds-link\"></span><button type=\"button\" class=\"ds-node\">#2 • 418 A</button></div><div class=\"ds-ruler-wrap\"><div class=\"ds-ruler\"><span class=\"ds-tick-mark\"></span><span class=\"ds-fill\" style=\"width:28.8%\"></span></div><div class=\"ds-ruler-leg\"><span class=\"ds-l0\">0%</span><span class=\"ds-l80\">80% Atenție</span><span class=\"ds-l100\">100% Ir</span></div></div></div>",
+      "css": ".ds-sig { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; background: var(--surface, #FFFFFF); border: 1px solid var(--border, #CBD5E1); border-radius: var(--radius, 4px); } .ds-chain { display: flex; align-items: center; gap: 4px; } .ds-link { width: 16px; height: 1px; background: var(--border, #CBD5E1); } .ds-node { font-family: var(--font-mono, monospace); font-variant-numeric: tabular-nums; background: var(--surface-subtle, #F1F5F9); color: var(--ink, #0F172A); border: 1px solid var(--border, #CBD5E1); border-radius: 4px; padding: 6px 11px; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: border-color 150ms ease, background 150ms ease; } .ds-node:hover { border-color: var(--accent, #005FB8); } .ds-node.active { background: var(--btn-accent-bg, #005FB8); border-color: var(--btn-accent-bg, #005FB8); color: #FFFFFF; } .ds-node:focus-visible { outline: 2px solid var(--accent, #005FB8); outline-offset: 2px; } .ds-ruler { position: relative; height: 10px; background: var(--surface-subtle, #F1F5F9); border: 1px solid var(--border, #CBD5E1); border-radius: 2px; overflow: hidden; } .ds-tick-mark { position: absolute; left: 80%; top: 0; bottom: 0; width: 1px; background: var(--warn, #B45309); z-index: 2; } .ds-fill { display: block; height: 100%; background: var(--accent, #005FB8); transition: width 250ms ease; } .ds-ruler-leg { position: relative; height: 18px; margin-top: 5px; font-size: 0.74rem; color: var(--ink-muted, #475569); } .ds-l0 { position: absolute; left: 0; font-family: var(--font-mono, monospace); } .ds-l80 { position: absolute; left: 80%; transform: translateX(-50%); color: var(--warn-ink, #92400E); font-weight: 600; white-space: nowrap; } .ds-l100 { position: absolute; right: 0; white-space: nowrap; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Industrial Switchgear Binder",
+    "overview": "This design system transforms a German-Swiss electrical engineering switchgear catalog (Eaton / Moeller specification binder style) into an air-gapped operational SCADA interface for university electrical engineering labs and industrial switchboard rooms. Light-first porcelain worksheets maximize daylight readability under overhead fluorescent lighting, while an authoritative Switchgear Navy navigation shell frames system status, role authority, and RS-485 bus controls cleanly without visual noise.\n\nAcross both the authentication gate (/login) and multi-device telemetry desk (/), information density is governed by crisp 1px steel hairlines, flat porcelain figure-ground separation, IEC three-phase signal discipline, and right-aligned tabular numerals (tabular-nums). The system deliberately rejects dark-slate glowing neon aesthetics, nested SaaS sub-cards, decorative thick accent stripes, and external CDN dependencies so every telemetry frame renders instantaneously offline.",
+    "keyCharacteristics": [
+      "Light-default Porcelain Lab Canvas (#F7F8FA) paired with pure white data sheets (#FFFFFF) and a committed Switchgear Navy left rail (#0F294A), plus a calibrated per-user dark-room polarity (#0C131D / #131C2B).",
+      "Zero-CDN system typography using \"Segoe UI\" for Romanian prose and \"Cascadia Mono\" (tabular-nums) strictly for electrical readings, Modbus register addresses, timestamps, and numeric badges.",
+      "Flat structural sheets divided internally by 1px steel borders (#CBD5E1) and hairlines (#E2E8F0) with a disciplined 4px technical corner radius.",
+      "Calibrated IEC three-phase waveform palette (#005FB8, #B45309, #0F766E, #6D28D9, #475569) paired with separate high-contrast solid control inks (>= 4.5:1 with white labels) across both Light and Dark themes.",
+      "Custom High-DPI HTML5 Canvas plots and RS-485 topology / Ir overcurrent load ruler components with zero third-party chart or icon packages."
+    ],
+    "rules": [
+      {
+        "name": "The Polarity Contrast Split Rule",
+        "body": "Never paint a bright dark-mode foreground pen (#3898EC, #34D399, #F87171) behind #FFFFFF button labels. Solid controls in dark theme bind to dedicated deep surface fills (--btn-accent-bg: #0B66C3, --btn-ok-bg: #0F766E, --btn-danger-bg: #C81E1E) to guarantee >= 4.5:1 legibility.",
+        "section": "colors"
+      },
+      {
+        "name": "The Semantic Non-Collision Rule",
+        "body": "Keep I_G earth-fault traces on neutral steel slate (#475569 / #CBD5E1) and admin role pills in Cobalt .info, reserving Crimson (--danger) exclusively for Prag Ir overcurrent thresholds and fault alarms and Teal (--ok) for active/normal operational health.",
+        "section": "colors"
+      },
+      {
+        "name": "The Monospace Discipline Rule",
+        "body": "Apply .mono (font-family: var(--font-mono); font-variant-numeric: tabular-nums;) exclusively to electrical quantities, Modbus register addresses, ISO/local timestamps, usernames/IDs, and numeric counters — never to surrounding Romanian prose labels.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Sheet-No-Nesting Rule",
+        "body": "Partition content inside .sheet exclusively with 1px solid var(--border) / var(--border-subtle) internal grid lines (.simple-columns, .charts-grid, .indicators-grid, .ledger-rows), removing redundant outer-edge hairlines (border-right: none, border-bottom: none on trailing grid rows/columns) instead of nesting bordered cards inside cards.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep 4px crisp technical corners (--radius) on all sheets, buttons, inputs, badges, and rail navigation items across light and dark modes.",
+      "Do enforce 14px flex/grid gaps between top-level .sheet and .hw-bar blocks while using 1px internal hairlines inside sheets (removing trailing bottom/right grid borders).",
+      "Do pair bright dark-mode accents (#3898EC, #34D399, #F87171) exclusively with borders, chart lines, and dark-surface text; use dedicated --btn-accent-bg (#0B66C3), --btn-ok-bg (#0F766E), and --btn-danger-bg (#C81E1E) behind #FFFFFF button labels.",
+      "Do restrict .mono and font-variant-numeric: tabular-nums strictly to numeric measurements, addresses, IDs, counters, and timestamps.",
+      "Do render all icons as inline stroke-width=\"1.75\" SVGs and keep HTML templates 100% self-contained with zero external URLs or CDN imports (Content-Security-Policy: default-src 'self')."
+    ],
+    "donts": [
+      "Don't add glowing neon gradients, blurred glassmorphism panels, heavy box-shadow depth cards, or nested bordered cards inside .sheet containers.",
+      "Don't use thick colored left/right border stripes (3px-4px) on alerts, banners, or KPI cells; communicate state through 1px semantic borders, subtle tinted backgrounds, and crisp SVG/pill marks.",
+      "Don't use raw Unicode emoji or symbol glyphs for UI buttons or alert indicators, and don't add decorative uppercase kickers above section titles.",
+      "Don't share Crimson (--danger) between Prag Ir limit thresholds and I_G earth-fault telemetry curves or allow negative Y-axis margin padding on inherently non-negative electrical series."
+    ]
+  }
+}
